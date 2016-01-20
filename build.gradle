@@ -25,14 +25,14 @@ sourceSets
 		java
 		{ srcDir 'src/java' }
     resources
-		{  srcDir 'src/java' }
+		{ srcDir 'src/java' }
 	}
 	test
 	{
 		java
 		{ srcDir 'src/java' }
     resources
-		{  srcDir 'src/java' }
+		{ srcDir 'src/java' }
 	}
 }
 
@@ -55,8 +55,6 @@ test
 
 dependencies
 {
-    compile 'org.jetbrains.kotlin:kotlin-stdlib:1.0.0-beta-4583'
-
 	compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	compile group: 'commons-io', name: 'commons-io', version: '2.4'
@@ -81,7 +79,6 @@ repositories
 	{ url "http://oss.sonatype.org/content/groups/public" }
 	maven
 	{ url  "http://dl.bintray.com/rtlib/CoreMem" }
-
 }
 
 
@@ -104,18 +101,7 @@ if (JavaVersion.current().isJava8Compatible()) {
 	}
 }
 
-//***********************************************************************************
-// TEST PROG
 
-task TestProgFatJar(type:Jar) {
-	archiveName = "TestProg.jar"
-	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-	with jar
-
-	manifest {
-		attributes("Class-Path": ".", 'Main-Class': 'cleargl.testprog.JOGLTestProgram')
-	}
-}
 
 
 
@@ -190,10 +176,9 @@ if(hasProperty('bintray_user') && hasProperty('bintray_key') )
 			vcsUrl = 'https://github.com/ClearVolume/ClearGL.git'
 			licenses = ['Apache-2.0']
 			labels = [
-				'ClearGL',
-				'Visualization',
-				'3D',
-				'OpenGL'
+				'ClearCL',
+				'OpenCL',
+				'GPU'
 			]
 			publicDownloadNumbers = true
 			//attributes= ['a': ['ay1', 'ay2'], 'b': ['bee'], c: 'cee'] //Optional package-level attributes
