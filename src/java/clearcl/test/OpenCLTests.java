@@ -9,8 +9,8 @@ import com.nativelibs4java.opencl.CLImage3D;
 import com.nativelibs4java.opencl.CLImageFormat;
 import com.nativelibs4java.opencl.CLKernel;
 
-import clearcl.OpenCLAvailability;
-import clearcl.OpenCLDevice;
+import clearcl.old.OpenCLAvailability;
+import clearcl.old.OpenCLDevice;
 
 public class OpenCLTests
 {
