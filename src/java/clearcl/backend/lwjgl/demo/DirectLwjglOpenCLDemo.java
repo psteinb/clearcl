@@ -2,7 +2,7 @@
  * Copyright LWJGL. All rights reserved.
  * License terms: http://lwjgl.org/license.php
  */
-package clearcl.lwjgl.demo;
+package clearcl.backend.lwjgl.demo;
 
 import static org.lwjgl.opencl.CL10.CL_COMPLETE;
 import static org.lwjgl.opencl.CL10.CL_CONTEXT_PLATFORM;

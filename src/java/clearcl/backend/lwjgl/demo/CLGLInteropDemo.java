@@ -1,12 +1,57 @@
-package clearcl.lwjgl.demo;
+package clearcl.backend.lwjgl.demo;
+
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
+import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_DEBUG_CONTEXT;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
+import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
+import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
+import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
+import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
+import static org.lwjgl.glfw.GLFW.glfwInit;
+import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
+import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
+import static org.lwjgl.glfw.GLFW.glfwShowWindow;
+import static org.lwjgl.glfw.GLFW.glfwTerminate;
+import static org.lwjgl.glfw.GLFW.glfwWindowHint;
+import static org.lwjgl.opencl.CL10.CL_DEVICE_TYPE;
+import static org.lwjgl.opencl.CL10.CL_DEVICE_TYPE_ALL;
+import static org.lwjgl.opencl.CL10.CL_DEVICE_TYPE_CPU;
+import static org.lwjgl.opencl.CL10.CL_DEVICE_TYPE_GPU;
+import static org.lwjgl.opencl.CL10.CL_PLATFORM_VENDOR;
+import static org.lwjgl.opencl.Info.clGetDeviceInfoLong;
+import static org.lwjgl.opencl.Info.clGetPlatformInfoStringASCII;
+import static org.lwjgl.opencl.Info.clGetPlatformInfoStringUTF8;
+import static org.lwjgl.opencl.KHRICD.CL_PLATFORM_ICD_SUFFIX_KHR;
+import static org.lwjgl.opengl.GL11.GL_VENDOR;
+import static org.lwjgl.opengl.GL11.glGetString;
+import static org.lwjgl.system.MemoryUtil.NULL;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 
 /*
  * Copyright LWJGL. All rights reserved.
  * License terms: http://lwjgl.org/license.php
  */
-
-
-import org.lwjgl.glfw.*;
+import org.lwjgl.glfw.Callbacks;
+import org.lwjgl.glfw.GLFWCursorPosCallback;
+import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
+import org.lwjgl.glfw.GLFWKeyCallback;
+import org.lwjgl.glfw.GLFWMouseButtonCallback;
+import org.lwjgl.glfw.GLFWScrollCallback;
+import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opencl.CL;
 import org.lwjgl.opencl.CLCapabilities;
 import org.lwjgl.opencl.CLDevice;
@@ -14,17 +59,6 @@ import org.lwjgl.opencl.CLPlatform;
 import org.lwjgl.opencl.CLPlatform.Filter;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.Platform;
-
-import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
-
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opencl.CL10.*;
-import static org.lwjgl.opencl.Info.*;
-import static org.lwjgl.opencl.KHRICD.*;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.system.MemoryUtil.*;
 
 /*
 		THIS DEMO USES CODE PORTED FROM JogAmp.org

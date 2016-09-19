@@ -1,4 +1,4 @@
-package clearcl.lwjgl.demo;
+package clearcl.backend.lwjgl.demo;
 
 import static org.lwjgl.glfw.Callbacks.glfwReleaseCallbacks;
 import static org.lwjgl.glfw.GLFW.GLFW_CURSOR;

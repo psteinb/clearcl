@@ -1,6 +1,6 @@
-package clearcl.lwjgl.demo;
+package clearcl.backend.lwjgl.demo;
 
-import static clearcl.lwjgl.demo.IOUtil.*;
+import static clearcl.backend.lwjgl.demo.IOUtil.ioResourceToByteBuffer;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
@@ -163,7 +163,7 @@ import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.Platform;
 import org.lwjgl.system.libffi.Closure;
 
-import clearcl.lwjgl.demo.CLGLInteropDemo.GLFWWindow;
+import clearcl.backend.lwjgl.demo.CLGLInteropDemo.GLFWWindow;
 
 public class Mandelbrot
 {

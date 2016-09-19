@@ -1,4 +1,7 @@
-package clearcl.lwjgl.demo;
+package clearcl.backend.lwjgl.demo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Copyright LWJGL. All rights reserved.
@@ -7,9 +10,6 @@ package clearcl.lwjgl.demo;
 
 import org.lwjgl.system.libffi.Closure;
 import org.lwjgl.system.libffi.ClosureRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /** Experimental ClosureRegistry, do not use in production. */
 public class ClosureGC implements ClosureRegistry

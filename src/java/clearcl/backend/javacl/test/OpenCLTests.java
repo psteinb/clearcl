@@ -1,4 +1,4 @@
-package clearcl.test;
+package clearcl.backend.javacl.test;
 
 import static org.junit.Assert.fail;
 
