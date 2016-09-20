@@ -1,14 +1,18 @@
 package clearcl;
 
+import java.nio.Buffer;
+
+import clearcl.enums.DataType;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageChannelType;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
+import coremem.ContiguousMemoryInterface;
 
 public class ClearCLImage extends ClearCLBase
 {
-
+	private final ClearCLContext mClearCLContext;
 	private final HostAccessType mHostAccessType;
 	private final KernelAccessType mKernelAccessType;
 	private final ImageType mImageType;
@@ -28,6 +32,7 @@ public class ClearCLImage extends ClearCLBase
 											long pDepth)
 	{
 		super(pClearCLContext.getBackend(), pImage);
+		mClearCLContext = pClearCLContext;
 		mHostAccessType = pHostAccessType;
 		mKernelAccessType = pKernelAccessType;
 		mImageType = pImageType;
@@ -36,6 +41,117 @@ public class ClearCLImage extends ClearCLBase
 		mWidth = pWidth;
 		mHeight = pHeight;
 		mDepth = pDepth;
+	}
+
+	public void fill(	byte[] pPattern,
+										long[] pOrigin,
+										long[] pRegion,
+										boolean pBlockingFill)
+	{
+
+		getBackend().enqueueFillImage(mClearCLContext.getDefaultQueue()
+																									.getPeerPointer(),
+																	getPeerPointer(),
+																	pBlockingFill,
+																	pOrigin,
+																	pRegion,
+																	pPattern);
+	}
+
+	public void copyTo(	ClearCLImage pDstImage,
+											long[] pOriginInSrcImage,
+											long[] pOriginInDstImage,
+											long[] pRegion,
+											boolean pBlockingCopy)
+	{
+		getBackend().enqueueCopyImage(mClearCLContext.getDefaultQueue()
+																									.getPeerPointer(),
+																	getPeerPointer(),
+																	pDstImage.getPeerPointer(),
+																	pBlockingCopy,
+																	pOriginInSrcImage,
+																	pOriginInDstImage,
+																	pRegion);
+	}
+
+	public void copyTo(	ClearCLBuffer pDstBuffer,
+											long[] pOriginInSrcImage,
+											long[] pRegionInDstImage,
+											long pOffsetInDstBuffer,
+											boolean pBlockingCopy)
+	{
+		getBackend().enqueueCopyImageToBuffer(mClearCLContext.getDefaultQueue()
+																													.getPeerPointer(),
+																					getPeerPointer(),
+																					pDstBuffer.getPeerPointer(),
+																					pBlockingCopy,
+																					pOriginInSrcImage,
+																					pRegionInDstImage,
+																					pOffsetInDstBuffer);
+	}
+
+	public void writeTo(ContiguousMemoryInterface pContiguousMemory,
+											long[] pOrigin,
+											long[] pRegion,
+											boolean pBlockingRead)
+	{
+		ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pContiguousMemory);
+
+		getBackend().enqueueReadFromImage(mClearCLContext.getDefaultQueue()
+																											.getPeerPointer(),
+																			getPeerPointer(),
+																			pBlockingRead,
+																			pOrigin,
+																			pRegion,
+																			lHostMemPointer);
+	}
+
+	public void writeTo(Buffer pBuffer,
+											long[] pOrigin,
+											long[] pRegion,
+											boolean pBlockingRead)
+	{
+		ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pBuffer);
+
+		getBackend().enqueueReadFromImage(mClearCLContext.getDefaultQueue()
+																											.getPeerPointer(),
+																			getPeerPointer(),
+																			pBlockingRead,
+																			pOrigin,
+																			pRegion,
+																			lHostMemPointer);
+	}
+
+	public void readFrom(	ContiguousMemoryInterface pContiguousMemory,
+												long[] pOrigin,
+												long[] pRegion,
+												boolean pBlockingRead)
+	{
+		ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pContiguousMemory);
+
+		getBackend().enqueueWriteToImage(	mClearCLContext.getDefaultQueue()
+																											.getPeerPointer(),
+																			getPeerPointer(),
+																			pBlockingRead,
+																			pOrigin,
+																			pRegion,
+																			lHostMemPointer);
+	}
+
+	public void readFrom(	Buffer pBuffer,
+												long[] pOrigin,
+												long[] pRegion,
+												boolean pBlockingRead)
+	{
+		ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pBuffer);
+
+		getBackend().enqueueWriteToImage(	mClearCLContext.getDefaultQueue()
+																											.getPeerPointer(),
+																			getPeerPointer(),
+																			pBlockingRead,
+																			pOrigin,
+																			pRegion,
+																			lHostMemPointer);
 	}
 
 	@Override
@@ -67,6 +183,16 @@ public class ClearCLImage extends ClearCLBase
 	public ImageChannelType getImageChannelType()
 	{
 		return mImageChannelType;
+	}
+
+	public DataType getDataType()
+	{
+		return mImageChannelType.getDataType();
+	}
+
+	public boolean isNormalized()
+	{
+		return mImageChannelType.isNormalized();
 	}
 
 	public long getWidth()

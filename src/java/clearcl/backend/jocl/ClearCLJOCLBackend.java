@@ -11,6 +11,7 @@ import static org.jocl.CL.clCreateKernel;
 import static org.jocl.CL.clCreateProgramWithSource;
 import static org.jocl.CL.clEnqueueNDRangeKernel;
 import static org.jocl.CL.clEnqueueReadBuffer;
+import static org.jocl.CL.clEnqueueReadImage;
 import static org.jocl.CL.clGetDeviceIDs;
 import static org.jocl.CL.clGetPlatformIDs;
 import static org.jocl.CL.clReleaseCommandQueue;
@@ -548,12 +549,6 @@ public class ClearCLJOCLBackend implements ClearCLBackendInterface
 																			long[] pLocalSizes)
 	{
 
-		/**
-		 * public static int clEnqueueNDRangeKernel( cl_command_queue command_queue,
-		 * cl_kernel kernel, int work_dim, long global_work_offset[], long
-		 * global_work_size[], long local_work_size[], int num_events_in_wait_list,
-		 * cl_event event_wait_list[], cl_event event)
-		 */
 		checkExceptions(() -> {
 			clEnqueueNDRangeKernel(	(cl_command_queue) pQueuePointer.getPointer(),
 															(cl_kernel) pKernelPointer.getPointer(),
@@ -608,6 +603,301 @@ public class ClearCLJOCLBackend implements ClearCLBackendInterface
 															0,
 															null,
 															null);
+		});
+	}
+
+	@Override
+	public void enqueueReadFromBufferBox(	ClearCLPeerPointer pQueuePointer,
+																				ClearCLPeerPointer pBufferPointer,
+																				boolean pBlockingRead,
+																				long[] pBufferOrigin,
+																				long[] pHostOrigin,
+																				long[] pRegion,
+																				ClearCLPeerPointer pHostMemPointer)
+	{
+		checkExceptions(() -> {
+			CL.clEnqueueReadBufferRect(	(cl_command_queue) pQueuePointer.getPointer(),
+																	(cl_mem) pBufferPointer.getPointer(),
+																	pBlockingRead,
+																	pBufferOrigin,
+																	pHostOrigin,
+																	pRegion,
+																	0,
+																	0,
+																	0,
+																	0,
+																	(Pointer) pHostMemPointer.getPointer(),
+																	0,
+																	null,
+																	null);
+		});
+	}
+
+	@Override
+	public void enqueueWriteToBufferBox(ClearCLPeerPointer pQueuePointer,
+																			ClearCLPeerPointer pBufferPointer,
+																			boolean pBlockingWrite,
+																			long[] pBufferOrigin,
+																			long[] pHostOrigin,
+																			long[] pRegion,
+																			ClearCLPeerPointer pHostMemPointer)
+	{
+		checkExceptions(() -> {
+
+			CL.clEnqueueWriteBufferRect((cl_command_queue) pQueuePointer.getPointer(),
+																	(cl_mem) pBufferPointer.getPointer(),
+																	pBlockingWrite,
+																	pBufferOrigin,
+																	pHostOrigin,
+																	pRegion,
+																	0,
+																	0,
+																	0,
+																	0,
+																	(Pointer) pHostMemPointer.getPointer(),
+																	0,
+																	null,
+																	null);
+		});
+	}
+
+	@Override
+	public void enqueueFillBuffer(ClearCLPeerPointer pQueuePointer,
+																ClearCLPeerPointer pBufferPointer,
+																boolean pBlockingFill,
+																long pOffsetInBytes,
+																long pLengthInBytes,
+																byte[] pPattern)
+	{
+		checkExceptions(() -> {
+
+			Pointer lPatternPointer = Pointer.to(pPattern);
+
+			CL.clEnqueueFillBuffer(	(cl_command_queue) pQueuePointer.getPointer(),
+															(cl_mem) pBufferPointer.getPointer(),
+															lPatternPointer,
+															pPattern.length,
+															pOffsetInBytes,
+															pLengthInBytes,
+															0,
+															null,
+															null);
+
+			if (pBlockingFill)
+				waitQueueToFinish(pQueuePointer);
+
+		});
+	}
+
+	@Override
+	public void enqueueCopyBuffer(ClearCLPeerPointer pQueuePointer,
+																ClearCLPeerPointer pSrcBufferPointer,
+																ClearCLPeerPointer pDstBufferPointer,
+																boolean pBlockingCopy,
+																long pSrcOffsetInBytes,
+																long pDstOffsetInBytes,
+																long pLengthToCopyInBytes)
+	{
+		checkExceptions(() -> {
+
+			CL.clEnqueueCopyBuffer(	(cl_command_queue) pQueuePointer.getPointer(),
+															(cl_mem) pSrcBufferPointer.getPointer(),
+															(cl_mem) pDstBufferPointer.getPointer(),
+															pSrcOffsetInBytes,
+															pDstOffsetInBytes,
+															pLengthToCopyInBytes,
+															0,
+															null,
+															null);
+
+			if (pBlockingCopy)
+				waitQueueToFinish(pQueuePointer);
+
+		});
+	}
+
+	@Override
+	public void enqueueCopyBufferBox(	ClearCLPeerPointer pQueuePointer,
+																		ClearCLPeerPointer pSrcBufferPointer,
+																		ClearCLPeerPointer pDstBufferPointer,
+																		boolean pBlockingCopy,
+																		long[] pSrcOrigin,
+																		long[] pDstOrigin,
+																		long[] pRegion)
+	{
+		checkExceptions(() -> {
+
+			CL.clEnqueueCopyBufferRect(	(cl_command_queue) pQueuePointer.getPointer(),
+																	(cl_mem) pSrcBufferPointer.getPointer(),
+																	(cl_mem) pDstBufferPointer.getPointer(),
+																	pSrcOrigin,
+																	pDstOrigin,
+																	pRegion,
+																	0,
+																	0,
+																	0,
+																	0,
+																	0,
+																	null,
+																	null);
+
+			if (pBlockingCopy)
+				waitQueueToFinish(pQueuePointer);
+
+		});
+	}
+
+	@Override
+	public void enqueueCopyBufferToImage(	ClearCLPeerPointer pQueuePointer,
+																				ClearCLPeerPointer pSrcBufferPointer,
+																				ClearCLPeerPointer pDstImagePointer,
+																				boolean pBlockingCopy,
+																				long pSrcOffsetInBytes,
+																				long[] pDstOrigin,
+																				long[] pDstRegion)
+	{
+		checkExceptions(() -> {
+
+			CL.clEnqueueCopyBufferToImage((cl_command_queue) pQueuePointer.getPointer(),
+																		(cl_mem) pSrcBufferPointer.getPointer(),
+																		(cl_mem) pDstImagePointer.getPointer(),
+																		pSrcOffsetInBytes,
+																		pDstOrigin,
+																		pDstRegion,
+																		0,
+																		null,
+																		null);
+
+			if (pBlockingCopy)
+				waitQueueToFinish(pQueuePointer);
+
+		});
+	}
+
+	@Override
+	public void enqueueReadFromImage(	ClearCLPeerPointer pQueuePointer,
+																		ClearCLPeerPointer pImagePointer,
+																		boolean pReadWrite,
+																		long[] pOrigin,
+																		long[] pRegion,
+																		ClearCLPeerPointer pHostMemPointer)
+	{
+		checkExceptions(() -> {
+			CL.clEnqueueReadImage((cl_command_queue) pQueuePointer.getPointer(),
+														(cl_mem) pImagePointer.getPointer(),
+														pReadWrite,
+														pOrigin,
+														pRegion,
+														0,
+														0,
+														(Pointer) pHostMemPointer.getPointer(),
+														0,
+														null,
+														null);
+		});
+	}
+
+	@Override
+	public void enqueueWriteToImage(ClearCLPeerPointer pQueuePointer,
+																	ClearCLPeerPointer pImagePointer,
+																	boolean pBlockingWrite,
+																	long[] pOrigin,
+																	long[] pRegion,
+																	ClearCLPeerPointer pHostMemPointer)
+	{
+		checkExceptions(() -> {
+			CL.clEnqueueWriteImage(	(cl_command_queue) pQueuePointer.getPointer(),
+															(cl_mem) pImagePointer.getPointer(),
+															true,
+															pOrigin,
+															pRegion,
+															0,
+															0,
+															(Pointer) pHostMemPointer.getPointer(),
+															0,
+															null,
+															null);
+		});
+	}
+
+	@Override
+	public void enqueueFillImage(	ClearCLPeerPointer pQueuePointer,
+																ClearCLPeerPointer pImagePointer,
+																boolean pBlockingFill,
+																long[] pOrigin,
+																long[] pRegion,
+																byte[] pColor)
+	{
+		checkExceptions(() -> {
+
+			Pointer lColorPointer = Pointer.to(pColor);
+
+			CL.clEnqueueFillImage((cl_command_queue) pQueuePointer.getPointer(),
+														(cl_mem) pImagePointer.getPointer(),
+														lColorPointer,
+														pOrigin,
+														pRegion,
+														0,
+														null,
+														null);
+
+			if (pBlockingFill)
+				waitQueueToFinish(pQueuePointer);
+
+		});
+	}
+
+	@Override
+	public void enqueueCopyImage(	ClearCLPeerPointer pQueuePointer,
+																ClearCLPeerPointer pSrcBImagePointer,
+																ClearCLPeerPointer pDstImagePointer,
+																boolean pBlockingCopy,
+																long[] pSrcOrigin,
+																long[] pDstOrigin,
+																long[] pRegion)
+	{
+		checkExceptions(() -> {
+
+			CL.clEnqueueCopyImage((cl_command_queue) pQueuePointer.getPointer(),
+														(cl_mem) pSrcBImagePointer.getPointer(),
+														(cl_mem) pDstImagePointer.getPointer(),
+														pSrcOrigin,
+														pDstOrigin,
+														pRegion,
+														0,
+														null,
+														null);
+
+			if (pBlockingCopy)
+				waitQueueToFinish(pQueuePointer);
+
+		});
+	}
+
+	@Override
+	public void enqueueCopyImageToBuffer(	ClearCLPeerPointer pQueuePointer,
+																				ClearCLPeerPointer pSrcImagePointer,
+																				ClearCLPeerPointer pDstBufferPointer,
+																				boolean pBlockingCopy,
+																				long[] pSrcOrigin,
+																				long[] pSrcRegion,
+																				long pDstOffset)
+	{
+		checkExceptions(() -> {
+
+			CL.clEnqueueCopyImageToBuffer((cl_command_queue) pQueuePointer.getPointer(),
+																		(cl_mem) pSrcImagePointer.getPointer(),
+																		(cl_mem) pDstBufferPointer.getPointer(),
+																		pSrcOrigin,
+																		pSrcRegion,
+																		pDstOffset,
+																		0,
+																		null,
+																		null);
+
+			if (pBlockingCopy)
+				waitQueueToFinish(pQueuePointer);
+
 		});
 	}
 

@@ -2,16 +2,35 @@ package clearcl.enums;
 
 public enum ImageChannelType
 {
-	SignedNormalizedInt8,
-	SignedNormalizedInt16,
-	UnsignedNormalizedInt8, 
-	UnsignedNormalizedInt16, 
-	SignedInt8, 
-	SignedInt16, 
-	SignedInt32,
-	UnsignedInt8, 
-	UnsignedInt16, 
-	UnsignedInt32, 
-	HalfFloat,
-	Float, 
+	SignedNormalizedInt8(DataType.SignedByte, true),
+	SignedNormalizedInt16(DataType.SignedShort, true),
+	UnsignedNormalizedInt8(DataType.Byte, true),
+	UnsignedNormalizedInt16(DataType.Short, true),
+	SignedInt8(DataType.SignedByte, false),
+	SignedInt16(DataType.SignedShort, false),
+	SignedInt32(DataType.SignedInteger, false),
+	UnsignedInt8(DataType.SignedByte, false),
+	UnsignedInt16(DataType.SignedShort, false),
+	UnsignedInt32(DataType.SignedInteger, false),
+	HalfFloat(DataType.HalfFloat, false),
+	Float(DataType.Float, false);
+
+	DataType mDataType;
+	boolean mIsNormalized;
+
+	private ImageChannelType(DataType pDataType, boolean pIsNormalized)
+	{
+		mDataType = pDataType;
+		mIsNormalized = pIsNormalized;
+	}
+
+	public DataType getDataType()
+	{
+		return mDataType;
+	}
+
+	public boolean isNormalized()
+	{
+		return mIsNormalized;
+	}
 }

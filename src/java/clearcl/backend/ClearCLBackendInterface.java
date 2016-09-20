@@ -48,10 +48,10 @@ public interface ClearCLBackendInterface
 																	boolean pInOrder);
 
 	ClearCLPeerPointer createBuffer(ClearCLPeerPointer pContextPointer,
-	                                HostAccessType pHostAccessType,
-                                  KernelAccessType pKernelAccessType,
+																	HostAccessType pHostAccessType,
+																	KernelAccessType pKernelAccessType,
 																	long pBufferSizeInBytes);
-	
+
 	ClearCLPeerPointer createImage(	ClearCLPeerPointer pContextPointer,
 																	HostAccessType pHostAccessType,
 																	KernelAccessType pKernelAccessType,
@@ -61,20 +61,19 @@ public interface ClearCLBackendInterface
 																	long pWidth,
 																	long pHeight,
 																	long pDepth);
-	
 
 	ClearCLPeerPointer createProgram(	ClearCLPeerPointer pContextPointer,
 																		String... pSourceCode);
 
 	void buildProgram(ClearCLPeerPointer pProgramPointer,
 										String pOptions);
-	
+
 	BuildStatus getBuildStatus(	ClearCLPeerPointer pDevicePointer,
-											ClearCLPeerPointer pProgramPointer);
-	
+															ClearCLPeerPointer pProgramPointer);
+
 	String getBuildLog(	ClearCLPeerPointer pDevicePointer,
 											ClearCLPeerPointer pProgramPointer);
-	
+
 	ClearCLPeerPointer createKernel(ClearCLPeerPointer pProgramPointer,
 																	String pKernelName);
 
@@ -116,20 +115,96 @@ public interface ClearCLBackendInterface
 														long pOffsetInBuffer,
 														long pLengthInBytes,
 														ClearCLPeerPointer pHostMemPointer);
+	
+	void enqueueReadFromBufferBox(ClearCLPeerPointer pQueuePointer,
+																ClearCLPeerPointer pBufferPointer,
+																boolean pBlockingRead,
+																long[] pBufferOrigin,
+																long[] pHostOrigin,
+																long[] pRegion,
+																ClearCLPeerPointer pHostMemPointer);
+
+	void enqueueWriteToBufferBox(	ClearCLPeerPointer pQueuePointer,
+																ClearCLPeerPointer pBufferPointer,
+																boolean pBlockingWrite,
+																long[] pBufferOrigin,
+																long[] pHostOrigin,
+																long[] pRegion,
+																ClearCLPeerPointer pHostMemPointer);
+
+	void enqueueFillBuffer(	ClearCLPeerPointer pQueuePointer,
+													ClearCLPeerPointer pBufferPointer,
+													boolean pBlockingFill,
+													long pOffsetInBytes,
+													long pLengthInBytes,
+													byte[] pPattern);
+
+	void enqueueCopyBuffer(	ClearCLPeerPointer pQueuePointer,
+													ClearCLPeerPointer pSrcBufferPointer,
+													ClearCLPeerPointer pDstBufferPointer,
+													boolean pBlockingCopy,
+													long pSrcOffsetInBytes,
+													long pDstOffsetInBytes,
+													long pLengthToCopyInBytes);
+
+	void enqueueCopyBufferBox(ClearCLPeerPointer pQueuePointer,
+														ClearCLPeerPointer pSrcBufferPointer,
+														ClearCLPeerPointer pDstBufferPointer,
+														boolean pBlockingCopy,
+														long[] pSrcOrigin,
+														long[] pDstOrigin,
+														long[] pRegion);
+
+	void enqueueCopyBufferToImage(ClearCLPeerPointer pQueuePointer,
+																ClearCLPeerPointer pSrcBufferPointer,
+																ClearCLPeerPointer pDstImagePointer,
+																boolean pBlockingCopy,
+																long pSrcOffsetInBytes,
+																long[] pDstOrigin,
+																long[] pDstRegion);
+
+	void enqueueReadFromImage(ClearCLPeerPointer pQueuePointer,
+														ClearCLPeerPointer pImagePointer,
+														boolean pReadWrite,
+														long[] pOrigin,
+														long[] pRegion,
+														ClearCLPeerPointer pHostMemPointer);
+
+	void enqueueWriteToImage(	ClearCLPeerPointer pQueuePointer,
+														ClearCLPeerPointer pImagePointer,
+														boolean pBlockingWrite,
+														long[] pOrigin,
+														long[] pRegion,
+														ClearCLPeerPointer pHostMemPointer);
+
+	void enqueueFillImage(ClearCLPeerPointer pQueuePointer,
+												ClearCLPeerPointer pImagePointer,
+												boolean pBlockingFill,
+												long[] pOrigin,
+												long[] pRegion,
+												byte[] pColor);
+
+	void enqueueCopyImage(ClearCLPeerPointer pQueuePointer,
+												ClearCLPeerPointer pSrcBImagePointer,
+												ClearCLPeerPointer pDstImagePointer,
+												boolean pBlockingCopy,
+												long[] pSrcOrigin,
+												long[] pDstOrigin,
+												long[] pRegion);
+
+	void enqueueCopyImageToBuffer(ClearCLPeerPointer pQueuePointer,
+																ClearCLPeerPointer pSrcImagePointer,
+																ClearCLPeerPointer pDstBufferPointer,
+																boolean pBlockingCopy,
+																long[] pSrcOrigin,
+																long[] pSrcRegion,
+																long pDstOffset);
 
 	ClearCLPeerPointer wrap(Buffer pBuffer);
 
 	ClearCLPeerPointer wrap(ContiguousMemoryInterface pContiguousMemory);
 
 	void waitQueueToFinish(ClearCLPeerPointer pPeerPointer);
-
-
-
-
-
-
-
-
 
 
 
