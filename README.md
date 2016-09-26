@@ -66,7 +66,7 @@ With Maven:
  </repository>
 ~~~~
 
-Just check the test to learn how to use ClearCL.
+* Just check the test (here)[https://github.com/ClearVolume/ClearCL/blob/master/src/java/clearcl/test/ClearCLTests.java] to learn how to use ClearCL. More tests are coming...
 
 ### Contributors ###
 
