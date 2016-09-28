@@ -39,6 +39,8 @@ public interface ClearCLBackendInterface
 	DeviceType getDeviceType(ClearCLPeerPointer pDevicePointer);
 
 	String getDeviceVersion(ClearCLPeerPointer pDevicePointer);
+	
+	String getDeviceExtensions(ClearCLPeerPointer pDevicePointer);
 
 	ClearCLPeerPointer getContext(ClearCLPeerPointer pPlatformPointer,
 																ClearCLPeerPointer... pDevicePointers);
@@ -206,6 +208,7 @@ public interface ClearCLBackendInterface
 
 	void waitQueueToFinish(ClearCLPeerPointer pPeerPointer);
 
+	
 
 
 }

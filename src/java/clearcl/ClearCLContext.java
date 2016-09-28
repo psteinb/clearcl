@@ -11,6 +11,7 @@ import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageChannelType;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
+import clearcl.enums.MemAllocMode;
 
 public class ClearCLContext extends ClearCLBase
 {
@@ -45,6 +46,19 @@ public class ClearCLContext extends ClearCLBase
 	public ClearCLBuffer createBuffer(HostAccessType pHostAccessType,
 																		KernelAccessType pKernelAccessType,
 																		DataType pDataType,
+																		long pBufferLengthInElements)
+	{
+		return createBuffer( pHostAccessType,
+												 pKernelAccessType,
+												 pDataType,
+												 MemAllocMode.None,
+												 pBufferLengthInElements);
+	}
+
+	public ClearCLBuffer createBuffer(HostAccessType pHostAccessType,
+																		KernelAccessType pKernelAccessType,
+																		DataType pDataType,
+																		MemAllocMode pMemAllocMode,
 																		long pBufferLengthInElements)
 	{
 

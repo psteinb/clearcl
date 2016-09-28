@@ -34,18 +34,26 @@ public class ClearCLDevice extends ClearCLBase
 		Double lDoubleVersion = Double.parseDouble(lStringVersion);
 		return lDoubleVersion;
 	}
+	
+
+	private String getExtensions()
+	{
+		return getBackend().getDeviceExtensions(mDevicePointer);
+	}
 
 	public String getInfoString()
 	{
 		StringBuilder lStringBuilder = new StringBuilder();
 
-		lStringBuilder.append(String.format("Device name: %s, type: %s, OpenCL version: %g  \n",
+		lStringBuilder.append(String.format("Device name: %s, type: %s, OpenCL version: %g, extensions: %s  \n",
 																				getName(),
 																				getType(),
-																				getVersion()));
+																				getVersion(),
+																				getExtensions()));
 
 		return lStringBuilder.toString();
 	}
+
 
 	public ClearCLContext createContext()
 	{

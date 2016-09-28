@@ -219,6 +219,13 @@ public class ClearCLJOCLBackend implements ClearCLBackendInterface
 		return getDeviceInfo(	pDevicePointer,
 													CL.CL_DEVICE_OPENCL_C_VERSION);
 	}
+	
+	@Override
+	public String getDeviceExtensions(ClearCLPeerPointer pDevicePointer)
+	{
+		return getDeviceInfo(	pDevicePointer,
+													CL.CL_DEVICE_EXTENSIONS);
+	}
 
 	private String getDeviceInfo(	ClearCLPeerPointer pDevicePointer,
 																int pInfoId)
