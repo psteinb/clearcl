@@ -1,79 +1,185 @@
 package clearcl;
 
+import clearcl.abs.ClearCLBase;
+import clearcl.enums.DeviceInfo;
 import clearcl.enums.DeviceType;
 
+/**
+ * ClearCLDevice is the ClearCL abstraction for OpenCl devices.
+ *
+ * @author royer
+ */
 public class ClearCLDevice extends ClearCLBase
 {
 
-	private ClearCLPlatform mClearCLPlatform;
-	private ClearCLPeerPointer mDevicePointer;
+  private ClearCLPlatform mClearCLPlatform;
+  private ClearCLPeerPointer mDevicePointer;
 
-	public ClearCLDevice(	ClearCLPlatform pClearCLPlatform,
-												ClearCLPeerPointer pDevicePointer)
-	{
-		super(pClearCLPlatform.getBackend(), pDevicePointer);
-		mClearCLPlatform = pClearCLPlatform;
-		mDevicePointer = pDevicePointer;
-	}
+  /**
+   * Construction of this object is done from within a ClearCLPlatform.
+   * 
+   * @param pClearCLPlatform
+   * @param pDevicePointer
+   */
+  ClearCLDevice(ClearCLPlatform pClearCLPlatform,
+                ClearCLPeerPointer pDevicePointer)
+  {
+    super(pClearCLPlatform.getBackend(), pDevicePointer);
+    mClearCLPlatform = pClearCLPlatform;
+    mDevicePointer = pDevicePointer;
+  }
 
-	public String getName()
-	{
-		return getBackend().getDeviceName(mDevicePointer);
-	}
+  /**
+   * Returns device name.
+   * 
+   * @return device name.
+   */
+  public String getName()
+  {
+    return getBackend().getDeviceName(mDevicePointer);
+  }
 
-	public DeviceType getType()
-	{
-		return getBackend().getDeviceType(mDevicePointer);
-	}
+  /**
+   * Returns device type.
+   * 
+   * @return device type
+   */
+  public DeviceType getType()
+  {
+    return getBackend().getDeviceType(mDevicePointer);
+  }
 
-	public double getVersion()
-	{
-		String lStringVersion = getBackend().getDeviceVersion(mDevicePointer)
-																				.replace("OpenCL C", "")
-																				.trim();
-		Double lDoubleVersion = Double.parseDouble(lStringVersion);
-		return lDoubleVersion;
-	}
-	
+  /**
+   * Returns OpenCL version
+   * 
+   * @return OpenCL version
+   */
+  public double getVersion()
+  {
+    String lStringVersion = getBackend().getDeviceVersion(mDevicePointer)
+                                        .replace("OpenCL C", "")
+                                        .trim();
+    Double lDoubleVersion = Double.parseDouble(lStringVersion);
+    return lDoubleVersion;
+  }
 
-	private String getExtensions()
-	{
-		return getBackend().getDeviceExtensions(mDevicePointer);
-	}
+  /**
+   * Returns device OpenL extensions string.
+   * 
+   * @return
+   */
+  public String getExtensions()
+  {
+    return getBackend().getDeviceExtensions(mDevicePointer);
+  }
 
-	public String getInfoString()
-	{
-		StringBuilder lStringBuilder = new StringBuilder();
+  /**
+   * Returns this device global memory size in bytes.
+   * 
+   * @return global memory size in bytes
+   */
+  public long getGlobalMemorySizeInBytes()
+  {
+    return getBackend().getDeviceInfo(mDevicePointer,
+                                      DeviceInfo.MaxGlobalMemory);
+  }
 
-		lStringBuilder.append(String.format("Device name: %s, type: %s, OpenCL version: %g, extensions: %s  \n",
-																				getName(),
-																				getType(),
-																				getVersion(),
-																				getExtensions()));
+  /**
+   * Returns this device max memory allocation size.
+   * 
+   * @return max allocation size
+   */
+  public long getMaxMemoryAllocationSizeInBytes()
+  {
+    return getBackend().getDeviceInfo(mDevicePointer,
+                                      DeviceInfo.MaxMemoryAllocationSize);
+  }
 
-		return lStringBuilder.toString();
-	}
+  /**
+   * Returns this device local memory size.
+   * 
+   * @return local memory size
+   */
+  public long getLocalMemorySizeInBytes()
+  {
+    return getBackend().getDeviceInfo(mDevicePointer,
+                                      DeviceInfo.LocalMemSize);
+  }
 
+  /**
+   * Returns this device clock frequency.
+   * 
+   * @return clock frequency in MHz
+   */
+  public long getClockFrequency()
+  {
+    return getBackend().getDeviceInfo(mDevicePointer,
+                                      DeviceInfo.MaxClockFreq);
+  }
 
-	public ClearCLContext createContext()
-	{
-		ClearCLPeerPointer lContextPointer = getBackend().getContext(	mClearCLPlatform.getPeerPointer(),
-																																	mDevicePointer);
-		return new ClearCLContext(this, lContextPointer);
-	}
+  /**
+   * Returns this device number of compute units.
+   * 
+   * @return number of compute units
+   */
+  public long getNumberOfComputeUnits()
+  {
+    return getBackend().getDeviceInfo(mDevicePointer,
+                                      DeviceInfo.ComputeUnits);
+  }
 
-	@Override
-	public String toString()
-	{
-		return String.format(	"ClearCLDevice [mClearCLPlatform=%s, getInfoString()=%s]",
-													mClearCLPlatform,
-													getInfoString());
-	}
+  /**
+   * Returns device info string.
+   * 
+   * @return device info string
+   */
+  public String getInfoString()
+  {
+    StringBuilder lStringBuilder = new StringBuilder();
 
-	@Override
-	public void close() throws Exception
-	{
-		getBackend().releaseDevice(getPeerPointer());
-	}
+    lStringBuilder.append(String.format("Device name: %s, type: %s, OpenCL version: %g \n max global memory: %d \n max local memory: %d \n clock freq: %dMhz \n nb compute units: %d \n extensions: %s  \n",
+                                        getName(),
+                                        getType(),
+                                        getVersion(),
+                                        getGlobalMemorySizeInBytes(),
+                                        getLocalMemorySizeInBytes(),
+                                        getClockFrequency(),
+                                        getNumberOfComputeUnits(),
+                                        getExtensions()));
+
+    return lStringBuilder.toString();
+  }
+
+  /**
+   * Creates device context.
+   * 
+   * @return context
+   */
+  public ClearCLContext createContext()
+  {
+    ClearCLPeerPointer lContextPointer = getBackend().getContextPeerPointer(mClearCLPlatform.getPeerPointer(),
+                                                                            mDevicePointer);
+    return new ClearCLContext(this, lContextPointer);
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString()
+  {
+    return String.format("ClearCLDevice [mClearCLPlatform=%s, name=%s]",
+                         mClearCLPlatform.toString(),
+                         getName());
+  }
+
+  /* (non-Javadoc)
+   * @see clearcl.ClearCLBase#close()
+   */
+  @Override
+  public void close() throws Exception
+  {
+    getBackend().releaseDevice(getPeerPointer());
+  }
 
 }

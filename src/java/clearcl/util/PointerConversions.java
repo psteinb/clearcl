@@ -5,13 +5,13 @@ import coremem.offheap.OffHeapMemory;
 public class PointerConversions
 {
 
-	public static OffHeapMemory convert(org.jocl.Pointer pJOCLPointer)
-	{
+  public static OffHeapMemory convert(org.jocl.Pointer pJOCLPointer)
+  {
 
-		// pJOCLPointer.
+    // pJOCLPointer.
 
-		return null;
+    return null;
 
-	}
+  }
 
 }

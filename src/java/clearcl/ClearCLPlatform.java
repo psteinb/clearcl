@@ -1,76 +1,143 @@
 package clearcl;
 
+import clearcl.abs.ClearCLBase;
 import clearcl.enums.DeviceType;
 
+/**
+ * ClearCLPlatform is the ClearCL abstraction for OpenCl platforms.
+ *
+ * @author royer
+ */
 public class ClearCLPlatform extends ClearCLBase
 {
 
-	private ClearCLPeerPointer mPlatformPointer;
+  private ClearCLPeerPointer mPlatformPointer;
 
-	public ClearCLPlatform(	ClearCL pClearCL,
-													ClearCLPeerPointer pPlatformIdPointer)
-	{
-		super(pClearCL.getBackend(), pPlatformIdPointer);
-		mPlatformPointer = pPlatformIdPointer;
-	}
+  /**
+   * This constructor is called internally from the 'starting point' ClearCl
+   * object.
+   * 
+   * @param pClearCL
+   * @param pPlatformIdPointer
+   */
+  ClearCLPlatform(ClearCL pClearCL,
+                  ClearCLPeerPointer pPlatformIdPointer)
+  {
+    super(pClearCL.getBackend(), pPlatformIdPointer);
+    mPlatformPointer = pPlatformIdPointer;
+  }
 
-	public int getNumberOfDevices(DeviceType pDeviceType)
-	{
-		return getBackend().getNumberOfDevicesForPlatform(mPlatformPointer,
-																											pDeviceType);
-	}
+  /**
+   * Returns the number of devices for a given device type
+   * 
+   * @param pDeviceType
+   *          device type
+   * @return number of devices for given device type
+   */
+  public int getNumberOfDevices(DeviceType pDeviceType)
+  {
+    return getBackend().getNumberOfDevicesForPlatform(mPlatformPointer,
+                                                      pDeviceType);
+  }
 
-	public int getNumberOfDevices()
-	{
-		return getBackend().getNumberOfDevicesForPlatform(mPlatformPointer);
-	}
+  /**
+   * Returns the total number of devices.
+   * 
+   * @return total number of devices.
+   */
+  public int getNumberOfDevices()
+  {
+    return getBackend().getNumberOfDevicesForPlatform(mPlatformPointer);
+  }
 
-	public ClearCLDevice getCPUDevice(int pCPUDeviceIndex,
-																		DeviceType pDeviceType)
-	{
-		ClearCLPeerPointer lDevicePointer = getBackend().getDeviceId(	mPlatformPointer,
-																															pDeviceType,
-																															pCPUDeviceIndex);
-		return new ClearCLDevice(this, lDevicePointer);
-	}
+  /**
+   * Returns the CPU device for a given index.
+   * 
+   * @param pDeviceIndex
+   *          device index
+   * @return device
+   */
+  public ClearCLDevice getCPUDevice(int pDeviceIndex)
+  {
+    ClearCLPeerPointer lDevicePointer = getBackend().getDevicePeerPointer(mPlatformPointer,
+                                                                          DeviceType.CPU,
+                                                                          pDeviceIndex);
+    return new ClearCLDevice(this, lDevicePointer);
+  }
 
-	public ClearCLDevice getDevice(int pDeviceIndex)
-	{
-		ClearCLPeerPointer lDevicePointer = getBackend().getDeviceId(	mPlatformPointer,
-																															pDeviceIndex);
-		return new ClearCLDevice(this, lDevicePointer);
-	}
+  /**
+   * Returns the CPU device for a given index.
+   * 
+   * @param pDeviceIndex
+   *          device index
+   * @return device
+   */
+  public ClearCLDevice getGPUDevice(int pDeviceIndex)
+  {
+    ClearCLPeerPointer lDevicePointer = getBackend().getDevicePeerPointer(mPlatformPointer,
+                                                                          DeviceType.GPU,
+                                                                          pDeviceIndex);
+    return new ClearCLDevice(this, lDevicePointer);
+  }
 
-	public String getName()
-	{
-		return getBackend().getPlatformName(mPlatformPointer);
-	}
+  /**
+   * Returns the device for a given index.
+   * 
+   * @param pDeviceIndex
+   *          device index
+   * @return
+   */
+  public ClearCLDevice getDevice(int pDeviceIndex)
+  {
+    ClearCLPeerPointer lDevicePointer = getBackend().getDevicePeerPointer(mPlatformPointer,
+                                                                          pDeviceIndex);
+    return new ClearCLDevice(this, lDevicePointer);
+  }
 
-	public String getInfoString()
-	{
-		StringBuilder lStringBuilder = new StringBuilder();
+  /**
+   * Returns platform name.
+   * 
+   * @return platform name.
+   */
+  public String getName()
+  {
+    return getBackend().getPlatformName(mPlatformPointer);
+  }
 
-		lStringBuilder.append(String.format("Platform name: %s \n",
-																				getName()));
-		lStringBuilder.append(String.format("\tNumber of CPU devices: %d \n",
-																				getNumberOfDevices(DeviceType.CPU)));
-		lStringBuilder.append(String.format("\tNumber of GPU devices: %d \n",
-																				getNumberOfDevices(DeviceType.GPU)));
+  /**
+   * Returns platform info string.
+   * 
+   * @return info string
+   */
+  public String getInfoString()
+  {
+    StringBuilder lStringBuilder = new StringBuilder();
 
-		return lStringBuilder.toString();
-	}
+    lStringBuilder.append(String.format("Platform name: %s \n",
+                                        getName()));
+    lStringBuilder.append(String.format("\tNumber of CPU devices: %d \n",
+                                        getNumberOfDevices(DeviceType.CPU)));
+    lStringBuilder.append(String.format("\tNumber of GPU devices: %d \n",
+                                        getNumberOfDevices(DeviceType.GPU)));
 
-	@Override
-	public String toString()
-	{
-		return String.format(	"ClearCLPlatform [mPlatformIdPointer=%s]\n %s",
-													mPlatformPointer,
-													getInfoString());
-	}
+    return lStringBuilder.toString();
+  }
 
-	@Override
-	public void close() throws Exception
-	{
-	}
+  /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString()
+  {
+    return String.format("ClearCLPlatform [name=%s]", getName());
+  }
+
+  /* (non-Javadoc)
+   * @see clearcl.ClearCLBase#close()
+   */
+  @Override
+  public void close() throws Exception
+  {
+  }
 
 }

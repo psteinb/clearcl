@@ -14,69 +14,91 @@ import java.nio.channels.ReadableByteChannel;
 
 import org.lwjgl.BufferUtils;
 
-public final class IOUtil {
+public final class IOUtil
+{
 
-	private IOUtil() {
-	}
+  private IOUtil()
+  {
+  }
 
-	private static ByteBuffer resizeBuffer(ByteBuffer buffer, int newCapacity) {
-		ByteBuffer newBuffer = BufferUtils.createByteBuffer(newCapacity);
-		buffer.flip();
-		newBuffer.put(buffer);
-		return newBuffer;
-	}
+  private static ByteBuffer resizeBuffer(ByteBuffer buffer,
+                                         int newCapacity)
+  {
+    ByteBuffer newBuffer = BufferUtils.createByteBuffer(newCapacity);
+    buffer.flip();
+    newBuffer.put(buffer);
+    return newBuffer;
+  }
 
-	/**
-	 * Reads the specified resource and returns the raw data as a ByteBuffer.
-	 *
-	 * @param resource   the resource to read
-	 * @param bufferSize the initial buffer size
-	 *
-	 * @return the resource data
-	 *
-	 * @throws IOException if an IO error occurs
-	 */
-	public static ByteBuffer ioResourceToByteBuffer(String resource, int bufferSize) throws IOException {
-		ByteBuffer buffer;
+  /**
+   * Reads the specified resource and returns the raw data as a ByteBuffer.
+   *
+   * @param resource
+   *          the resource to read
+   * @param bufferSize
+   *          the initial buffer size
+   *
+   * @return the resource data
+   *
+   * @throws IOException
+   *           if an IO error occurs
+   */
+  public static ByteBuffer ioResourceToByteBuffer(String resource,
+                                                  int bufferSize) throws IOException
+  {
+    ByteBuffer buffer;
 
-		File file = new File(resource);
-		if ( file.isFile() ) {
-			FileInputStream fis = new FileInputStream(file);
-			FileChannel fc = fis.getChannel();
-			
-			buffer = BufferUtils.createByteBuffer((int)fc.size() + 1);
+    File file = new File(resource);
+    if (file.isFile())
+    {
+      FileInputStream fis = new FileInputStream(file);
+      FileChannel fc = fis.getChannel();
 
-			while ( fc.read(buffer) != -1 ) ;
-			
-			fis.close();
-			fc.close();
-		} else {
-			buffer = createByteBuffer(bufferSize);
+      buffer = BufferUtils.createByteBuffer((int) fc.size() + 1);
 
-			InputStream source = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
-			if ( source == null )
-				throw new FileNotFoundException(resource);
+      while (fc.read(buffer) != -1)
+        ;
 
-			try {
-				ReadableByteChannel rbc = Channels.newChannel(source);
-				try {
-					while ( true ) {
-						int bytes = rbc.read(buffer);
-						if ( bytes == -1 )
-							break;
-						if ( buffer.remaining() == 0 )
-							buffer = resizeBuffer(buffer, buffer.capacity() * 2);
-					}
-				} finally {
-					rbc.close();
-				}
-			} finally {
-				source.close();
-			}
-		}
+      fis.close();
+      fc.close();
+    }
+    else
+    {
+      buffer = createByteBuffer(bufferSize);
 
-		buffer.flip();
-		return buffer;
-	}
+      InputStream source = Thread.currentThread()
+                                 .getContextClassLoader()
+                                 .getResourceAsStream(resource);
+      if (source == null)
+        throw new FileNotFoundException(resource);
+
+      try
+      {
+        ReadableByteChannel rbc = Channels.newChannel(source);
+        try
+        {
+          while (true)
+          {
+            int bytes = rbc.read(buffer);
+            if (bytes == -1)
+              break;
+            if (buffer.remaining() == 0)
+              buffer = resizeBuffer(buffer, buffer.capacity() * 2);
+          }
+        }
+        finally
+        {
+          rbc.close();
+        }
+      }
+      finally
+      {
+        source.close();
+      }
+    }
+
+    buffer.flip();
+    return buffer;
+  }
 
 }

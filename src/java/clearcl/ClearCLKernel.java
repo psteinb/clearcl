@@ -1,102 +1,414 @@
 package clearcl;
 
-public class ClearCLKernel extends ClearCLBase
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import clearcl.abs.ClearCLBase;
+import clearcl.exceptions.ClearCLArgumentMissingException;
+import clearcl.exceptions.ClearCLUnknownArgumentNameException;
+
+/**
+ * ClearCLKernel is the ClearCL abstraction for OpenCL kernels.
+ *
+ * @author royer
+ */
+public class ClearCLKernel extends ClearCLBase implements Runnable
 {
-	private ClearCLContext mClearCLContext;
-	private ClearCLProgram mClearCLProgram;
-	private String mName;
+  private final ClearCLContext mClearCLContext;
+  private final ClearCLProgram mClearCLProgram;
+  private final String mName;
+  private final String mSourceCode;
 
-	public ClearCLKernel(	ClearCLContext pClearCLContext,
-												ClearCLProgram pClearCLProgram,
-												ClearCLPeerPointer pKernelPointer,
-												String pKernelName)
-	{
-		super(pClearCLProgram.getBackend(), pKernelPointer);
-		mClearCLContext = pClearCLContext;
-		mClearCLProgram = pClearCLProgram;
-		mName = pKernelName;
-	}
+  private final ConcurrentHashMap<String, Integer> mNameToIndexMap;
+  private final ConcurrentHashMap<Integer, Argument> mIndexToArgumentMap = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, Number> mDefaultArgumentsMap;
 
-	public void setArguments(Object... pArguments)
-	{
-		int i = 0;
-		for (Object lObject : pArguments)
-		{
-			setArgument(i, lObject);
-			i++;
-		}
-	}
+  private long[] mGlobalOffsets = null;
+  private long[] mGlobalSizes = null;
+  private long[] mLocalSizes = null;
 
-	public void setArgument(int pIndex, Object pObject)
-	{
-		getBackend().setKernelArgument(	this.getPeerPointer(),
-																		pIndex,
-																		pObject);
-	}
+  private class Argument
+  {
+    public Object argument;
 
-	public void run(boolean pBlockingRun, long... pGlobalSizes)
-	{
-		run(mClearCLContext.getDefaultQueue(),
-				pBlockingRun,
-				pGlobalSizes.length,
-				null, //getConstantArray(pGlobalSizes.length, 0)
-				pGlobalSizes,
-				getConstantArray(pGlobalSizes.length, 1));
-	}
+    public Argument(Object pObject)
+    {
+      argument = pObject;
+    }
+  }
 
-	public void run(boolean pBlockingRun,
-									int pNumberOfDimension,
-									long[] pGlobalOffsets,
-									long[] pGlobalSizes,
-									long[] pLocalSize)
-	{
-		run(mClearCLContext.getDefaultQueue(),
-				pBlockingRun,
-				pNumberOfDimension,
-				pGlobalOffsets,
-				pGlobalSizes,
-				pLocalSize);
-	}
+  /**
+   * This constructor is called internally from an OpenCl program.
+   * 
+   * @param pClearCLContext
+   *          context
+   * @param pClearCLProgram
+   *          program
+   * @param pKernelPointer
+   *          kernel peer pointer
+   * @param pKernelName
+   *          kernel name
+   * @param pSourceCode
+   */
+  ClearCLKernel(ClearCLContext pClearCLContext,
+                ClearCLProgram pClearCLProgram,
+                ClearCLPeerPointer pKernelPointer,
+                String pKernelName,
+                String pSourceCode)
+  {
+    super(pClearCLProgram.getBackend(), pKernelPointer);
+    mClearCLContext = pClearCLContext;
+    mClearCLProgram = pClearCLProgram;
+    mName = pKernelName;
+    mSourceCode = pSourceCode;
 
-	public void run(ClearCLQueue pClearCLQueue,
-									boolean pBlockingRun,
-									int pDimensions,
-									long[] pGlobalOffsets,
-									long[] pGlobalSizes,
-									long[] pLocalSizes)
-	{
-		getBackend().enqueueKernelExecution(pClearCLQueue.getPeerPointer(),
-																				getPeerPointer(),
-																				pDimensions,
-																				pGlobalOffsets,
-																				pGlobalSizes,
-																				pLocalSizes);
+    mNameToIndexMap = getKernelIndexMap(pKernelName);
+    mDefaultArgumentsMap = getKernelDefaultArgumentsMap(pKernelName);
+  }
 
-		if (pBlockingRun)
-			pClearCLQueue.waitToFinish();
-	}
+  public String getName()
+  {
+    return mName;
+  }
 
-	@Override
-	public void close() throws Exception
-	{
-		getBackend().releaseKernel(getPeerPointer());
-	}
+  /**
+   * Return global offsets.
+   * 
+   * @return global offsets
+   */
+  public long[] getGlobalOffsets()
+  {
+    return mGlobalOffsets;
+  }
 
-	@Override
-	public String toString()
-	{
-		return String.format(	"ClearCLKernel [mClearCLProgram=%s, mName=%s]",
-													mClearCLProgram,
-													mName);
-	}
+  /**
+   * Sets the global offsets.
+   * 
+   * @param pGlobalOffsets
+   *          new global offsets
+   */
+  public void setGlobalOffsets(long... pGlobalOffsets)
+  {
+    mGlobalOffsets = pGlobalOffsets;
+  }
 
-	private static final long[] getConstantArray(	int pDimension,
-																								int pValue)
-	{
-		long[] lArray = new long[pDimension];
-		for (int i = 0; i < pDimension; i++)
-			lArray[i] = pValue;
-		return lArray;
-	}
+  /**
+   * returns the global sizes
+   * 
+   * @return global sizes
+   */
+  public long[] getGlobalSizes()
+  {
+    return mGlobalSizes;
+  }
+
+  /**
+   * Sets the global sizes
+   * 
+   * @param pGlobalSizes
+   *          global sizes
+   */
+  public void setGlobalSizes(long... pGlobalSizes)
+  {
+    mGlobalSizes = pGlobalSizes;
+  }
+
+  /**
+   * Returns the local sizes.
+   * 
+   * @return local sizes
+   */
+  public long[] getLocalSizes()
+  {
+    return mLocalSizes;
+  }
+
+  /**
+   * Sets the local sizes.
+   * 
+   * @param pLocalSizes
+   *          local sizes
+   */
+  public void setLocalSizes(long... pLocalSizes)
+  {
+    mLocalSizes = pLocalSizes;
+  }
+
+  /**
+   * Clears arguments.
+   */
+  public void clearArguments()
+  {
+    mIndexToArgumentMap.clear();
+  }
+
+  /**
+   * Sets the kernel arguments for the next kernel run.
+   * 
+   * @param pArguments
+   *          list of arguments
+   */
+  public void setArguments(Object... pArguments)
+  {
+    int i = 0;
+    for (Object lObject : pArguments)
+    {
+      setArgument(i, lObject);
+      i++;
+    }
+  }
+
+  /**
+   * Sets argument for a given argument index.
+   * 
+   * @param pIndex
+   *          argument index
+   * @param pObject
+   *          argument
+   */
+  public void setArgument(int pIndex, Object pObject)
+  {
+    mIndexToArgumentMap.put(pIndex, new Argument(pObject));
+
+  }
+
+  /**
+   * Sets argument for a given argument name.
+   * 
+   * @param pIndex
+   *          argument name
+   * @param pObject
+   *          argument
+   */
+  public void setArgument(String pArgumentName, Object pObject)
+  {
+    Integer lArgumentIndex = mNameToIndexMap.get(pArgumentName);
+
+    if (lArgumentIndex == null)
+      throw new ClearCLUnknownArgumentNameException(this,
+                                                    pArgumentName,
+                                                    pObject);
+
+    mIndexToArgumentMap.put(lArgumentIndex, new Argument(pObject));
+
+  }
+
+  /**
+   * Sets the arguments on the OpenCL side
+   */
+  private void setArgumentsInternal()
+  {
+    for (Map.Entry<String, Integer> lEntry : mNameToIndexMap.entrySet())
+    {
+      String lArgumentName = lEntry.getKey();
+      Integer lArgumentIndex = lEntry.getValue();
+
+      Argument lArgument = mIndexToArgumentMap.get(lArgumentIndex);
+
+      if (lArgument == null)
+      {
+        Number lDefaultValue = mDefaultArgumentsMap.get(lArgumentName);
+        if (lDefaultValue != null)
+          lArgument = new Argument(lDefaultValue);
+      }
+
+      if (lArgument == null)
+        throw new ClearCLArgumentMissingException(this,
+                                                  lArgumentName,
+                                                  lArgumentIndex);
+
+      getBackend().setKernelArgument(this.getPeerPointer(),
+                                     lArgumentIndex,
+                                     lArgument.argument);/**/
+    }
+
+  }
+
+  /**
+   * Executes kernel for current set of arguments on default queue (blocking
+   * call until kernel finishes).
+   * 
+   */
+  @Override
+  public void run()
+  {
+    run(mClearCLContext.getDefaultQueue(), true);
+  }
+
+  /**
+   * Executes kernel for current set of arguments on default queue.
+   * 
+   * @param pBlockingRun
+   *          if true the call is blocking, false otherwise
+   */
+  public void run(boolean pBlockingRun)
+  {
+    run(mClearCLContext.getDefaultQueue(), pBlockingRun);
+  }
+
+  /**
+   * Executes kernel for current set of arguments on provided queue. IMPORTANT:
+   * about blocking calls: there is a cost associated to waiting for a kernel to
+   * finish... If you execute several kernels in the same queue, you do no need
+   * to wait.
+   * 
+   * @param pClearCLQueue
+   *          queue
+   * @param pBlockingRun
+   *          if true the call is blocking, false otherwise
+   */
+  public void run(ClearCLQueue pClearCLQueue, boolean pBlockingRun)
+  {
+    setArgumentsInternal();
+    getBackend().enqueueKernelExecution(pClearCLQueue.getPeerPointer(),
+                                        getPeerPointer(),
+                                        getGlobalSizes().length,
+                                        getGlobalOffsets(),
+                                        getGlobalSizes(),
+                                        getLocalSizes());
+
+    if (pBlockingRun)
+      pClearCLQueue.waitToFinish();
+  }
+
+  /* (non-Javadoc)
+   * @see clearcl.ClearCLBase#close()
+   */
+  @Override
+  public void close() throws Exception
+  {
+    getBackend().releaseKernel(getPeerPointer());
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString()
+  {
+    return String.format("ClearCLKernel [mClearCLProgram=%s, mName=%s]",
+                         mClearCLProgram,
+                         mName);
+  }
+
+  public String getSourceCode()
+  {
+    return mSourceCode;
+  }
+
+  public ConcurrentHashMap<String, Number> getKernelDefaultArgumentsMap(String pKernelName)
+  {
+    ConcurrentHashMap<String, Number> lNameToDefaultArgumentMapMap = new ConcurrentHashMap<String, Number>();
+
+    String lSourceCode = getSourceCode();
+    {
+      int lBeginOfDefault = lSourceCode.indexOf("//default:" + pKernelName);
+      if (lBeginOfDefault >= 0)
+      {
+        int lEndOfDefault = lSourceCode.indexOf('\n', lBeginOfDefault);
+        String lSubStringKernel = lSourceCode.substring(lBeginOfDefault,
+                                                        lEndOfDefault);
+
+        // System.out.println(lSubStringKernel);
+
+        String[] lTwoPointsSplit = lSubStringKernel.split(":");
+        // System.out.println(Arrays.toString(lTwoPointsSplit));
+        String[] lEqualSplit = lTwoPointsSplit[lTwoPointsSplit.length - 1].split("=");
+        // System.out.println(Arrays.toString(lEqualSplit));
+
+        String lArgumentName = lEqualSplit[0].trim().toLowerCase();
+        String lArgumentValue = lEqualSplit[1].trim().toLowerCase();
+
+        char lArgumentType = lArgumentValue.charAt(lArgumentValue.length() - 1);
+
+        switch (lArgumentType)
+        {
+        case 'b':
+          lNameToDefaultArgumentMapMap.put(lArgumentName,
+                                           Byte.parseByte(lArgumentValue));
+          break;
+
+        case 's':
+          lNameToDefaultArgumentMapMap.put(lArgumentName,
+                                           Short.parseShort(lArgumentValue));
+          break;
+
+        case 'i':
+          lNameToDefaultArgumentMapMap.put(lArgumentName,
+                                           Integer.parseInt(lArgumentValue));
+          break;
+
+        case 'l':
+          lNameToDefaultArgumentMapMap.put(lArgumentName,
+                                           Long.parseLong(lArgumentValue));
+          break;
+
+        case 'f':
+          lNameToDefaultArgumentMapMap.put(lArgumentName,
+                                           Float.parseFloat(lArgumentValue));
+          break;
+
+        case 'd':
+          lNameToDefaultArgumentMapMap.put(lArgumentName,
+                                           Double.parseDouble(lArgumentValue));
+          break;
+        }
+
+      }
+    }
+
+    // System.out.println(lNameToDefaultArgumentMapMap);
+
+    return lNameToDefaultArgumentMapMap;
+  }
+
+  public ConcurrentHashMap<String, Integer> getKernelIndexMap(String pKernelName)
+  {
+    ConcurrentHashMap<String, Integer> lNameToIndexMap = new ConcurrentHashMap<String, Integer>();
+
+    String[] lKernelSignature = getKernelSignature(pKernelName);
+
+    int i = 0;
+    for (String lArgumentEntry : lKernelSignature)
+    {
+      String[] lSplit = lArgumentEntry.split("[*\\s]+");
+      // System.out.println(Arrays.toString(lSplit));
+      String lArgumentName = lSplit[lSplit.length - 1];
+      lNameToIndexMap.put(lArgumentName, i);
+
+      i++;
+    }
+
+    return lNameToIndexMap;
+  }
+
+  public String[] getKernelSignature(String pKernelName)
+  {
+    String lSourceCode = getSourceCode();
+    {
+      int lBeginOfKernelSignature = lSourceCode.indexOf(pKernelName);
+      if (lBeginOfKernelSignature >= 0)
+      {
+        int lEndOfKernelSignature = lSourceCode.indexOf('{',
+                                                        lBeginOfKernelSignature);
+        String lSubStringKernel = lSourceCode.substring(lBeginOfKernelSignature,
+                                                        lEndOfKernelSignature);
+
+        String lSubStringSignature = lSubStringKernel.substring(lSubStringKernel.indexOf('(') + 1,
+                                                                lSubStringKernel.indexOf(')'));
+
+        // System.out.println("[[[" + lSubStringSignature + "]]]");
+
+        String[] lKernelSignature = lSubStringSignature.split(",", -1);
+
+        for (int i = 0; i < lKernelSignature.length; i++)
+          lKernelSignature[i] = lKernelSignature[i].trim();
+
+        // System.out.println(Arrays.toString(lKernelSignature));
+        return lKernelSignature;
+      }
+    }
+    return null;
+  }
 
 }

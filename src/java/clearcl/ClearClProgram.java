@@ -1,95 +1,596 @@
 package clearcl;
 
-import clearcl.enums.BuildStatus;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.io.IOUtils;
+
+import clearcl.abs.ClearCLBase;
+import clearcl.enums.BuildStatus;
+import clearcl.exceptions.ClearCLProgramNotBuiltException;
+
+/**
+ * ClearCLProgram is the ClearCL abstraction for OpenCl programs.
+ *
+ * @author royer
+ */
 public class ClearCLProgram extends ClearCLBase
 {
-	private final ClearCLDevice mDevice;
-	private final ClearCLContext mContext;
-	private final String[] mSourceCode;
-	private String mOptions;
+  private final ClearCLDevice mDevice;
+  private final ClearCLContext mContext;
+  private final ArrayList<String> mSourceCode;
+  private final ConcurrentHashMap<String, String> mDefinesMap = new ConcurrentHashMap<>();
+  private final ArrayList<String> mBuildOptionsList = new ArrayList<>();
+  private final ArrayList<String> mIncludesSearchPackages = new ArrayList<>();
 
+  private volatile boolean mModified = true;
+  private volatile String mLastBuiltSourceCode;
 
+  /**
+   * This constructor is called internally from an OpenCl context.
+   * 
+   * @param pDevice
+   * @param pClearCLContext
+   * @param pProgramPointer
+   */
+  ClearCLProgram(ClearCLDevice pDevice,
+                 ClearCLContext pClearCLContext,
+                 ClearCLPeerPointer pProgramPointer)
+  {
+    super(pClearCLContext.getBackend(), pProgramPointer);
+    mDevice = pDevice;
+    mContext = pClearCLContext;
+    mSourceCode = new ArrayList<String>();
+    mIncludesSearchPackages.add("clearcl.ocllib");
+  }
 
+  /**
+   * Adds source code to this program. You must rebuild after this call for
+   * changes to take effect.
+   * 
+   * @param pSourceCode
+   *          source code string
+   */
+  public void addSource(String pSourceCode)
+  {
+    mSourceCode.add(pSourceCode);
+    mModified = true;
+  }
 
-	public ClearCLProgram(ClearCLDevice pDevice, ClearCLContext pClearCLContext,
-												ClearCLPeerPointer pProgramPointer,
-												String[] pSourceCode)
-	{
-		super(pClearCLContext.getBackend(), pProgramPointer);
-		mDevice = pDevice;
-		mContext = pClearCLContext;
-		mSourceCode = pSourceCode;
-	}
-	
-	public ClearCLDevice getDevice()
-	{
-		return mDevice;
-	}
+  /**
+   * Adds source code to this program from a resource file located relative to a
+   * given class. You must rebuild after this call for changes to take effect.
+   * 
+   * @param pClassForRessource
+   *          Reference class to locate resources
+   * @param pIncludeRessourceName
+   *          Resource file names (relative to reference class)
+   * @throws IOException
+   *           if problem while loading resource
+   */
+  public void addSource(Class<?> pClassForRessource,
+                        String pIncludeRessourceName) throws IOException
+  {
+    StringBuilder lStringBuilder = new StringBuilder();
 
-	public ClearCLContext getContext()
-	{
-		return mContext;
-	}
+    lStringBuilder.append("\n\n");
+    lStringBuilder.append(" //###########################################################################\n");
+    lStringBuilder.append("// Source: '" + pIncludeRessourceName
+                          + "' relative to "
+                          + pClassForRessource.getSimpleName()
+                          + "\n");
 
-	public BuildStatus build()
-	{
-		getBackend().buildProgram(getPeerPointer(), mOptions);
-		return getBuildStatus();
-	}
-	
-	public BuildStatus getBuildStatus()
-	{
-		BuildStatus lBuildStatus = getBackend().getBuildStatus(getDevice().getPeerPointer(), getPeerPointer());
-		return lBuildStatus;
-	}
-	
-	public String getBuildLog()
-	{
-		String lBuildLog = getBackend().getBuildLog(getDevice().getPeerPointer(), getPeerPointer()).trim();
-		return lBuildLog;
-	}
+    InputStream lResourceAsStream = pClassForRessource.getResourceAsStream(pIncludeRessourceName);
+    String lSourceCode = IOUtils.toString(lResourceAsStream, "UTF-8");
+    lStringBuilder.append(lSourceCode);
+    lStringBuilder.append("\n\n");
 
-	public ClearCLKernel createKernel(String pKernelName)
-	{
-		ClearCLPeerPointer lKernelPointer = getBackend().createKernel(this.getPeerPointer(),
-																															pKernelName);
+    addSource(lStringBuilder.toString());
+  }
 
-		ClearCLKernel lClearCLKernel = new ClearCLKernel(	getContext(),
-		                                                 	this,
-																											lKernelPointer,
-																											pKernelName);
-		return lClearCLKernel;
-	}
+  /**
+   * Clears all sources in this program. You must rebuild after this call for
+   * changes to take effect.
+   */
+  public void clearSources()
+  {
+    mSourceCode.clear();
+    mModified = true;
+  }
 
-	public int getNumberLinesOfCode()
-	{
-		int lCounter = 0;
-		for (String lSourceCodeFile : mSourceCode)
-		{
-			String[] lSplit = lSourceCodeFile.split("\\r?\\n");
-			lCounter += lSplit.length;
-		}
-		return lCounter;
-	}
+  /**
+   * Adds a define (e.g. #define 'key' 'value') to the program source code. You
+   * must rebuild after this call for changes to take effect.
+   * 
+   * @param pKey
+   *          key
+   * @param pValue
+   *          value
+   */
+  public void addDefine(String pKey, String pValue)
+  {
+    mDefinesMap.put(pKey, pValue);
+    mModified = true;
+  }
 
-	@Override
-	public void close() throws Exception
-	{
-		getBackend().releaseProgram(getPeerPointer());
-	}
+  /**
+   * Adds a define (e.g. #define 'symbol') to the program source code. You must
+   * rebuild after this call for changes to take effect.
+   * 
+   * @param pSymbol
+   *          define symbol
+   */
+  public void addDefine(String pSymbol)
+  {
+    mDefinesMap.put(pSymbol, "");
+    mModified = true;
+  }
 
-	@Override
-	public String toString()
-	{
-		return String.format(	"ClearCLProgram [mOptions=%s, lines of code:%d]",
-													mOptions,
-													getNumberLinesOfCode());
-	}
+  /**
+   * Clears all defines. You must rebuild after this call for changes to take
+   * effect.
+   */
+  public void clearDefines()
+  {
+    mDefinesMap.clear();
+    mModified = true;
+  }
 
+  /**
+   * Adds an building option for this program. You must rebuild after this call
+   * for changes to take effect.
+   * 
+   * @param pOption
+   */
+  public void addBuildOption(String pOption)
+  {
+    mBuildOptionsList.add(pOption);
+    mModified = true;
+  }
 
+  /**
+   * Clears all options for this program. You must rebuild after this call for
+   * changes to take effect.
+   */
+  public void clearBuildOptions()
+  {
+    mBuildOptionsList.clear();
+    mModified = true;
+  }
 
+  /**
+   * Returns the device for this program.
+   * 
+   * @return
+   */
+  public ClearCLDevice getDevice()
+  {
+    return mDevice;
+  }
 
+  /**
+   * Returns the context for this program.
+   * 
+   * @return
+   */
+  public ClearCLContext getContext()
+  {
+    return mContext;
+  }
 
+  /**
+   * Builds this program. The source code can be changed after a first build and
+   * this method will build a new program from scratch.
+   * 
+   * @return build status
+   * @throws IOException
+   *           if source code includes cannot be resolved
+   */
+  public BuildStatus build() throws IOException
+  {
+    mLastBuiltSourceCode = getSourceCode();
+
+    ClearCLPeerPointer lProgramPeerPointer = getBackend().getProgramPeerPointer(mContext.getPeerPointer(),
+                                                                                mLastBuiltSourceCode);
+
+    ClearCLPeerPointer lCurrentProgramPeerPointer = getPeerPointer();
+    if (lCurrentProgramPeerPointer != null)
+      getBackend().releaseProgram(lCurrentProgramPeerPointer);
+
+    setPeerPointer(lProgramPeerPointer);
+
+    String lOptions = concatenateOptions();
+
+    getBackend().buildProgram(getPeerPointer(), lOptions);
+
+    mModified = false;
+
+    return getBuildStatus();
+  }
+
+  /**
+   * Returns the complete concatenated source code with includes and defines
+   * added.
+   * 
+   * @return source code
+   * @throws IOException
+   *           thrown if the includes cannot be resolved
+   */
+  public String getSourceCode() throws IOException
+  {
+    String lConcatenatedSourceCode = concatenateSourceCode();
+    String lSourceCodeWithDefines = insertDefines(lConcatenatedSourceCode);
+    String lSourceCodeWithDefinesAndIncludes = insertIncludes(lSourceCodeWithDefines);
+    return lSourceCodeWithDefinesAndIncludes;
+  }
+
+  private String insertDefines(String pSourceCode)
+  {
+    StringBuilder lStringBuilder = new StringBuilder();
+
+    lStringBuilder.append("\n\n");
+    lStringBuilder.append(" //###########################################################################\n");
+    lStringBuilder.append("// Defines:\n");
+    for (Map.Entry<String, String> lDefinesEntry : mDefinesMap.entrySet())
+    {
+
+      if (lDefinesEntry.getValue().length() == 0)
+        lStringBuilder.append("#define " + lDefinesEntry.getKey());
+      else
+        lStringBuilder.append("#define " + lDefinesEntry.getKey()
+                              + " \t"
+                              + lDefinesEntry.getValue());
+    }
+    lStringBuilder.append(pSourceCode);
+
+    String lDefinesAndSourceCode = lStringBuilder.toString();
+    return lDefinesAndSourceCode;
+  }
+
+  private String insertIncludes(String pSourceCode) throws IOException
+  {
+    StringBuilder lSourceCodeWithIncludes = new StringBuilder();
+
+    int lBeginIndex = 0;
+    int lIncludeIndex = 0;
+    while ((lIncludeIndex = pSourceCode.indexOf("//include",
+                                                lBeginIndex)) >= 0)
+    {
+      lSourceCodeWithIncludes.append(pSourceCode.substring(lBeginIndex,
+                                                           lIncludeIndex));
+
+      int lEndOfLine = pSourceCode.indexOf('\n', lIncludeIndex);
+
+      String lIncludeLine = pSourceCode.substring(lIncludeIndex,
+                                                  lEndOfLine);
+
+      int lClassNameBegin = lIncludeLine.indexOf('[');
+      int lClassNameEnd = lIncludeLine.indexOf(']',
+                                               lClassNameBegin + 1);
+      String lClassName = lClassNameBegin == -1 ? ""
+                                               : lIncludeLine.substring(lClassNameBegin + 1,
+                                                                        lClassNameEnd)
+                                                             .trim();
+
+      int lIncludeNameBegin = lIncludeLine.indexOf('"');
+      int lIncludeNameEnd = lIncludeLine.indexOf('"',
+                                                 lIncludeNameBegin + 1);
+
+      String lIncludeName = lIncludeLine.substring(lIncludeNameBegin + 1,
+                                                   lIncludeNameEnd)
+                                        .trim();
+
+      Class<?> lReferenceClass = Object.class;
+      if (lClassName.isEmpty())
+        lIncludeName = "/" + lIncludeName;
+      else
+        lReferenceClass = findClassByName(lClassName);
+
+      InputStream lResourceAsStream = lReferenceClass.getResourceAsStream(lIncludeName);
+
+      if (lResourceAsStream != null)
+      {
+
+        String lSourceCode = IOUtils.toString(lResourceAsStream,
+                                              "UTF-8");
+
+        lSourceCodeWithIncludes.append("\n\n");
+        lSourceCodeWithIncludes.append(" //___________________________________________________________________________\n");
+        lSourceCodeWithIncludes.append("// Begin Include: '" + lIncludeName
+                                       + "'\n");
+        lSourceCodeWithIncludes.append(lSourceCode);
+        lSourceCodeWithIncludes.append("// End Include: '" + lIncludeName
+                                       + "'\n");
+        lSourceCodeWithIncludes.append(" //___________________________________________________________________________\n");
+        lSourceCodeWithIncludes.append("\n\n");
+
+      }
+      else
+      {
+        lSourceCodeWithIncludes.append("\n");
+        lSourceCodeWithIncludes.append("//WARNING!! Could not resolve include given below:\n");
+        lSourceCodeWithIncludes.append(lIncludeLine);
+      }
+
+      lBeginIndex = lEndOfLine;
+    }
+    lSourceCodeWithIncludes.append(pSourceCode.substring(lBeginIndex));
+
+    return lSourceCodeWithIncludes.toString();
+  }
+
+  private Class<?> findClassByName(String pClassName)
+  {
+    for (String lPackage : mIncludesSearchPackages)
+    {
+      try
+      {
+        return Class.forName(lPackage + "." + pClassName);
+      }
+      catch (ClassNotFoundException e)
+      {
+        // not in this package, try another
+      }
+    }
+    // nothing found: return null or throw ClassNotFoundException
+    return null;
+  }
+
+  private String concatenateOptions()
+  {
+    StringBuilder lStringBuilder = new StringBuilder();
+    for (String lOptions : mBuildOptionsList)
+    {
+      lStringBuilder.append(" ");
+      lStringBuilder.append(lOptions);
+    }
+    return lStringBuilder.toString();
+  }
+
+  private String concatenateSourceCode()
+  {
+    StringBuilder lStringBuilder = new StringBuilder();
+    for (String lSourceCode : mSourceCode)
+    {
+      lStringBuilder.append("\n\n\n");
+      lStringBuilder.append(lSourceCode);
+    }
+    return lStringBuilder.toString();
+  }
+
+  /**
+   * Returns last build status for this program.
+   * 
+   * @return last build status
+   */
+  public BuildStatus getBuildStatus()
+  {
+    BuildStatus lBuildStatus = getBackend().getBuildStatus(getDevice().getPeerPointer(),
+                                                           getPeerPointer());
+    return lBuildStatus;
+  }
+
+  /**
+   * Returns last build logs for this program.
+   * 
+   * @return build logs
+   */
+  public String getBuildLog()
+  {
+    String lBuildLog = getBackend().getBuildLog(getDevice().getPeerPointer(),
+                                                getPeerPointer())
+                                   .trim();
+    return lBuildLog;
+  }
+
+  /**
+   * Creates kernel of given name from this program
+   * 
+   * @param pKernelName
+   *          kernel name (function name)
+   * @return kernel
+   */
+  public ClearCLKernel createKernel(String pKernelName)
+  {
+    if (mModified)
+      throw new ClearCLProgramNotBuiltException();
+
+    ClearCLPeerPointer lKernelPointer = getBackend().getKernelPeerPointer(this.getPeerPointer(),
+                                                                          pKernelName);
+
+    ClearCLKernel lClearCLKernel = new ClearCLKernel(getContext(),
+                                                     this,
+                                                     lKernelPointer,
+                                                     pKernelName,
+                                                     mLastBuiltSourceCode);
+    return lClearCLKernel;
+  }
+
+  /**
+   * Returns the number of lines of code for this program.
+   * 
+   * @return number of line of code.
+   */
+  public int getNumberLinesOfCode()
+  {
+    int lCounter = 0;
+    for (String lSourceCodeFile : mSourceCode)
+    {
+      String[] lSplit = lSourceCodeFile.split("\\r?\\n");
+      lCounter += lSplit.length;
+    }
+    return lCounter;
+  }
+
+  /* (non-Javadoc)
+   * @see clearcl.ClearCLBase#close()
+   */
+  @Override
+  public void close() throws Exception
+  {
+    getBackend().releaseProgram(getPeerPointer());
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString()
+  {
+    return String.format("ClearCLProgram [mOptions=%s, mDefinesMap=%s, lines of code:%d]",
+                         mBuildOptionsList.toString(),
+                         mDefinesMap.toString(),
+                         getNumberLinesOfCode());
+  }
+
+  /**
+   * Adds all math optimizations option available. Note: this might lead to
+   * 'unsafe' floating point behavior, although in practice it is rarely a
+   * problem.F You must rebuild after this call for changes to take effect.
+   * 
+   * @param pOption
+   */
+  public void addBuildOptionAllMathOpt()
+  {
+    addBuildOptionFastRelaxedMath();
+    addBuildOptionFiniteMathOnly();
+    addBuildOptionMadEnable();
+    addBuildOptionUnsafeMathOptimizations();
+  }
+
+  /**
+   * Add the -cl-fast-relaxed-math compile option.<br>
+   * Sets the optimization options -cl-finite-math-only and
+   * -cl-unsafe-math-optimizations. This allows optimizations for floating-point
+   * arithmetic that may violate the IEEE 754 standard and the OpenCL numerical
+   * compliance requirements defined in the specification in section 7.4 for
+   * single-precision floating-point, section 9.3.9 for double-precision
+   * floating-point, and edge case behavior in section 7.5. This option causes
+   * the preprocessor macro __FAST_RELAXED_MATH__ to be defined in the OpenCL
+   * program. <br>
+   * Also see : <a href=
+   * "http://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/clBuildProgram.html"
+   * >Khronos' documentation for clBuildProgram</a>.
+   */
+  public void addBuildOptionFastRelaxedMath()
+  {
+    addBuildOption("-cl-fast-relaxed-math");
+  }
+
+  /**
+   * Add the -cl-no-signed-zero compile option.<br>
+   * Allow optimizations for floating-point arithmetic that ignore the
+   * signedness of zero. IEEE 754 arithmetic specifies the behavior of distinct
+   * +0.0 and -0.0 values, which then prohibits simplification of expressions
+   * such as x+0.0 or 0.0*x (even with -clfinite-math only). This option implies
+   * that the sign of a zero result isn't significant. <br>
+   * Also see : <a href=
+   * "http://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/clBuildProgram.html"
+   * >Khronos' documentation for clBuildProgram</a>.
+   */
+  public void addBuildOptionNoSignedZero()
+  {
+    addBuildOption("-cl-no-signed-zero");
+  }
+
+  /**
+   * Add the -cl-mad-enable compile option.<br>
+   * Allow a * b + c to be replaced by a mad. The mad computes a * b + c with
+   * reduced accuracy. For example, some OpenCL devices implement mad as
+   * truncate the result of a * b before adding it to c.<br>
+   * Also see : <a href=
+   * "http://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/clBuildProgram.html"
+   * >Khronos' documentation for clBuildProgram</a>.
+   */
+  public void addBuildOptionMadEnable()
+  {
+    addBuildOption("-cl-mad-enable");
+  }
+
+  /**
+   * Add the -cl-finite-math-only compile option.<br>
+   * Allow optimizations for floating-point arithmetic that assume that
+   * arguments and results are not NaNs or infinites. This option may violate
+   * the OpenCL numerical compliance requirements defined in in section 7.4 for
+   * single-precision floating-point, section 9.3.9 for double-precision
+   * floating-point, and edge case behavior in section 7.5.<br>
+   * Also see : <a href=
+   * "http://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/clBuildProgram.html"
+   * >Khronos' documentation for clBuildProgram</a>.
+   */
+  public void addBuildOptionFiniteMathOnly()
+  {
+    addBuildOption("-cl-finite-math-only");
+  }
+
+  /**
+   * Add the -cl-unsafe-math-optimizations option.<br>
+   * Allow optimizations for floating-point arithmetic that (a) assume that
+   * arguments and results are valid, (b) may violate IEEE 754 standard and (c)
+   * may violate the OpenCL numerical compliance requirements as defined in
+   * section 7.4 for single-precision floating-point, section 9.3.9 for
+   * double-precision floating-point, and edge case behavior in section 7.5.
+   * This option includes the -cl-no-signed-zeros and -cl-mad-enable options.<br>
+   * Also see : <a href=
+   * "http://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/clBuildProgram.html"
+   * >Khronos' documentation for clBuildProgram</a>.
+   */
+  public void addBuildOptionUnsafeMathOptimizations()
+  {
+    addBuildOption("-cl-unsafe-math-optimizations");
+  }
+
+  /**
+   * Add the <a href=
+   * "http://www.cs.cmu.edu/afs/cs/academic/class/15668-s11/www/cuda-doc/OpenCL_Extensions/cl_nv_compiler_options.txt"
+   * >-cl-nv-verbose</a> compilation option (<b><i>NVIDIA GPUs only</i></b>)<br>
+   * Enable verbose mode. Output will be reported in JavaCL's log at the INFO
+   * level
+   */
+  public void addBuildOptionNVVerbose()
+  {
+    addBuildOption("-cl-nv-verbose");
+  }
+
+  /**
+   * Add the <a href=
+   * "http://www.cs.cmu.edu/afs/cs/academic/class/15668-s11/www/cuda-doc/OpenCL_Extensions/cl_nv_compiler_options.txt"
+   * >-cl-nv-maxrregcount=N</a> compilation option (<b><i>NVIDIA GPUs
+   * only</i></b>)<br>
+   * Specify the maximum number of registers that GPU functions can use. Until a
+   * function-specific limit, a higher value will generally increase the
+   * performance of individual GPU threads that execute this function. However,
+   * because thread registers are allocated from a global register pool on each
+   * GPU, a higher value of this option will also reduce the maximum thread
+   * block size, thereby reducing the amount of thread parallelism. Hence, a
+   * good maxrregcount value is the result of a trade-off. If this option is not
+   * specified, then no maximum is assumed. Otherwise the specified value will
+   * be rounded to the next multiple of 4 registers until the GPU specific
+   * maximum of 128 registers.
+   * 
+   * @param N
+   *          positive integer
+   */
+  public void addBuildOptionNVMaximumRegistryCount(int N)
+  {
+    addBuildOption("-cl-nv-maxrregcount=" + N);
+  }
+
+  /**
+   * Add the <a href=
+   * "http://www.cs.cmu.edu/afs/cs/academic/class/15668-s11/www/cuda-doc/OpenCL_Extensions/cl_nv_compiler_options.txt"
+   * >-cl-nv-opt-level</a> compilation option (<b><i>NVIDIA GPUs only</i></b>)<br>
+   * Specify optimization level (default value: 3)
+   * 
+   * @param N
+   *          positive integer, or 0 (no optimization).
+   */
+  public void addBuildOptionNVOptimizationLevel(int N)
+  {
+    addBuildOption("-cl-nv-opt-level=" + N);
+  }
 
 }

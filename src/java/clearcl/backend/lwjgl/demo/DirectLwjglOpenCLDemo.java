@@ -79,233 +79,355 @@ import org.lwjgl.opencl.CLNativeKernel;
 import org.lwjgl.opencl.CLPlatform;
 import org.lwjgl.system.FunctionProviderLocal;
 
-public final class DirectLwjglOpenCLDemo {
+public final class DirectLwjglOpenCLDemo
+{
 
-	private DirectLwjglOpenCLDemo() {
-	}
+  private DirectLwjglOpenCLDemo()
+  {
+  }
 
-	public static void main(String[] args) {
-		System.setProperty(
-			"org.lwjgl.system.libffi.ClosureRegistry",
-			"clearcl.lwjgl.demo.ClosureGC"
-		);
+  public static void main(String[] args)
+  {
+    System.setProperty("org.lwjgl.system.libffi.ClosureRegistry",
+                       "clearcl.lwjgl.demo.ClosureGC");
 
-		List<CLPlatform> platforms = CLPlatform.getPlatforms();
-		if ( platforms.isEmpty() )
-			throw new RuntimeException("No OpenCL platforms found.");
+    List<CLPlatform> platforms = CLPlatform.getPlatforms();
+    if (platforms.isEmpty())
+      throw new RuntimeException("No OpenCL platforms found.");
 
-		IntBuffer errcode_ret = BufferUtils.createIntBuffer(1);
+    IntBuffer errcode_ret = BufferUtils.createIntBuffer(1);
 
-		for ( CLPlatform platform : platforms ) {
-			System.out.println("\n-------------------------");
-			System.out.printf("NEW PLATFORM: [0x%X]\n", platform.address());
+    for (CLPlatform platform : platforms)
+    {
+      System.out.println("\n-------------------------");
+      System.out.printf("NEW PLATFORM: [0x%X]\n", platform.address());
 
-			CLCapabilities platformCaps = platform.getCapabilities();
+      CLCapabilities platformCaps = platform.getCapabilities();
 
-			printPlatformInfo(platform, "CL_PLATFORM_PROFILE", CL_PLATFORM_PROFILE);
-			printPlatformInfo(platform, "CL_PLATFORM_VERSION", CL_PLATFORM_VERSION);
-			printPlatformInfo(platform, "CL_PLATFORM_NAME", CL_PLATFORM_NAME);
-			printPlatformInfo(platform, "CL_PLATFORM_VENDOR", CL_PLATFORM_VENDOR);
-			printPlatformInfo(platform, "CL_PLATFORM_EXTENSIONS", CL_PLATFORM_EXTENSIONS);
-			if ( platformCaps.cl_khr_icd )
-				printPlatformInfo(platform, "CL_PLATFORM_ICD_SUFFIX_KHR", CL_PLATFORM_ICD_SUFFIX_KHR);
-			System.out.println("");
+      printPlatformInfo(platform,
+                        "CL_PLATFORM_PROFILE",
+                        CL_PLATFORM_PROFILE);
+      printPlatformInfo(platform,
+                        "CL_PLATFORM_VERSION",
+                        CL_PLATFORM_VERSION);
+      printPlatformInfo(platform,
+                        "CL_PLATFORM_NAME",
+                        CL_PLATFORM_NAME);
+      printPlatformInfo(platform,
+                        "CL_PLATFORM_VENDOR",
+                        CL_PLATFORM_VENDOR);
+      printPlatformInfo(platform,
+                        "CL_PLATFORM_EXTENSIONS",
+                        CL_PLATFORM_EXTENSIONS);
+      if (platformCaps.cl_khr_icd)
+        printPlatformInfo(platform,
+                          "CL_PLATFORM_ICD_SUFFIX_KHR",
+                          CL_PLATFORM_ICD_SUFFIX_KHR);
+      System.out.println("");
 
-			PointerBuffer ctxProps = BufferUtils.createPointerBuffer(3);
-			ctxProps.put(CL_CONTEXT_PLATFORM).put(platform).put(0).flip();
+      PointerBuffer ctxProps = BufferUtils.createPointerBuffer(3);
+      ctxProps.put(CL_CONTEXT_PLATFORM).put(platform).put(0).flip();
 
-			List<CLDevice> devices = platform.getDevices(CL_DEVICE_TYPE_ALL);
-			for ( CLDevice device : devices ) {
-				long cl_device_id = device.address();
-				CLCapabilities caps = device.getCapabilities();
+      List<CLDevice> devices = platform.getDevices(CL_DEVICE_TYPE_ALL);
+      for (CLDevice device : devices)
+      {
+        long cl_device_id = device.address();
+        CLCapabilities caps = device.getCapabilities();
 
-				System.out.printf("\n\t** NEW DEVICE: [0x%X]\n", cl_device_id);
-				System.out.print("\t");
-				System.out.println(caps);
+        System.out.printf("\n\t** NEW DEVICE: [0x%X]\n", cl_device_id);
+        System.out.print("\t");
+        System.out.println(caps);
 
-				System.out.println("\tCL_DEVICE_TYPE = " + clGetDeviceInfoLong(cl_device_id, CL_DEVICE_TYPE));
-				System.out.println("\tCL_DEVICE_VENDOR_ID = " + clGetDeviceInfoInt(cl_device_id, CL_DEVICE_VENDOR_ID));
-				System.out.println("\tCL_DEVICE_MAX_COMPUTE_UNITS = " + clGetDeviceInfoInt(cl_device_id, CL_DEVICE_MAX_COMPUTE_UNITS));
-				System.out
-					.println("\tCL_DEVICE_MAX_WORK_ITEM_DIMENSIONS = " + clGetDeviceInfoInt(cl_device_id, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS));
-				System.out.println("\tCL_DEVICE_MAX_WORK_GROUP_SIZE = " + clGetDeviceInfoPointer(cl_device_id, CL_DEVICE_MAX_WORK_GROUP_SIZE));
-				System.out.println("\tCL_DEVICE_MAX_CLOCK_FREQUENCY = " + clGetDeviceInfoInt(cl_device_id, CL_DEVICE_MAX_CLOCK_FREQUENCY));
-				System.out.println("\tCL_DEVICE_ADDRESS_BITS = " + clGetDeviceInfoInt(cl_device_id, CL_DEVICE_ADDRESS_BITS));
-				System.out.println("\tCL_DEVICE_AVAILABLE = " + clGetDeviceInfoBoolean(cl_device_id, CL_DEVICE_AVAILABLE));
-				System.out.println("\tCL_DEVICE_COMPILER_AVAILABLE = " + clGetDeviceInfoBoolean(cl_device_id, CL_DEVICE_COMPILER_AVAILABLE));
+        System.out.println("\tCL_DEVICE_TYPE = " + clGetDeviceInfoLong(cl_device_id,
+                                                                       CL_DEVICE_TYPE));
+        System.out.println("\tCL_DEVICE_VENDOR_ID = " + clGetDeviceInfoInt(cl_device_id,
+                                                                           CL_DEVICE_VENDOR_ID));
+        System.out.println("\tCL_DEVICE_MAX_COMPUTE_UNITS = " + clGetDeviceInfoInt(cl_device_id,
+                                                                                   CL_DEVICE_MAX_COMPUTE_UNITS));
+        System.out.println("\tCL_DEVICE_MAX_WORK_ITEM_DIMENSIONS = " + clGetDeviceInfoInt(cl_device_id,
+                                                                                          CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS));
+        System.out.println("\tCL_DEVICE_MAX_WORK_GROUP_SIZE = " + clGetDeviceInfoPointer(cl_device_id,
+                                                                                         CL_DEVICE_MAX_WORK_GROUP_SIZE));
+        System.out.println("\tCL_DEVICE_MAX_CLOCK_FREQUENCY = " + clGetDeviceInfoInt(cl_device_id,
+                                                                                     CL_DEVICE_MAX_CLOCK_FREQUENCY));
+        System.out.println("\tCL_DEVICE_ADDRESS_BITS = " + clGetDeviceInfoInt(cl_device_id,
+                                                                              CL_DEVICE_ADDRESS_BITS));
+        System.out.println("\tCL_DEVICE_AVAILABLE = " + clGetDeviceInfoBoolean(cl_device_id,
+                                                                               CL_DEVICE_AVAILABLE));
+        System.out.println("\tCL_DEVICE_COMPILER_AVAILABLE = " + clGetDeviceInfoBoolean(cl_device_id,
+                                                                                        CL_DEVICE_COMPILER_AVAILABLE));
 
-				printDeviceInfo(device, "CL_DEVICE_NAME", CL_DEVICE_NAME);
-				printDeviceInfo(device, "CL_DEVICE_VENDOR", CL_DEVICE_VENDOR);
-				printDeviceInfo(device, "CL_DRIVER_VERSION", CL_DRIVER_VERSION);
-				printDeviceInfo(device, "CL_DEVICE_PROFILE", CL_DEVICE_PROFILE);
-				printDeviceInfo(device, "CL_DEVICE_VERSION", CL_DEVICE_VERSION);
-				printDeviceInfo(device, "CL_DEVICE_EXTENSIONS", CL_DEVICE_EXTENSIONS);
-				if ( caps.OpenCL11 )
-					printDeviceInfo(device, "CL_DEVICE_OPENCL_C_VERSION", CL_DEVICE_OPENCL_C_VERSION);
+        printDeviceInfo(device, "CL_DEVICE_NAME", CL_DEVICE_NAME);
+        printDeviceInfo(device, "CL_DEVICE_VENDOR", CL_DEVICE_VENDOR);
+        printDeviceInfo(device,
+                        "CL_DRIVER_VERSION",
+                        CL_DRIVER_VERSION);
+        printDeviceInfo(device,
+                        "CL_DEVICE_PROFILE",
+                        CL_DEVICE_PROFILE);
+        printDeviceInfo(device,
+                        "CL_DEVICE_VERSION",
+                        CL_DEVICE_VERSION);
+        printDeviceInfo(device,
+                        "CL_DEVICE_EXTENSIONS",
+                        CL_DEVICE_EXTENSIONS);
+        if (caps.OpenCL11)
+          printDeviceInfo(device,
+                          "CL_DEVICE_OPENCL_C_VERSION",
+                          CL_DEVICE_OPENCL_C_VERSION);
 
-				long context = clCreateContext(ctxProps, device.address(), new CLContextCallback() {
-					@Override
-					public void invoke(long errinfo, long private_info, long cb, long user_data) {
-						System.err.println("[LWJGL] cl_context_callback");
-						System.err.println("\tInfo: " + memDecodeUTF8(errinfo));
-					}
-				}, NULL, errcode_ret);
-				checkCLError(errcode_ret);
+        long context = clCreateContext(ctxProps,
+                                       device.address(),
+                                       new CLContextCallback()
+                                       {
+                                         @Override
+                                         public void invoke(long errinfo,
+                                                            long private_info,
+                                                            long cb,
+                                                            long user_data)
+                                         {
+                                           System.err.println("[LWJGL] cl_context_callback");
+                                           System.err.println("\tInfo: " + memDecodeUTF8(errinfo));
+                                         }
+                                       },
+                                       NULL,
+                                       errcode_ret);
+        checkCLError(errcode_ret);
 
-				long buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, 128, errcode_ret);
-				checkCLError(errcode_ret);
+        long buffer = clCreateBuffer(context,
+                                     CL_MEM_READ_ONLY,
+                                     128,
+                                     errcode_ret);
+        checkCLError(errcode_ret);
 
-				int errcode;
+        int errcode;
 
-				if ( caps.OpenCL11 ) {
-					errcode = clSetMemObjectDestructorCallback(buffer, new CLMemObjectDestructorCallback() {
-						@Override
-						public void invoke(long memobj, long user_data) {
-							System.out.println("\t\tBuffer destructed (1): " + memobj);
-						}
-					}, NULL);
-					checkCLError(errcode);
+        if (caps.OpenCL11)
+        {
+          errcode = clSetMemObjectDestructorCallback(buffer,
+                                                     new CLMemObjectDestructorCallback()
+                                                     {
+                                                       @Override
+                                                       public void invoke(long memobj,
+                                                                          long user_data)
+                                                       {
+                                                         System.out.println("\t\tBuffer destructed (1): " + memobj);
+                                                       }
+                                                     },
+                                                     NULL);
+          checkCLError(errcode);
 
-					errcode = clSetMemObjectDestructorCallback(buffer, new CLMemObjectDestructorCallback() {
-						@Override
-						public void invoke(long memobj, long user_data) {
-							System.out.println("\t\tBuffer destructed (2): " + memobj);
-						}
-					}, NULL);
-					checkCLError(errcode);
-				}
+          errcode = clSetMemObjectDestructorCallback(buffer,
+                                                     new CLMemObjectDestructorCallback()
+                                                     {
+                                                       @Override
+                                                       public void invoke(long memobj,
+                                                                          long user_data)
+                                                       {
+                                                         System.out.println("\t\tBuffer destructed (2): " + memobj);
+                                                       }
+                                                     },
+                                                     NULL);
+          checkCLError(errcode);
+        }
 
-				long subbuffer = NULL;
-				if ( caps.OpenCL11 ) {
-					CLBufferRegion buffer_region = CLBufferRegion.malloc();
-					buffer_region.origin(0);
-					buffer_region.size(64);
+        long subbuffer = NULL;
+        if (caps.OpenCL11)
+        {
+          CLBufferRegion buffer_region = CLBufferRegion.malloc();
+          buffer_region.origin(0);
+          buffer_region.size(64);
 
-					try {
-						subbuffer = nclCreateSubBuffer(buffer, CL_MEM_READ_ONLY, CL_BUFFER_CREATE_TYPE_REGION, buffer_region.address(), memAddress(errcode_ret));
-						checkCLError(errcode_ret);
-					} finally {
-						buffer_region.free();
-					}
+          try
+          {
+            subbuffer = nclCreateSubBuffer(buffer,
+                                           CL_MEM_READ_ONLY,
+                                           CL_BUFFER_CREATE_TYPE_REGION,
+                                           buffer_region.address(),
+                                           memAddress(errcode_ret));
+            checkCLError(errcode_ret);
+          }
+          finally
+          {
+            buffer_region.free();
+          }
 
-					errcode = clSetMemObjectDestructorCallback(subbuffer, new CLMemObjectDestructorCallback() {
-						@Override
-						public void invoke(long memobj, long user_data) {
-							System.out.println("\t\tSub Buffer destructed: " + memobj);
-						}
-					}, NULL);
-					checkCLError(errcode);
-				}
+          errcode = clSetMemObjectDestructorCallback(subbuffer,
+                                                     new CLMemObjectDestructorCallback()
+                                                     {
+                                                       @Override
+                                                       public void invoke(long memobj,
+                                                                          long user_data)
+                                                       {
+                                                         System.out.println("\t\tSub Buffer destructed: " + memobj);
+                                                       }
+                                                     },
+                                                     NULL);
+          checkCLError(errcode);
+        }
 
-				long exec_caps = clGetDeviceInfoLong(cl_device_id, CL_DEVICE_EXECUTION_CAPABILITIES);
-				if ( (exec_caps & CL_EXEC_NATIVE_KERNEL) == CL_EXEC_NATIVE_KERNEL ) {
-					ClosureGC.get().push();
+        long exec_caps = clGetDeviceInfoLong(cl_device_id,
+                                             CL_DEVICE_EXECUTION_CAPABILITIES);
+        if ((exec_caps & CL_EXEC_NATIVE_KERNEL) == CL_EXEC_NATIVE_KERNEL)
+        {
+          ClosureGC.get().push();
 
-					System.out.println("\t\t-TRYING TO EXEC NATIVE KERNEL-");
-					long queue = clCreateCommandQueue(context, device.address(), 0L, errcode_ret);
+          System.out.println("\t\t-TRYING TO EXEC NATIVE KERNEL-");
+          long queue = clCreateCommandQueue(context,
+                                            device.address(),
+                                            0L,
+                                            errcode_ret);
 
-					PointerBuffer ev = BufferUtils.createPointerBuffer(1);
+          PointerBuffer ev = BufferUtils.createPointerBuffer(1);
 
-					ByteBuffer kernelArgs = BufferUtils.createByteBuffer(4);
-					kernelArgs.putInt(0, 1337);
+          ByteBuffer kernelArgs = BufferUtils.createByteBuffer(4);
+          kernelArgs.putInt(0, 1337);
 
-					errcode = clEnqueueNativeKernel(queue, new CLNativeKernel() {
-						@Override
-						public void invoke(long args) {
-							System.out.println("\t\tKERNEL EXEC argument: " + memByteBuffer(args, 4).getInt(0) + ", should be 1337");
-						}
-					}, kernelArgs, null, null, null, ev);
-					checkCLError(errcode);
+          errcode = clEnqueueNativeKernel(queue, new CLNativeKernel()
+          {
+            @Override
+            public void invoke(long args)
+            {
+              System.out.println("\t\tKERNEL EXEC argument: " + memByteBuffer(args,
+                                                                              4).getInt(0)
+                                 + ", should be 1337");
+            }
+          },
+                                          kernelArgs,
+                                          null,
+                                          null,
+                                          null,
+                                          ev);
+          checkCLError(errcode);
 
-					long e = ev.get(0);
+          long e = ev.get(0);
 
-					final CountDownLatch latch = new CountDownLatch(1);
-					errcode = clSetEventCallback(e, CL_COMPLETE, new CLEventCallback() {
-						@Override
-						public void invoke(long event, int event_command_exec_status, long user_data) {
-							System.out.println("\t\tEvent callback status: " + getEventStatusName(event_command_exec_status));
-							latch.countDown();
-						}
-					}, NULL);
-					checkCLError(errcode);
+          final CountDownLatch latch = new CountDownLatch(1);
+          errcode = clSetEventCallback(e,
+                                       CL_COMPLETE,
+                                       new CLEventCallback()
+                                       {
+                                         @Override
+                                         public void invoke(long event,
+                                                            int event_command_exec_status,
+                                                            long user_data)
+                                         {
+                                           System.out.println("\t\tEvent callback status: " + getEventStatusName(event_command_exec_status));
+                                           latch.countDown();
+                                         }
+                                       },
+                                       NULL);
+          checkCLError(errcode);
 
-					try {
-						boolean expired = !latch.await(500, TimeUnit.MILLISECONDS);
-						if ( expired )
-							System.out.println("\t\tKERNEL EXEC FAILED!");
-					} catch (InterruptedException exc) {
-						exc.printStackTrace();
-					}
+          try
+          {
+            boolean expired = !latch.await(500, TimeUnit.MILLISECONDS);
+            if (expired)
+              System.out.println("\t\tKERNEL EXEC FAILED!");
+          }
+          catch (InterruptedException exc)
+          {
+            exc.printStackTrace();
+          }
 
-					errcode = clReleaseEvent(e);
-					checkCLError(errcode);
+          errcode = clReleaseEvent(e);
+          checkCLError(errcode);
 
-					kernelArgs = BufferUtils.createByteBuffer(POINTER_SIZE * 2);
+          kernelArgs = BufferUtils.createByteBuffer(POINTER_SIZE * 2);
 
-					CLNativeKernel kernel = new CLNativeKernel() {
-						@Override
-						public void invoke(long args) {
-						}
-					};
+          CLNativeKernel kernel = new CLNativeKernel()
+          {
+            @Override
+            public void invoke(long args)
+            {
+            }
+          };
 
-					long time = System.nanoTime();
-					int REPEAT = 1000;
-					for ( int i = 0; i < REPEAT; i++ )
-						clEnqueueNativeKernel(queue, kernel, kernelArgs, null, null, null, null);
-					clFinish(queue);
-					time = System.nanoTime() - time;
+          long time = System.nanoTime();
+          int REPEAT = 1000;
+          for (int i = 0; i < REPEAT; i++)
+            clEnqueueNativeKernel(queue,
+                                  kernel,
+                                  kernelArgs,
+                                  null,
+                                  null,
+                                  null,
+                                  null);
+          clFinish(queue);
+          time = System.nanoTime() - time;
 
-					System.out.printf("\n\t\tEMPTY NATIVE KERNEL AVG EXEC TIME: %.4fus\n", (double)time / (REPEAT * 1000));
+          System.out.printf("\n\t\tEMPTY NATIVE KERNEL AVG EXEC TIME: %.4fus\n",
+                            (double) time / (REPEAT * 1000));
 
-					errcode = clReleaseCommandQueue(queue);
-					checkCLError(errcode);
+          errcode = clReleaseCommandQueue(queue);
+          checkCLError(errcode);
 
-					ClosureGC.get().pop();
-				}
+          ClosureGC.get().pop();
+        }
 
-				System.out.println();
+        System.out.println();
 
-				if ( subbuffer != NULL ) {
-					errcode = clReleaseMemObject(subbuffer);
-					checkCLError(errcode);
-				}
+        if (subbuffer != NULL)
+        {
+          errcode = clReleaseMemObject(subbuffer);
+          checkCLError(errcode);
+        }
 
-				errcode = clReleaseMemObject(buffer);
-				checkCLError(errcode);
+        errcode = clReleaseMemObject(buffer);
+        checkCLError(errcode);
 
-				errcode = clReleaseContext(context);
-				checkCLError(errcode);
+        errcode = clReleaseContext(context);
+        checkCLError(errcode);
 
-				ClosureGC.get().gc();
-			}
-		}
-	}
+        ClosureGC.get().gc();
+      }
+    }
+  }
 
-	public static void get(FunctionProviderLocal provider, long platform, String name) {
-		System.out.println(name + ": " + provider.getFunctionAddress(platform, name));
-	}
+  public static void get(FunctionProviderLocal provider,
+                         long platform,
+                         String name)
+  {
+    System.out.println(name + ": "
+                       + provider.getFunctionAddress(platform, name));
+  }
 
-	private static void printPlatformInfo(CLPlatform platform, String param_name, int param) {
-		System.out.println("\t" + param_name + " = " + clGetPlatformInfoStringUTF8(platform.address(), param));
-	}
+  private static void printPlatformInfo(CLPlatform platform,
+                                        String param_name,
+                                        int param)
+  {
+    System.out.println("\t" + param_name
+                       + " = "
+                       + clGetPlatformInfoStringUTF8(platform.address(),
+                                                     param));
+  }
 
-	private static void printDeviceInfo(CLDevice device, String param_name, int param) {
-		System.out.println("\t" + param_name + " = " + clGetDeviceInfoStringUTF8(device.address(), param));
-	}
+  private static void printDeviceInfo(CLDevice device,
+                                      String param_name,
+                                      int param)
+  {
+    System.out.println("\t" + param_name
+                       + " = "
+                       + clGetDeviceInfoStringUTF8(device.address(),
+                                                   param));
+  }
 
-	private static String getEventStatusName(int status) {
-		switch ( status ) {
-			case CL_QUEUED:
-				return "CL_QUEUED";
-			case CL_SUBMITTED:
-				return "CL_SUBMITTED";
-			case CL_RUNNING:
-				return "CL_RUNNING";
-			case CL_COMPLETE:
-				return "CL_COMPLETE";
-			default:
-				throw new IllegalArgumentException(String.format("Unsupported event status: 0x%X", status));
-		}
-	}
+  private static String getEventStatusName(int status)
+  {
+    switch (status)
+    {
+    case CL_QUEUED:
+      return "CL_QUEUED";
+    case CL_SUBMITTED:
+      return "CL_SUBMITTED";
+    case CL_RUNNING:
+      return "CL_RUNNING";
+    case CL_COMPLETE:
+      return "CL_COMPLETE";
+    default:
+      throw new IllegalArgumentException(String.format("Unsupported event status: 0x%X",
+                                                       status));
+    }
+  }
 
 }
