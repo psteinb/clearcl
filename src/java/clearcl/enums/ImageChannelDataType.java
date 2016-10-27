@@ -1,5 +1,7 @@
 package clearcl.enums;
 
+import coremem.types.NativeTypeEnum;
+
 /**
  * OpenCL image channel data type
  *
@@ -7,32 +9,32 @@ package clearcl.enums;
  */
 public enum ImageChannelDataType
 {
-  SignedNormalizedInt8(DataType.SignedByte, true),
-  SignedNormalizedInt16(DataType.SignedShort, true),
-  UnsignedNormalizedInt8(DataType.Byte, true),
-  UnsignedNormalizedInt16(DataType.Short, true),
-  SignedInt8(DataType.SignedByte, false),
-  SignedInt16(DataType.SignedShort, false),
-  SignedInt32(DataType.SignedInteger, false),
-  UnsignedInt8(DataType.SignedByte, false),
-  UnsignedInt16(DataType.SignedShort, false),
-  UnsignedInt32(DataType.SignedInteger, false),
-  HalfFloat(DataType.HalfFloat, false),
-  Float(DataType.Float, false);
+  SignedNormalizedInt8(NativeTypeEnum.Byte, true),
+  SignedNormalizedInt16(NativeTypeEnum.Short, true),
+  UnsignedNormalizedInt8(NativeTypeEnum.UnsignedByte, true),
+  UnsignedNormalizedInt16(NativeTypeEnum.UnsignedShort, true),
+  SignedInt8(NativeTypeEnum.Byte, false),
+  SignedInt16(NativeTypeEnum.Short, false),
+  SignedInt32(NativeTypeEnum.Int, false),
+  UnsignedInt8(NativeTypeEnum.UnsignedByte, false),
+  UnsignedInt16(NativeTypeEnum.UnsignedShort, false),
+  UnsignedInt32(NativeTypeEnum.UnsignedInt, false),
+  HalfFloat(NativeTypeEnum.HalfFloat, false),
+  Float(NativeTypeEnum.Float, false);
 
-  DataType mDataType;
+  NativeTypeEnum mNativeType;
   boolean mIsNormalized;
 
-  private ImageChannelDataType(DataType pDataType,
+  private ImageChannelDataType(NativeTypeEnum pDataType,
                                boolean pIsNormalized)
   {
-    mDataType = pDataType;
+    mNativeType = pDataType;
     mIsNormalized = pIsNormalized;
   }
 
-  public DataType getDataType()
+  public NativeTypeEnum getNativeType()
   {
-    return mDataType;
+    return mNativeType;
   }
 
   public boolean isNormalized()

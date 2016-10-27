@@ -153,9 +153,7 @@ public abstract class ClearCLBackendBase implements
                                                 ImageType pImageType,
                                                 ImageChannelOrder pImageChannelOrder,
                                                 ImageChannelDataType pImageChannelDataType,
-                                                long pWidth,
-                                                long pHeight,
-                                                long pDepth)
+                                                long... pDimensions)
   {
     throw new ClearCLUnsupportedException();
   }
@@ -237,7 +235,7 @@ public abstract class ClearCLBackendBase implements
   }
 
   @Override
-  public void enqueueReadFromBufferBox(ClearCLPeerPointer pQueuePeerPointer,
+  public void enqueueReadFromBufferRegion(ClearCLPeerPointer pQueuePeerPointer,
                                        ClearCLPeerPointer pBufferPeerPointer,
                                        boolean pBlockingRead,
                                        long[] pBufferOrigin,

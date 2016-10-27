@@ -16,7 +16,6 @@ import clearcl.backend.ClearCLBackendInterface;
 import clearcl.backend.javacl.ClearCLBackendJavaCL;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.enums.BuildStatus;
-import clearcl.enums.DataType;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.KernelAccessType;
 import clearcl.exceptions.ClearCLArgumentMissingException;
@@ -24,6 +23,7 @@ import clearcl.exceptions.ClearCLUnknownArgumentNameException;
 import clearcl.selector.BadDeviceSelector;
 import clearcl.selector.DeviceTypeSelector;
 import clearcl.selector.GlobalMemorySelector;
+import coremem.types.NativeTypeEnum;
 
 public class ClearCLKernelTests
 {
@@ -77,17 +77,17 @@ public class ClearCLKernelTests
 
       ClearCLBuffer lBufferA = lContext.createBuffer(HostAccessType.WriteOnly,
                                                      KernelAccessType.ReadOnly,
-                                                     DataType.Float,
+                                                     NativeTypeEnum.Float,
                                                      cFloatArrayLength);
 
       ClearCLBuffer lBufferB = lContext.createBuffer(HostAccessType.WriteOnly,
                                                      KernelAccessType.ReadOnly,
-                                                     DataType.Float,
+                                                     NativeTypeEnum.Float,
                                                      cFloatArrayLength);
 
       ClearCLBuffer lBufferC = lContext.createBuffer(HostAccessType.ReadOnly,
                                                      KernelAccessType.WriteOnly,
-                                                     DataType.Float,
+                                                     NativeTypeEnum.Float,
                                                      cFloatArrayLength);
 
       ClearCLKernel lKernel = lProgram.createKernel("buffersum");

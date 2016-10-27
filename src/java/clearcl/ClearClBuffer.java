@@ -3,11 +3,13 @@ package clearcl;
 import java.nio.Buffer;
 
 import clearcl.abs.ClearCLMemBase;
-import clearcl.enums.DataType;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.KernelAccessType;
+import clearcl.exceptions.ClearCLHostAccessException;
 import clearcl.interfaces.ClearCLMemInterface;
+import clearcl.util.Region3;
 import coremem.ContiguousMemoryInterface;
+import coremem.types.NativeTypeEnum;
 
 /**
  * ClearCLBuffer is the ClearCL abstraction for OpenCL buffers.
@@ -21,7 +23,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   private final ClearCLContext mClearCLContext;
   private final HostAccessType mHostAccessType;
   private final KernelAccessType mKernelAccessType;
-  private final DataType mDataType;
+  private final NativeTypeEnum mNativeType;
   private final long mLength;
 
   /**
@@ -35,7 +37,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    *          host access type
    * @param pKernelAccessType
    *          kernel access type
-   * @param pDataType
+   * @param pNativeType
    *          data type
    * @param pLength
    *          length
@@ -44,15 +46,28 @@ public class ClearCLBuffer extends ClearCLMemBase implements
                 ClearCLPeerPointer pBufferPointer,
                 HostAccessType pHostAccessType,
                 KernelAccessType pKernelAccessType,
-                DataType pDataType,
+                NativeTypeEnum pNativeType,
                 long pLength)
   {
     super(pClearCLContext.getBackend(), pBufferPointer);
     mClearCLContext = pClearCLContext;
     mHostAccessType = pHostAccessType;
     mKernelAccessType = pKernelAccessType;
-    mDataType = pDataType;
+    mNativeType = pNativeType;
     mLength = pLength;
+  }
+
+  /**
+   * Fills the buffer with a given byte pattern.
+   * 
+   * @param pPattern
+   *          pattern as a sequence of bytes
+   * @param pBlockingFill
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void fill(byte[] pPattern, boolean pBlockingFill)
+  {
+    fill(pPattern, 0, getSizeInBytes(), pBlockingFill);
   }
 
   /**
@@ -79,9 +94,23 @@ public class ClearCLBuffer extends ClearCLMemBase implements
                                                   .getPeerPointer(),
                                    getPeerPointer(),
                                    pBlockingFill,
-                                   pOffsetInBuffer * getDataType().getSizeInBytes(),
-                                   pLengthInBuffer * getDataType().getSizeInBytes(),
+                                   pOffsetInBuffer * getNativeType().getSizeInBytes(),
+                                   pLengthInBuffer * getNativeType().getSizeInBytes(),
                                    pPattern);
+    notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+  }
+
+  /**
+   * Copies this OpenCl buffer into another OpenCl buffer of same length.
+   * 
+   * @param pDstBuffer
+   *          destination buffer
+   * @param pBlockingCopy
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void copyTo(ClearCLBuffer pDstBuffer, boolean pBlockingCopy)
+  {
+    copyTo(pDstBuffer, 0, 0, getSizeInBytes(), pBlockingCopy);
   }
 
   /**
@@ -110,9 +139,10 @@ public class ClearCLBuffer extends ClearCLMemBase implements
                                    getPeerPointer(),
                                    pDstBuffer.getPeerPointer(),
                                    pBlockingCopy,
-                                   pOffsetInSrcBuffer * getDataType().getSizeInBytes(),
-                                   pOffsetInDstBuffer * getDataType().getSizeInBytes(),
-                                   pLengthInElements * getDataType().getSizeInBytes());
+                                   pOffsetInSrcBuffer * getNativeType().getSizeInBytes(),
+                                   pOffsetInDstBuffer * getNativeType().getSizeInBytes(),
+                                   pLengthInElements * getNativeType().getSizeInBytes());
+    pDstBuffer.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
   }
 
   /**
@@ -141,9 +171,27 @@ public class ClearCLBuffer extends ClearCLMemBase implements
                                          getPeerPointer(),
                                          pDstBuffer.getPeerPointer(),
                                          pBlockingCopy,
-                                         pOriginInSrcBuffer,
-                                         pOriginInDstBuffer,
-                                         pRegion);
+                                         Region3.origin(pOriginInSrcBuffer),
+                                         Region3.origin(pOriginInDstBuffer),
+                                         Region3.region(pRegion));
+    pDstBuffer.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+  }
+
+  /**
+   * Copies this OpenCl buffer to an OpenCl image.
+   * 
+   * @param pDstImage
+   *          destination image
+   * @param pBlockingCopy
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void copyTo(ClearCLImage pDstImage, boolean pBlockingCopy)
+  {
+    copyTo(pDstImage,
+           0,
+           Region3.originZero(),
+           Region3.region(pDstImage.getDimensions()),
+           pBlockingCopy);
   }
 
   /**
@@ -172,13 +220,53 @@ public class ClearCLBuffer extends ClearCLMemBase implements
                                           getPeerPointer(),
                                           pDstImage.getPeerPointer(),
                                           pBlockingCopy,
-                                          pOffsetInSrcBuffer * getDataType().getSizeInBytes(),
-                                          pDstOrigin,
-                                          pDstRegion);
+                                          pOffsetInSrcBuffer * getNativeType().getSizeInBytes(),
+                                          Region3.origin(pDstOrigin),
+                                          Region3.region(pDstRegion));
+    pDstImage.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
   }
 
   /**
-   * Writes a linear region of a CoreMem buffer into this OpenCl buffer.
+   * Copies this image into a host image.
+   * 
+   * @param pClearCLHostImage
+   *          host image.
+   * @param pBlockingCopy
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void copyTo(ClearCLHostImage pClearCLHostImage,
+                     boolean pBlockingCopy)
+  {
+    if (!getHostAccessType().isReadableFromHost())
+      throw new ClearCLHostAccessException("Image not readable from host");
+
+    getBackend().enqueueReadFromBuffer(mClearCLContext.getDefaultQueue()
+                                                      .getPeerPointer(),
+                                       getPeerPointer(),
+                                       pBlockingCopy,
+                                       0,
+                                       getSizeInBytes(),
+                                       getBackend().wrap(pClearCLHostImage.getContiguousMemory()));
+    pClearCLHostImage.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+  }
+
+  /**
+   * Writes the contents of this OpenCl buffer into CoreMem buffer.
+   * 
+   * @param pContiguousMemory
+   *          destination CoreMem buffer
+   * @param pBlockingWrite
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void writeTo(ContiguousMemoryInterface pContiguousMemory,
+                      boolean pBlockingWrite)
+  {
+    writeTo(pContiguousMemory, 0, getSizeInBytes(), pBlockingWrite);
+  }
+
+  /**
+   * Writes the contents of this OpenCl buffer into a linear region of a CoreMem
+   * buffer.
    * 
    * @param pContiguousMemory
    *          destination CoreMem buffer
@@ -186,23 +274,40 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    *          offset in destination buffer
    * @param pLengthInBuffer
    *          length to write
-   * @param pBlockingRead
+   * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
    */
   public void writeTo(ContiguousMemoryInterface pContiguousMemory,
                       long pOffsetInBuffer,
                       long pLengthInBuffer,
-                      boolean pBlockingRead)
+                      boolean pBlockingWrite)
   {
+    if (!getHostAccessType().isReadableFromHost())
+      throw new ClearCLHostAccessException("Image not readable from host");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pContiguousMemory);
 
     getBackend().enqueueReadFromBuffer(mClearCLContext.getDefaultQueue()
                                                       .getPeerPointer(),
                                        getPeerPointer(),
-                                       pBlockingRead,
-                                       pOffsetInBuffer * getDataType().getSizeInBytes(),
-                                       pLengthInBuffer * getDataType().getSizeInBytes(),
+                                       pBlockingWrite,
+                                       pOffsetInBuffer * getNativeType().getSizeInBytes(),
+                                       pLengthInBuffer * getNativeType().getSizeInBytes(),
                                        lHostMemPointer);
+  }
+
+  /**
+   * Writes a NIO buffer into this OpenCl buffer.
+   * 
+   * @param pBuffer
+   *          destination NIO buffer
+   * 
+   * @param pBlockingWrite
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void writeTo(Buffer pBuffer, boolean pBlockingWrite)
+  {
+    writeTo(pBuffer, 0, getSizeInBytes(), pBlockingWrite);
   }
 
   /**
@@ -214,23 +319,40 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    *          offset in destination buffer
    * @param pLengthInBuffer
    *          length to write
-   * @param pBlockingRead
+   * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
    */
   public void writeTo(Buffer pBuffer,
                       long pOffsetInBuffer,
                       long pLengthInBuffer,
-                      boolean pBlockingRead)
+                      boolean pBlockingWrite)
   {
+    if (!getHostAccessType().isReadableFromHost())
+      throw new ClearCLHostAccessException("Image not readable from host");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pBuffer);
 
     getBackend().enqueueReadFromBuffer(mClearCLContext.getDefaultQueue()
                                                       .getPeerPointer(),
                                        getPeerPointer(),
-                                       pBlockingRead,
-                                       pOffsetInBuffer * getDataType().getSizeInBytes(),
-                                       pLengthInBuffer * getDataType().getSizeInBytes(),
+                                       pBlockingWrite,
+                                       pOffsetInBuffer * getNativeType().getSizeInBytes(),
+                                       pLengthInBuffer * getNativeType().getSizeInBytes(),
                                        lHostMemPointer);
+  }
+
+  /**
+   * Reads from a linear region of a CoreMem buffer into this OpenCl buffer.
+   * 
+   * @param pContiguousMemory
+   *          source NIO buffer
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void readFrom(ContiguousMemoryInterface pContiguousMemory,
+                       boolean pBlockingRead)
+  {
+    readFrom(pContiguousMemory, 0, getSizeInBytes(), pBlockingRead);
   }
 
   /**
@@ -250,15 +372,32 @@ public class ClearCLBuffer extends ClearCLMemBase implements
                        long pLengthInBuffer,
                        boolean pBlockingRead)
   {
+    if (!getHostAccessType().isWritableFromHost())
+      throw new ClearCLHostAccessException("Image not writable from host");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pContiguousMemory);
 
     getBackend().enqueueWriteToBuffer(mClearCLContext.getDefaultQueue()
                                                      .getPeerPointer(),
                                       getPeerPointer(),
                                       pBlockingRead,
-                                      pOffsetInBuffer * getDataType().getSizeInBytes(),
-                                      pLengthInBuffer * getDataType().getSizeInBytes(),
+                                      pOffsetInBuffer * getNativeType().getSizeInBytes(),
+                                      pLengthInBuffer * getNativeType().getSizeInBytes(),
                                       lHostMemPointer);
+    notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+  }
+
+  /**
+   * Reads from a linear region of a NIO buffer into this OpenCl buffer.
+   * 
+   * @param pBuffer
+   *          source NIO buffer
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void readFrom(Buffer pBuffer, boolean pBlockingRead)
+  {
+    readFrom(pBuffer, 0, getSizeInBytes(), pBlockingRead);
   }
 
   /**
@@ -278,15 +417,19 @@ public class ClearCLBuffer extends ClearCLMemBase implements
                        long pLengthInBuffer,
                        boolean pBlockingRead)
   {
+    if (!getHostAccessType().isWritableFromHost())
+      throw new ClearCLHostAccessException("Image not writable from host");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pBuffer);
 
     getBackend().enqueueWriteToBuffer(mClearCLContext.getDefaultQueue()
                                                      .getPeerPointer(),
                                       getPeerPointer(),
                                       pBlockingRead,
-                                      pOffsetInBuffer * getDataType().getSizeInBytes(),
-                                      pLengthInBuffer * getDataType().getSizeInBytes(),
+                                      pOffsetInBuffer * getNativeType().getSizeInBytes(),
+                                      pLengthInBuffer * getNativeType().getSizeInBytes(),
                                       lHostMemPointer);
+    notifyListenersOfChange(mClearCLContext.getDefaultQueue());
   }
 
   /**
@@ -301,25 +444,28 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    *          origin in source buffer
    * @param Region
    *          region to write
-   * @param pBlockingRead
+   * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
    */
   public void writeTo(ContiguousMemoryInterface pContiguousMemory,
                       long[] pSourceOrigin,
                       long[] pDestinationOrigin,
                       long[] pRegion,
-                      boolean pBlockingRead)
+                      boolean pBlockingWrite)
   {
+    if (!getHostAccessType().isReadableFromHost())
+      throw new ClearCLHostAccessException("Image not readable from host");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pContiguousMemory);
 
-    getBackend().enqueueReadFromBufferBox(mClearCLContext.getDefaultQueue()
-                                                         .getPeerPointer(),
-                                          getPeerPointer(),
-                                          pBlockingRead,
-                                          pSourceOrigin,
-                                          pDestinationOrigin,
-                                          pRegion,
-                                          lHostMemPointer);
+    getBackend().enqueueReadFromBufferRegion(mClearCLContext.getDefaultQueue()
+                                                            .getPeerPointer(),
+                                             getPeerPointer(),
+                                             pBlockingWrite,
+                                             Region3.origin(pSourceOrigin),
+                                             Region3.origin(pDestinationOrigin),
+                                             Region3.region(pRegion),
+                                             lHostMemPointer);
   }
 
   /**
@@ -334,25 +480,28 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    *          origin in destination buffer
    * @param Region
    *          region to write
-   * @param pBlockingRead
+   * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
    */
   public void writeTo(Buffer pBuffer,
                       long[] pSourceOrigin,
                       long[] pDestinationOrigin,
                       long[] pRegion,
-                      boolean pBlockingRead)
+                      boolean pBlockingWrite)
   {
+    if (!getHostAccessType().isReadableFromHost())
+      throw new ClearCLHostAccessException("Image not readable from host");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pBuffer);
 
-    getBackend().enqueueReadFromBufferBox(mClearCLContext.getDefaultQueue()
-                                                         .getPeerPointer(),
-                                          getPeerPointer(),
-                                          pBlockingRead,
-                                          pSourceOrigin,
-                                          pDestinationOrigin,
-                                          pRegion,
-                                          lHostMemPointer);
+    getBackend().enqueueReadFromBufferRegion(mClearCLContext.getDefaultQueue()
+                                                            .getPeerPointer(),
+                                             getPeerPointer(),
+                                             pBlockingWrite,
+                                             Region3.origin(pSourceOrigin),
+                                             Region3.origin(pDestinationOrigin),
+                                             Region3.region(pRegion),
+                                             lHostMemPointer);
   }
 
   /**
@@ -376,16 +525,21 @@ public class ClearCLBuffer extends ClearCLMemBase implements
                        long[] pRegion,
                        boolean pBlockingRead)
   {
+    if (!getHostAccessType().isWritableFromHost())
+      throw new ClearCLHostAccessException("Image not writable from host");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pContiguousMemory);
 
     getBackend().enqueueWriteToBufferRegion(mClearCLContext.getDefaultQueue()
                                                            .getPeerPointer(),
                                             getPeerPointer(),
                                             pBlockingRead,
-                                            pDestinationOrigin,
-                                            pSourceOrigin,
-                                            pRegion,
+                                            Region3.origin(pDestinationOrigin),
+                                            Region3.origin(pSourceOrigin),
+                                            Region3.region(pRegion),
                                             lHostMemPointer);
+
+    notifyListenersOfChange(mClearCLContext.getDefaultQueue());
   }
 
   /**
@@ -409,16 +563,21 @@ public class ClearCLBuffer extends ClearCLMemBase implements
                        long[] pRegion,
                        boolean pBlockingRead)
   {
+    if (!getHostAccessType().isWritableFromHost())
+      throw new ClearCLHostAccessException("Image not writable from host");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pBuffer);
 
     getBackend().enqueueWriteToBufferRegion(mClearCLContext.getDefaultQueue()
                                                            .getPeerPointer(),
                                             getPeerPointer(),
                                             pBlockingRead,
-                                            pDestinationOrigin,
-                                            pSourceOrigin,
-                                            pRegion,
+                                            Region3.origin(pDestinationOrigin),
+                                            Region3.origin(pSourceOrigin),
+                                            Region3.region(pRegion),
                                             lHostMemPointer);
+  
+    notifyListenersOfChange(mClearCLContext.getDefaultQueue());
   }
 
   /**
@@ -446,9 +605,9 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * 
    * @return data type
    */
-  public DataType getDataType()
+  public NativeTypeEnum getNativeType()
   {
-    return mDataType;
+    return mNativeType;
   }
 
   /**
@@ -469,7 +628,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   @Override
   public long getSizeInBytes()
   {
-    return getLengthInElements() * mDataType.getSizeInBytes();
+    return getLengthInElements() * mNativeType.getSizeInBytes();
   }
 
   /* (non-Javadoc)
@@ -480,7 +639,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   {
     return String.format("ClearCLBuffer [mBufferType=%s, mDataType=%s, getLengthInElements()=%s, getSizeInBytes()=%s]",
                          mHostAccessType,
-                         mDataType,
+                         mNativeType,
                          getLengthInElements(),
                          getSizeInBytes());
   }
@@ -489,7 +648,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @see clearcl.ClearCLBase#close()
    */
   @Override
-  public void close() throws Exception
+  public void close()
   {
     getBackend().releaseBuffer(getPeerPointer());
   }

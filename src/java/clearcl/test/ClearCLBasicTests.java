@@ -23,7 +23,6 @@ import clearcl.backend.ClearCLBackendInterface;
 import clearcl.backend.javacl.ClearCLBackendJavaCL;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.enums.BuildStatus;
-import clearcl.enums.DataType;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
@@ -31,6 +30,7 @@ import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
 import clearcl.exceptions.OpenCLException;
 import coremem.offheap.OffHeapMemory;
+import coremem.types.NativeTypeEnum;
 
 public class ClearCLBasicTests
 {
@@ -162,7 +162,7 @@ public class ClearCLBasicTests
       @SuppressWarnings("unused")
       ClearCLBuffer lBufferTooBig = lCreateContext.createBuffer(HostAccessType.WriteOnly,
                                                                 KernelAccessType.ReadOnly,
-                                                                DataType.Float,
+                                                                NativeTypeEnum.Float,
                                                                 Long.MAX_VALUE);
       fail();
     }
@@ -183,17 +183,17 @@ public class ClearCLBasicTests
 
     ClearCLBuffer lBufferA = lCreateContext.createBuffer(HostAccessType.WriteOnly,
                                                          KernelAccessType.ReadOnly,
-                                                         DataType.Float,
+                                                         NativeTypeEnum.Float,
                                                          cFloatArrayLength);
 
     ClearCLBuffer lBufferB = lCreateContext.createBuffer(HostAccessType.WriteOnly,
                                                          KernelAccessType.ReadOnly,
-                                                         DataType.Float,
+                                                         NativeTypeEnum.Float,
                                                          cFloatArrayLength);
 
     ClearCLBuffer lBufferC = lCreateContext.createBuffer(HostAccessType.ReadOnly,
                                                          KernelAccessType.WriteOnly,
-                                                         DataType.Float,
+                                                         NativeTypeEnum.Float,
                                                          cFloatArrayLength);
 
     lBufferA.readFrom(FloatBuffer.wrap(lArrayA),

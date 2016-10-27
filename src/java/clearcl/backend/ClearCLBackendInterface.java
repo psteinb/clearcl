@@ -250,9 +250,7 @@ public interface ClearCLBackendInterface
                                          ImageType pImageType,
                                          ImageChannelOrder pImageChannelOrder,
                                          ImageChannelDataType pImageChannelDataType,
-                                         long pWidth,
-                                         long pHeight,
-                                         long pDepth);
+                                         long... pDimensions);
 
   /**
    * Returns program peer pointer for given context and list of source code
@@ -404,13 +402,13 @@ public interface ClearCLBackendInterface
    * @param pRegion
    * @param pHostMemPeerPointer
    */
-  void enqueueReadFromBufferBox(ClearCLPeerPointer pQueuePeerPointer,
-                                ClearCLPeerPointer pBufferPeerPointer,
-                                boolean pBlockingRead,
-                                long[] pBufferOrigin,
-                                long[] pHostOrigin,
-                                long[] pRegion,
-                                ClearCLPeerPointer pHostMemPeerPointer);
+  void enqueueReadFromBufferRegion(ClearCLPeerPointer pQueuePeerPointer,
+                                   ClearCLPeerPointer pBufferPeerPointer,
+                                   boolean pBlockingRead,
+                                   long[] pBufferOrigin,
+                                   long[] pHostOrigin,
+                                   long[] pRegion,
+                                   ClearCLPeerPointer pHostMemPeerPointer);
 
   /**
    * Enqueues write to buffer region.

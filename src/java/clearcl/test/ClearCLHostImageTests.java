@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import clearcl.ClearCLHostImage;
+import clearcl.backend.jocl.ClearCLBackendJOCL;
 import coremem.types.NativeTypeEnum;
 
 public class ClearCLHostImageTests
@@ -13,7 +14,10 @@ public class ClearCLHostImageTests
   @Test
   public void test()
   {
-    ClearCLHostImage lHostImage = new ClearCLHostImage(NativeTypeEnum.UnsignedShort,
+    ClearCLBackendJOCL lClearCLJOCLBackend = new ClearCLBackendJOCL();
+
+    ClearCLHostImage lHostImage = new ClearCLHostImage(lClearCLJOCLBackend,
+                                                       NativeTypeEnum.UnsignedShort,
                                                        10,
                                                        10,
                                                        10);

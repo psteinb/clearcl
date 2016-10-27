@@ -351,9 +351,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
                                                 ImageType pImageType,
                                                 ImageChannelOrder pImageChannelOrder,
                                                 ImageChannelDataType pImageChannelDataType,
-                                                long pWidth,
-                                                long pHeight,
-                                                long pDepth)
+                                                long... pDimensions)
   {
 
     cl_image_format lImageFormat = new cl_image_format();
@@ -361,9 +359,11 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
     lImageFormat.image_channel_data_type(BackendUtils.getImageChannelDataTypeFlags(pImageChannelDataType));
 
     cl_image_desc lImageDescription = new cl_image_desc();
-    lImageDescription.image_width(pWidth);
-    lImageDescription.image_height(pHeight);
-    lImageDescription.image_depth(pDepth);
+    lImageDescription.image_width(pDimensions[0]);
+    lImageDescription.image_height(pDimensions.length < 2 ? 1
+                                                         : pDimensions[1]);
+    lImageDescription.image_depth(pDimensions.length < 3 ? 1
+                                                        : pDimensions[2]);
     lImageDescription.image_type(BackendUtils.getImageTypeFlags(pImageType));
 
     long lMemFlags = BackendUtils.getMemTypeFlags(pHostAccessType,
@@ -726,7 +726,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void enqueueReadFromBufferBox(ClearCLPeerPointer pQueuePointer,
+  public void enqueueReadFromBufferRegion(ClearCLPeerPointer pQueuePointer,
                                        ClearCLPeerPointer pBufferPointer,
                                        boolean pBlockingRead,
                                        long[] pBufferOrigin,

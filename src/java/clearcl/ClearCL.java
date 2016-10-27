@@ -4,7 +4,11 @@ import java.util.ArrayList;
 
 import clearcl.abs.ClearCLBase;
 import clearcl.backend.ClearCLBackendInterface;
+import clearcl.selector.BadDeviceSelector;
 import clearcl.selector.DeviceSelector;
+import clearcl.selector.DeviceTypeSelector;
+import clearcl.selector.FastestDeviceSelector;
+import clearcl.selector.GlobalMemorySelector;
 
 /**
  * ClearCL is the starting point for creating ClearCL objects for OpenCL.
@@ -47,6 +51,45 @@ public class ClearCL extends ClearCLBase
   {
     ClearCLPeerPointer lPlatformIdPointer = getBackend().getPlatformPeerPointer(pPlatformIndex);
     return new ClearCLPlatform(this, lPlatformIdPointer);
+  }
+
+  /**
+   * Returns the fastest GPU device available. This method does its best to
+   * avoid crappy Intel integrated cards (except Iris which is not too shabby).
+   * 
+   * @return fastest GPU device
+   */
+  public ClearCLDevice getFastestGPUDevice()
+  {
+    ClearCLDevice lClearClDevice = getBestDevice(DeviceTypeSelector.GPU,
+                                                 BadDeviceSelector.NotSlowIntegratedIntel,
+                                                 FastestDeviceSelector.Fastest);
+    return lClearClDevice;
+  }
+
+  /**
+   * Returns the GPU device with most global memory available - hence 'largest'.
+   * 
+   * @return fastest GPU device
+   */
+  public ClearCLDevice getLargestGPUDevice()
+  {
+    ClearCLDevice lClearClDevice = getBestDevice(DeviceTypeSelector.GPU,
+                                                 BadDeviceSelector.NotIntegratedIntel,
+                                                 GlobalMemorySelector.MAX);
+    return lClearClDevice;
+  }
+  
+  /**
+   * Returns the best (right now fastest) CPU device.
+   * 
+   * @return fastest CPU device
+   */
+  public ClearCLDevice getBestCPUDevice()
+  {
+    ClearCLDevice lClearClDevice = getBestDevice(DeviceTypeSelector.CPU,
+                                                 FastestDeviceSelector.Fastest);
+    return lClearClDevice;
   }
 
   /**
@@ -153,7 +196,7 @@ public class ClearCL extends ClearCLBase
    * @see clearcl.ClearCLBase#close()
    */
   @Override
-  public void close() throws Exception
+  public void close()
   {
 
   }

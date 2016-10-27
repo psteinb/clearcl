@@ -16,6 +16,8 @@ public class BadDeviceSelector implements DeviceSelector
                                                                               .addName("Iris Graphics")
                                                                               .addName("Iris Pro Graphics");
 
+  public static BadDeviceSelector NotSlowIntegratedIntel = new BadDeviceSelector().addName("HD Graphics");
+
   public static BadDeviceSelector NotIntegratedIntelHD = new BadDeviceSelector().addName("HD Graphics");
 
   private ArrayList<String> mBadDeviceNamesList = new ArrayList<>();

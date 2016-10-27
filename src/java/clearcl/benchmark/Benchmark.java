@@ -10,9 +10,9 @@ import clearcl.ClearCLDevice;
 import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
 import clearcl.enums.BuildStatus;
-import clearcl.enums.DataType;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.KernelAccessType;
+import coremem.types.NativeTypeEnum;
 
 public class Benchmark
 {
@@ -75,11 +75,11 @@ public class Benchmark
 
     ClearCLBuffer lBufferA = lContext.createBuffer(HostAccessType.NoAccess,
                                                    KernelAccessType.ReadOnly,
-                                                   DataType.Float,
+                                                   NativeTypeEnum.Float,
                                                    cImageSize * cImageSize);
     ClearCLBuffer lBufferB = lContext.createBuffer(HostAccessType.NoAccess,
                                                    KernelAccessType.ReadWrite,
-                                                   DataType.Float,
+                                                   NativeTypeEnum.Float,
                                                    cImageSize * cImageSize);
 
     ClearCLKernel lKernelFill = lProgram.createKernel("fill");

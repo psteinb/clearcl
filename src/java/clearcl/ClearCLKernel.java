@@ -1,11 +1,17 @@
 package clearcl;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import clearcl.abs.ClearCLBase;
+import clearcl.exceptions.CleaCLInvalidExecutionRange;
 import clearcl.exceptions.ClearCLArgumentMissingException;
 import clearcl.exceptions.ClearCLUnknownArgumentNameException;
+import clearcl.interfaces.ClearCLImageInterface;
+import clearcl.interfaces.ClearCLMemInterface;
+import clearcl.util.AsynchronousNotification;
+import clearcl.util.Region3;
 
 /**
  * ClearCLKernel is the ClearCL abstraction for OpenCL kernels.
@@ -23,7 +29,8 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   private final ConcurrentHashMap<Integer, Argument> mIndexToArgumentMap = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, Number> mDefaultArgumentsMap;
 
-  private long[] mGlobalOffsets = null;
+  private long[] mGlobalOffsets = new long[]
+  { 0, 0, 0 };
   private long[] mGlobalSizes = null;
   private long[] mLocalSizes = null;
 
@@ -111,6 +118,17 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   public void setGlobalSizes(long... pGlobalSizes)
   {
     mGlobalSizes = pGlobalSizes;
+  }
+
+  /**
+   * Sets the global sizes to the dimensions of a image (1D, 2D, or 3D)
+   * 
+   * @param pImage
+   *          image
+   */
+  public void setGlobalSizesFor(ClearCLImageInterface pImage)
+  {
+    mGlobalSizes = pImage.getDimensions();
   }
 
   /**
@@ -260,12 +278,31 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   public void run(ClearCLQueue pClearCLQueue, boolean pBlockingRun)
   {
     setArgumentsInternal();
+    if (getGlobalSizes() == null || getGlobalOffsets() == null)
+      throw new CleaCLInvalidExecutionRange(String.format("global offset = %s, global range = %s, local range = %s",
+                                                          Arrays.toString(getGlobalOffsets()),
+                                                          Arrays.toString(getGlobalSizes()),
+                                                          Arrays.toString(getLocalSizes())));
+
     getBackend().enqueueKernelExecution(pClearCLQueue.getPeerPointer(),
                                         getPeerPointer(),
                                         getGlobalSizes().length,
                                         getGlobalOffsets(),
                                         getGlobalSizes(),
                                         getLocalSizes());
+
+    for (Map.Entry<Integer, Argument> lEntry : mIndexToArgumentMap.entrySet())
+    {
+      Object lArgument = lEntry.getValue().argument;
+      if (lArgument instanceof ClearCLMemInterface)
+      {
+        ClearCLMemInterface lClearCLMemInterface = (ClearCLMemInterface) lArgument;
+        AsynchronousNotification.notifyChange(() -> {
+          pClearCLQueue.waitToFinish();
+          lClearCLMemInterface.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+        });
+      }
+    }
 
     if (pBlockingRun)
       pClearCLQueue.waitToFinish();
@@ -275,7 +312,7 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
    * @see clearcl.ClearCLBase#close()
    */
   @Override
-  public void close() throws Exception
+  public void close()
   {
     getBackend().releaseKernel(getPeerPointer());
   }
@@ -301,60 +338,64 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
     ConcurrentHashMap<String, Number> lNameToDefaultArgumentMapMap = new ConcurrentHashMap<String, Number>();
 
     String lSourceCode = getSourceCode();
+
+    int lBeginOfDefault = 0;
+    while ((lBeginOfDefault = lSourceCode.indexOf("//default:" + pKernelName,
+                                                  lBeginOfDefault)) != -1)
     {
-      int lBeginOfDefault = lSourceCode.indexOf("//default:" + pKernelName);
-      if (lBeginOfDefault >= 0)
+      int lEndOfDefault = lSourceCode.indexOf('\n', lBeginOfDefault);
+      String lSubStringKernel = lSourceCode.substring(lBeginOfDefault,
+                                                      lEndOfDefault);
+
+      // System.out.println(lSubStringKernel);
+
+      String[] lTwoPointsSplit = lSubStringKernel.split(":");
+      // System.out.println(Arrays.toString(lTwoPointsSplit));
+      String[] lEqualSplit = lTwoPointsSplit[lTwoPointsSplit.length - 1].split("=");
+      // System.out.println(Arrays.toString(lEqualSplit));
+
+      String lArgumentName = lEqualSplit[0].trim().toLowerCase();
+      String lArgumentValue = lEqualSplit[1].trim().toLowerCase();
+
+      char lArgumentType = lArgumentValue.charAt(lArgumentValue.length() - 1);
+
+      lArgumentValue = lArgumentValue.substring(0,
+                                                lArgumentValue.length() - 1);
+
+      switch (lArgumentType)
       {
-        int lEndOfDefault = lSourceCode.indexOf('\n', lBeginOfDefault);
-        String lSubStringKernel = lSourceCode.substring(lBeginOfDefault,
-                                                        lEndOfDefault);
+      case 'b':
+        lNameToDefaultArgumentMapMap.put(lArgumentName,
+                                         Byte.parseByte(lArgumentValue));
+        break;
 
-        // System.out.println(lSubStringKernel);
+      case 's':
+        lNameToDefaultArgumentMapMap.put(lArgumentName,
+                                         Short.parseShort(lArgumentValue));
+        break;
 
-        String[] lTwoPointsSplit = lSubStringKernel.split(":");
-        // System.out.println(Arrays.toString(lTwoPointsSplit));
-        String[] lEqualSplit = lTwoPointsSplit[lTwoPointsSplit.length - 1].split("=");
-        // System.out.println(Arrays.toString(lEqualSplit));
+      case 'i':
+        lNameToDefaultArgumentMapMap.put(lArgumentName,
+                                         Integer.parseInt(lArgumentValue));
+        break;
 
-        String lArgumentName = lEqualSplit[0].trim().toLowerCase();
-        String lArgumentValue = lEqualSplit[1].trim().toLowerCase();
+      case 'l':
+        lNameToDefaultArgumentMapMap.put(lArgumentName,
+                                         Long.parseLong(lArgumentValue));
+        break;
 
-        char lArgumentType = lArgumentValue.charAt(lArgumentValue.length() - 1);
+      case 'f':
+        lNameToDefaultArgumentMapMap.put(lArgumentName,
+                                         Float.parseFloat(lArgumentValue));
+        break;
 
-        switch (lArgumentType)
-        {
-        case 'b':
-          lNameToDefaultArgumentMapMap.put(lArgumentName,
-                                           Byte.parseByte(lArgumentValue));
-          break;
-
-        case 's':
-          lNameToDefaultArgumentMapMap.put(lArgumentName,
-                                           Short.parseShort(lArgumentValue));
-          break;
-
-        case 'i':
-          lNameToDefaultArgumentMapMap.put(lArgumentName,
-                                           Integer.parseInt(lArgumentValue));
-          break;
-
-        case 'l':
-          lNameToDefaultArgumentMapMap.put(lArgumentName,
-                                           Long.parseLong(lArgumentValue));
-          break;
-
-        case 'f':
-          lNameToDefaultArgumentMapMap.put(lArgumentName,
-                                           Float.parseFloat(lArgumentValue));
-          break;
-
-        case 'd':
-          lNameToDefaultArgumentMapMap.put(lArgumentName,
-                                           Double.parseDouble(lArgumentValue));
-          break;
-        }
-
+      case 'd':
+        lNameToDefaultArgumentMapMap.put(lArgumentName,
+                                         Double.parseDouble(lArgumentValue));
+        break;
       }
+
+      lBeginOfDefault = lEndOfDefault;
     }
 
     // System.out.println(lNameToDefaultArgumentMapMap);

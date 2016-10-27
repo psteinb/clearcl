@@ -1,6 +1,7 @@
 package clearcl;
 
 import java.nio.Buffer;
+import java.util.Arrays;
 
 import clearcl.abs.ClearCLMemBase;
 import clearcl.enums.HostAccessType;
@@ -8,8 +9,12 @@ import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
+import clearcl.exceptions.ClearCLHostAccessException;
+import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.interfaces.ClearCLMemInterface;
+import clearcl.util.Region3;
 import coremem.ContiguousMemoryInterface;
+import coremem.types.NativeTypeEnum;
 
 /**
  * ClearCLImage is the ClearCL abstraction for OpenCL images.
@@ -17,7 +22,8 @@ import coremem.ContiguousMemoryInterface;
  * @author royer
  */
 public class ClearCLImage extends ClearCLMemBase implements
-                                                ClearCLMemInterface
+                                                ClearCLMemInterface,
+                                                ClearCLImageInterface
 {
   private final ClearCLContext mClearCLContext;
   private final HostAccessType mHostAccessType;
@@ -25,7 +31,7 @@ public class ClearCLImage extends ClearCLMemBase implements
   private final ImageType mImageType;
   private final ImageChannelOrder mImageChannelOrder;
   private final ImageChannelDataType mImageChannelDataType;
-  private final long mWidth, mHeight, mDepth;
+  private final long[] mDimensions;
 
   /**
    * This constructor is called internally from an OpenCl context.
@@ -58,9 +64,7 @@ public class ClearCLImage extends ClearCLMemBase implements
                ImageType pImageType,
                ImageChannelOrder pImageChannelOrder,
                ImageChannelDataType pImageChannelType,
-               long pWidth,
-               long pHeight,
-               long pDepth)
+               long... pDimensions)
   {
     super(pClearCLContext.getBackend(), pImage);
     mClearCLContext = pClearCLContext;
@@ -69,9 +73,23 @@ public class ClearCLImage extends ClearCLMemBase implements
     mImageType = pImageType;
     mImageChannelOrder = pImageChannelOrder;
     mImageChannelDataType = pImageChannelType;
-    mWidth = pWidth;
-    mHeight = pHeight;
-    mDepth = pDepth;
+    mDimensions = pDimensions;
+  }
+
+  /**
+   * Fills this image with a byte pattern.
+   * 
+   * @param pPattern
+   *          byte pattern
+   * @param pBlockingFill
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void fill(byte[] pPattern, boolean pBlockingFill)
+  {
+    fill(pPattern,
+         Region3.originZero(),
+         Region3.region(getDimensions()),
+         pBlockingFill);
   }
 
   /**
@@ -91,14 +109,31 @@ public class ClearCLImage extends ClearCLMemBase implements
                    long[] pRegion,
                    boolean pBlockingFill)
   {
-
     getBackend().enqueueFillImage(mClearCLContext.getDefaultQueue()
                                                  .getPeerPointer(),
                                   getPeerPointer(),
                                   pBlockingFill,
-                                  pOrigin,
-                                  pRegion,
+                                  Region3.origin(pOrigin),
+                                  Region3.region(pRegion),
                                   pPattern);
+    notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+  }
+
+  /**
+   * Copies this image to another image of same dimensions.
+   * 
+   * @param pDstImage
+   *          destination image
+   * @param pBlocking
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void copyTo(ClearCLImage pDstImage, boolean pBlockingCopy)
+  {
+    copyTo(pDstImage,
+           Region3.originZero(),
+           Region3.originZero(),
+           Region3.region(getDimensions()),
+           pBlockingCopy);
   }
 
   /**
@@ -130,6 +165,24 @@ public class ClearCLImage extends ClearCLMemBase implements
                                   pOriginInSrcImage,
                                   pOriginInDstImage,
                                   pRegion);
+    pDstImage.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+  }
+
+  /**
+   * Copies this image into an (OpenCl) buffer.
+   * 
+   * @param pDstBuffer
+   *          destination buffer
+   * @param pBlockingCopy
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void copyTo(ClearCLBuffer pDstBuffer, boolean pBlockingCopy)
+  {
+    copyTo(pDstBuffer,
+           Region3.originZero(),
+           Region3.region(getDimensions()),
+           0,
+           pBlockingCopy);
   }
 
   /**
@@ -158,9 +211,36 @@ public class ClearCLImage extends ClearCLMemBase implements
                                           getPeerPointer(),
                                           pDstBuffer.getPeerPointer(),
                                           pBlockingCopy,
-                                          pOriginInSrcImage,
-                                          pRegionInSrcImage,
+                                          Region3.origin(pOriginInSrcImage),
+                                          Region3.region(pRegionInSrcImage),
                                           pOffsetInDstBuffer);
+    pDstBuffer.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+  }
+
+  /**
+   * Copies this buffer into a host image.
+   * 
+   * @param pClearCLHostImage
+   *          host image.
+   * @param pBlockingCopy
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void copyTo(ClearCLHostImage pClearCLHostImage,
+                     boolean pBlockingCopy)
+  {
+    if (!getHostAccessType().isReadableFromHost())
+      throw new ClearCLHostAccessException("Buffer not readable from host");
+
+    getBackend().enqueueReadFromImage(mClearCLContext.getDefaultQueue()
+                                                     .getPeerPointer(),
+                                      getPeerPointer(),
+                                      pBlockingCopy,
+                                      Region3.originZero(),
+                                      Region3.region(getDimensions()),
+                                      getBackend().wrap(pClearCLHostImage.getContiguousMemory()));
+
+    pClearCLHostImage.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+
   }
 
   /**
@@ -180,14 +260,17 @@ public class ClearCLImage extends ClearCLMemBase implements
                       long[] pRegion,
                       boolean pBlockingRead)
   {
+    if (!getHostAccessType().isReadableFromHost())
+      throw new ClearCLHostAccessException("Image not readable from host");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pContiguousMemory);
 
     getBackend().enqueueReadFromImage(mClearCLContext.getDefaultQueue()
                                                      .getPeerPointer(),
                                       getPeerPointer(),
                                       pBlockingRead,
-                                      pOrigin,
-                                      pRegion,
+                                      Region3.origin(pOrigin),
+                                      Region3.region(pRegion),
                                       lHostMemPointer);
   }
 
@@ -208,14 +291,17 @@ public class ClearCLImage extends ClearCLMemBase implements
                       long[] pRegion,
                       boolean pBlockingRead)
   {
+    if (!getHostAccessType().isReadableFromHost())
+      throw new ClearCLHostAccessException("Image not readable from host");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pBuffer);
 
     getBackend().enqueueReadFromImage(mClearCLContext.getDefaultQueue()
                                                      .getPeerPointer(),
                                       getPeerPointer(),
                                       pBlockingRead,
-                                      pOrigin,
-                                      pRegion,
+                                      Region3.origin(pOrigin),
+                                      Region3.region(pRegion),
                                       lHostMemPointer);
   }
 
@@ -236,15 +322,19 @@ public class ClearCLImage extends ClearCLMemBase implements
                        long[] pRegion,
                        boolean pBlockingRead)
   {
+    if (!getHostAccessType().isWritableFromHost())
+      throw new ClearCLHostAccessException("Image not writable from host");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pContiguousMemory);
 
     getBackend().enqueueWriteToImage(mClearCLContext.getDefaultQueue()
                                                     .getPeerPointer(),
                                      getPeerPointer(),
                                      pBlockingRead,
-                                     pOrigin,
-                                     pRegion,
+                                     Region3.origin(pOrigin),
+                                     Region3.region(pRegion),
                                      lHostMemPointer);
+    notifyListenersOfChange(mClearCLContext.getDefaultQueue());
   }
 
   /**
@@ -264,15 +354,19 @@ public class ClearCLImage extends ClearCLMemBase implements
                        long[] pRegion,
                        boolean pBlockingRead)
   {
+    if (!getHostAccessType().isWritableFromHost())
+      throw new ClearCLHostAccessException("Image not writable from host");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pBuffer);
 
     getBackend().enqueueWriteToImage(mClearCLContext.getDefaultQueue()
                                                     .getPeerPointer(),
                                      getPeerPointer(),
                                      pBlockingRead,
-                                     pOrigin,
-                                     pRegion,
+                                     Region3.origin(pOrigin),
+                                     Region3.region(pRegion),
                                      lHostMemPointer);
+    notifyListenersOfChange(mClearCLContext.getDefaultQueue());
   }
 
   /**
@@ -310,7 +404,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    * 
    * @return image type
    */
-  public ImageChannelOrder getImageChannelOrder()
+  public ImageChannelOrder getChannelOrder()
   {
     return mImageChannelOrder;
   }
@@ -320,7 +414,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    * 
    * @return channel type
    */
-  public ImageChannelDataType getImageChannelDataType()
+  public ImageChannelDataType getChannelDataType()
   {
     return mImageChannelDataType;
   }
@@ -335,75 +429,58 @@ public class ClearCLImage extends ClearCLMemBase implements
     return mImageChannelDataType.isNormalized();
   }
 
-  /**
-   * Returns this image width
-   * 
-   * @return width
-   */
-  public long getWidth()
+  public NativeTypeEnum getNativeType()
   {
-    return mWidth;
+    return getChannelDataType().getNativeType();
+  }
+
+  public long getNumberOfChannels()
+  {
+    return getChannelOrder().getNumberOfChannels();
   }
 
   /**
-   * Returns this image height
+   * Returns this image dimensions.
    * 
-   * @return height
+   * @return dimensions
    */
-  public long getHeight()
+  public long[] getDimensions()
   {
-    return mHeight;
-  }
-
-  /**
-   * Returns this image depth
-   * 
-   * @return depth
-   */
-  public long getDepth()
-  {
-    return mDepth;
-  }
-
-  /**
-   * Returns this image volume
-   * 
-   * @return depth
-   */
-  public long getVolume()
-  {
-    return mWidth * mHeight * mDepth;
-  }
-
-  @Override
-  public long getSizeInBytes()
-  {
-    return getVolume() * getImageChannelDataType().getDataType()
-                                                  .getSizeInBytes();
+    return Arrays.copyOf(mDimensions, mDimensions.length);
   }
 
   /* (non-Javadoc)
-   * @see java.lang.Object#toString()
+   * @see coremem.interfaces.SizedInBytes#getSizeInBytes()
    */
+  @Override
+  public long getSizeInBytes()
+  {
+    return getVolume() * getChannelDataType().getNativeType()
+                                             .getSizeInBytes()
+           * getChannelOrder().getNumberOfChannels();
+  }
+
   @Override
   public String toString()
   {
-    return String.format("ClearCLImage [mImageType=%s, mImageChannelOrder=%s, mImageChannelType=%s, mWidth=%s, mHeight=%s, mDepth=%s, mHostAccessType=%s, mKernelAccessType=%s]",
-                         mImageType,
-                         mImageChannelOrder,
-                         mImageChannelDataType,
-                         mWidth,
-                         mHeight,
-                         mDepth,
-                         mHostAccessType,
-                         mKernelAccessType);
+    return String.format("ClearCLImage [getHostAccessType()=%s, getKernelAccessType()=%s, getImageType()=%s, getChannelOrder()=%s, getChannelDataType()=%s, isNormalized()=%s, getNativeType()=%s, getNumberOfChannels()=%s, getDimensions()=%s, getSizeInBytes()=%s]",
+                         getHostAccessType(),
+                         getKernelAccessType(),
+                         getImageType(),
+                         getChannelOrder(),
+                         getChannelDataType(),
+                         isNormalized(),
+                         getNativeType(),
+                         getNumberOfChannels(),
+                         Arrays.toString(getDimensions()),
+                         getSizeInBytes());
   }
 
   /* (non-Javadoc)
    * @see clearcl.ClearCLBase#close()
    */
   @Override
-  public void close() throws Exception
+  public void close()
   {
     getBackend().releaseImage(getPeerPointer());
   }

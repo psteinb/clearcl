@@ -3,13 +3,13 @@ package clearcl;
 import java.io.IOException;
 
 import clearcl.abs.ClearCLBase;
-import clearcl.enums.DataType;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
+import coremem.types.NativeTypeEnum;
 
 /**
  * ClearCLContext is the ClearCL abstraction for OpenCl contexts.
@@ -71,7 +71,7 @@ public class ClearCLContext extends ClearCLBase
    *          host access type
    * @param pKernelAccessType
    *          kernel access type
-   * @param pDataType
+   * @param pNativeType
    *          data type
    * @param pBufferLengthInElements
    *          length in elements
@@ -79,12 +79,12 @@ public class ClearCLContext extends ClearCLBase
    */
   public ClearCLBuffer createBuffer(HostAccessType pHostAccessType,
                                     KernelAccessType pKernelAccessType,
-                                    DataType pDataType,
+                                    NativeTypeEnum pNativeType,
                                     long pBufferLengthInElements)
   {
     return createBuffer(pHostAccessType,
                         pKernelAccessType,
-                        pDataType,
+                        pNativeType,
                         MemAllocMode.None,
                         pBufferLengthInElements);
   }
@@ -105,14 +105,42 @@ public class ClearCLContext extends ClearCLBase
    *          length in elements
    * @return
    */
+  public ClearCLBuffer createBuffer(NativeTypeEnum pNativeType,
+                                    MemAllocMode pMemAllocMode,
+                                    long pBufferLengthInElements)
+  {
+    return createBuffer(HostAccessType.ReadWrite,
+                        KernelAccessType.ReadWrite,
+                        pNativeType,
+                        pMemAllocMode,
+                        pBufferLengthInElements);
+  }
+
+  /**
+   * Creates an OpenCL buffer with a given data type, memory allocation mode and
+   * length. The host and kernel access policy is read and write access for
+   * both.
+   * 
+   * @param pHostAccessType
+   *          host access type
+   * @param pKernelAccessType
+   *          kernel access type
+   * @param pDataType
+   *          data type
+   * @param pMemAllocMode
+   *          memory allocation mode
+   * @param pBufferLengthInElements
+   *          length in elements
+   * @return
+   */
   public ClearCLBuffer createBuffer(HostAccessType pHostAccessType,
                                     KernelAccessType pKernelAccessType,
-                                    DataType pDataType,
+                                    NativeTypeEnum pNativeType,
                                     MemAllocMode pMemAllocMode,
                                     long pBufferLengthInElements)
   {
 
-    long lBufferSizeInBytes = pBufferLengthInElements * pDataType.getSizeInBytes();
+    long lBufferSizeInBytes = pBufferLengthInElements * pNativeType.getSizeInBytes();
 
     ClearCLPeerPointer lBufferPointer = getBackend().getBufferPeerPointer(getPeerPointer(),
                                                                           pHostAccessType,
@@ -123,9 +151,41 @@ public class ClearCLContext extends ClearCLBase
                                                      lBufferPointer,
                                                      pHostAccessType,
                                                      pKernelAccessType,
-                                                     pDataType,
+                                                     pNativeType,
                                                      pBufferLengthInElements);
     return lClearCLBuffer;
+  }
+
+  /**
+   * Creates 1D, 2D, or 3D image with a given channel order, channel data type,
+   * and dimensions. The host and kernel access policy is read and write access
+   * for both.
+   * 
+   * @param pImageType
+   *          image type (1D, 2D, 3D)
+   * @param pImageChannelOrder
+   *          channel order
+   * @param pImageChannelType
+   *          channel data type
+   * @param pWidth
+   *          width
+   * @param pHeight
+   *          height
+   * @param pDepth
+   *          depth
+   * @return 1D,2D, or 3D image
+   */
+  public ClearCLImage createImage(ImageType pImageType,
+                                  ImageChannelOrder pImageChannelOrder,
+                                  ImageChannelDataType pImageChannelType,
+                                  long... pDimensions)
+  {
+    return createImage(HostAccessType.ReadWrite,
+                       KernelAccessType.ReadWrite,
+                       pImageType,
+                       pImageChannelOrder,
+                       pImageChannelType,
+                       pDimensions);
   }
 
   /**
@@ -155,9 +215,7 @@ public class ClearCLContext extends ClearCLBase
                                   ImageType pImageType,
                                   ImageChannelOrder pImageChannelOrder,
                                   ImageChannelDataType pImageChannelType,
-                                  long pWidth,
-                                  long pHeight,
-                                  long pDepth)
+                                  long... pDimensions)
   {
     ClearCLPeerPointer lImage = getBackend().getImagePeerPointer(getPeerPointer(),
                                                                  pHostAccessType,
@@ -165,9 +223,7 @@ public class ClearCLContext extends ClearCLBase
                                                                  pImageType,
                                                                  pImageChannelOrder,
                                                                  pImageChannelType,
-                                                                 pWidth,
-                                                                 pHeight,
-                                                                 pDepth);
+                                                                 pDimensions);
 
     ClearCLImage lClearCLImage = new ClearCLImage(this,
                                                   lImage,
@@ -176,9 +232,7 @@ public class ClearCLContext extends ClearCLBase
                                                   pImageType,
                                                   pImageChannelOrder,
                                                   pImageChannelType,
-                                                  pWidth,
-                                                  pHeight,
-                                                  pDepth);
+                                                  pDimensions);
 
     return lClearCLImage;
   }
@@ -234,7 +288,7 @@ public class ClearCLContext extends ClearCLBase
    * @see clearcl.ClearCLBase#close()
    */
   @Override
-  public void close() throws Exception
+  public void close()
   {
     getBackend().releaseContext(getPeerPointer());
   }

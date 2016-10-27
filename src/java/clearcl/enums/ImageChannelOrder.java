@@ -7,5 +7,32 @@ package clearcl.enums;
  */
 public enum ImageChannelOrder
 {
-  Intensity, Luminance, R, A, RG, RA, RGB, RGBA, ARGB, BGRA
+  Intensity(1),
+  Luminance(1),
+  R(1),
+  A(1),
+  RG(2),
+  RA(2),
+  RGB(3),
+  RGBA(4),
+  ARGB(4),
+  BGRA(4);
+
+
+  private final int mNumberOfChannels;
+
+  private ImageChannelOrder(int pNumberOfChannels)
+  {
+    mNumberOfChannels = pNumberOfChannels;
+  }
+
+  /**
+   * Returns the number of channels
+   * @return number of channels
+   */
+  public int getNumberOfChannels()
+  {
+    return mNumberOfChannels;
+  }
+
 }

@@ -136,7 +136,7 @@ public class ClearCLPlatform extends ClearCLBase
    * @see clearcl.ClearCLBase#close()
    */
   @Override
-  public void close() throws Exception
+  public void close()
   {
   }
 

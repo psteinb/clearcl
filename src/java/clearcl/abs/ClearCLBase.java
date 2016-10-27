@@ -64,6 +64,6 @@ public abstract class ClearCLBase implements AutoCloseable
    * @see java.lang.AutoCloseable#close()
    */
   @Override
-  public abstract void close() throws Exception;
+  public abstract void close();
 
 }

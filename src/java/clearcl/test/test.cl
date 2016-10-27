@@ -31,12 +31,15 @@ __kernel void buffersum(         const float p,
 }
 
 // A kernel to fill an image with beautiful garbage:
-__kernel void fillimagexor(__write_only image3d_t img)
+//default:fillimagexor:dx=0i
+//default:fillimagexor:dy=0i
+//default:fillimagexor:u=0f
+__kernel void fillimagexor(__write_only image3d_t image, int dx, int dy, float u )
 {
 	int x = get_global_id(0); 
 	int y = get_global_id(1);
 	int z = get_global_id(2);
 	
-	write_imagef (img, (int4)(x, y, z, 0), x^(y+1)^(z+2));
+	write_imagef (image, (int4)(x, y, z, 0), u*((x+dx)^((y+dy)+1)^(z+2)));
 }
 
