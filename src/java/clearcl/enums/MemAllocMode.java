@@ -34,6 +34,6 @@ public enum MemAllocMode
    * code and not by a library decoupled from your control. Don't forget to map
    * and unmap the buffer during initialization.
    **/
-  AllocateHostPointer,
+  AllocateHostPointer
 
 }

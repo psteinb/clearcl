@@ -11,6 +11,7 @@ import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
+import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.ClearCLUnsupportedException;
 import coremem.ContiguousMemoryInterface;
 
@@ -139,6 +140,7 @@ public abstract class ClearCLBackendBase implements
 
   @Override
   public ClearCLPeerPointer getBufferPeerPointer(ClearCLPeerPointer pContextPeerPointer,
+                                                 MemAllocMode pMemAllocMode,
                                                  HostAccessType pHostAccessType,
                                                  KernelAccessType pKernelAccessType,
                                                  long pBufferSizeInBytes)
@@ -148,6 +150,7 @@ public abstract class ClearCLBackendBase implements
 
   @Override
   public ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pContextPeerPointer,
+                                                MemAllocMode pMemAllocMode,
                                                 HostAccessType pHostAccessType,
                                                 KernelAccessType pKernelAccessType,
                                                 ImageType pImageType,

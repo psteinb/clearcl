@@ -65,6 +65,37 @@ public class ClearCLContext extends ClearCLBase
   }
 
   /**
+   * Creates an OpenCL buffer with a given access policy,memory allocation mode
+   * and a template image to match for dimensions, data type and number of
+   * channels.
+   * 
+   * @param pHostAccessType
+   *          host access type
+   * @param pKernelAccessType
+   *          kernel access type
+   * @param pNativeType
+   *          data type
+   * @param pBufferLengthInElements
+   *          length in elements
+   * @param pTemplate
+   *          image to use as template
+   * @return created buffer
+   */
+  public ClearCLBuffer createBuffer(MemAllocMode pMemAllocMode,
+                                    HostAccessType pHostAccessType,
+                                    KernelAccessType pKernelAccessType,
+                                    
+                                    ClearCLImage pTemplate)
+  {
+    return createBuffer(pMemAllocMode,
+                        pHostAccessType,
+                        pKernelAccessType,
+                        pTemplate.getNumberOfChannels(),
+                        pTemplate.getNativeType(),
+                        pTemplate.getDimension());
+  }
+
+  /**
    * Creates an OpenCL buffer with a given access policy, data type and length.
    * 
    * @param pHostAccessType
@@ -84,14 +115,15 @@ public class ClearCLContext extends ClearCLBase
   {
     return createBuffer(pHostAccessType,
                         pKernelAccessType,
-                        pNativeType,
                         MemAllocMode.None,
+                        pNativeType,
                         pBufferLengthInElements);
   }
 
   /**
    * Creates an OpenCL buffer with a given access policy, data type, memory
-   * allocation mode and length.
+   * allocation mode and length. The host and kernel access policy is read and
+   * write access for both.
    * 
    * @param pHostAccessType
    *          host access type
@@ -105,21 +137,20 @@ public class ClearCLContext extends ClearCLBase
    *          length in elements
    * @return
    */
-  public ClearCLBuffer createBuffer(NativeTypeEnum pNativeType,
-                                    MemAllocMode pMemAllocMode,
+  public ClearCLBuffer createBuffer(MemAllocMode pMemAllocMode,
+                                    NativeTypeEnum pNativeType,
                                     long pBufferLengthInElements)
   {
     return createBuffer(HostAccessType.ReadWrite,
                         KernelAccessType.ReadWrite,
-                        pNativeType,
                         pMemAllocMode,
+                        pNativeType,
                         pBufferLengthInElements);
   }
 
   /**
-   * Creates an OpenCL buffer with a given data type, memory allocation mode and
-   * length. The host and kernel access policy is read and write access for
-   * both.
+   * Creates an OpenCL buffer with a given data type, access policy, memory
+   * allocation mode, native type, and length.
    * 
    * @param pHostAccessType
    *          host access type
@@ -135,14 +166,58 @@ public class ClearCLContext extends ClearCLBase
    */
   public ClearCLBuffer createBuffer(HostAccessType pHostAccessType,
                                     KernelAccessType pKernelAccessType,
-                                    NativeTypeEnum pNativeType,
                                     MemAllocMode pMemAllocMode,
+                                    NativeTypeEnum pNativeType,
                                     long pBufferLengthInElements)
   {
+    return createBuffer(pMemAllocMode,
+                        pHostAccessType,
+                        pKernelAccessType,
+                        1,
+                        pNativeType,
+                        pBufferLengthInElements);
+  }
 
-    long lBufferSizeInBytes = pBufferLengthInElements * pNativeType.getSizeInBytes();
+  /**
+   * Creates an OpenCL buffer with a given data type, memory allocation mode and
+   * access policy, memory allocation mode, native type, and dimensions. In this
+   * case the buffer can be interpreted as an image.
+   * 
+   * @param pMemAllocMode
+   *          memory allocation mode
+   * @param pHostAccessType
+   *          host access type
+   * @param pKernelAccessType
+   *          kernel access type
+   * @param pDataType
+   *          data type
+   * @param pMemAllocMode
+   *          memory allocation mode
+   * @param pNumberOfChannels
+   *          number of channels per
+   * @param pNativeType
+   *          native type per channel per pixel/voxel
+   * @param pDimensions
+   *          image buffer dimensions
+   * @return
+   */
+  public ClearCLBuffer createBuffer(MemAllocMode pMemAllocMode,
+                                    HostAccessType pHostAccessType,
+                                    KernelAccessType pKernelAccessType,
+                                    long pNumberOfChannels,
+                                    NativeTypeEnum pNativeType,
+                                    long... pDimensions)
+  {
+
+    long lVolume = 1;
+    for (int i = 0; i < pDimensions.length; i++)
+      lVolume *= pDimensions[i];
+
+    long lBufferSizeInBytes = lVolume * pNumberOfChannels
+                              * pNativeType.getSizeInBytes();
 
     ClearCLPeerPointer lBufferPointer = getBackend().getBufferPeerPointer(getPeerPointer(),
+                                                                          pMemAllocMode,
                                                                           pHostAccessType,
                                                                           pKernelAccessType,
                                                                           lBufferSizeInBytes);
@@ -151,8 +226,9 @@ public class ClearCLContext extends ClearCLBase
                                                      lBufferPointer,
                                                      pHostAccessType,
                                                      pKernelAccessType,
+                                                     pNumberOfChannels,
                                                      pNativeType,
-                                                     pBufferLengthInElements);
+                                                     pDimensions);
     return lClearCLBuffer;
   }
 
@@ -161,8 +237,6 @@ public class ClearCLContext extends ClearCLBase
    * and dimensions. The host and kernel access policy is read and write access
    * for both.
    * 
-   * @param pImageType
-   *          image type (1D, 2D, 3D)
    * @param pImageChannelOrder
    *          channel order
    * @param pImageChannelType
@@ -175,29 +249,29 @@ public class ClearCLContext extends ClearCLBase
    *          depth
    * @return 1D,2D, or 3D image
    */
-  public ClearCLImage createImage(ImageType pImageType,
-                                  ImageChannelOrder pImageChannelOrder,
+  public ClearCLImage createImage(ImageChannelOrder pImageChannelOrder,
                                   ImageChannelDataType pImageChannelType,
                                   long... pDimensions)
   {
-    return createImage(HostAccessType.ReadWrite,
+    return createImage(MemAllocMode.AllocateHostPointer,
+                       HostAccessType.ReadWrite,
                        KernelAccessType.ReadWrite,
-                       pImageType,
                        pImageChannelOrder,
                        pImageChannelType,
                        pDimensions);
   }
 
   /**
-   * Creates 1D, 2D, or 3D image with a given access policy, channel order,
-   * channel data type, and dimensions.
+   * Creates 1D, 2D, or 3D image with a given memory allocation and access
+   * policy, channel order, channel data type, and dimensions.
    * 
+   * 
+   * @param pMemAllocMode
+   *          memory allocation mode
    * @param pHostAccessType
    *          host access type
    * @param pKernelAccessType
    *          kernel access type
-   * @param pImageType
-   *          image type (1D, 2D, 3D)
    * @param pImageChannelOrder
    *          channel order
    * @param pImageChannelType
@@ -212,15 +286,55 @@ public class ClearCLContext extends ClearCLBase
    */
   public ClearCLImage createImage(HostAccessType pHostAccessType,
                                   KernelAccessType pKernelAccessType,
-                                  ImageType pImageType,
                                   ImageChannelOrder pImageChannelOrder,
                                   ImageChannelDataType pImageChannelType,
                                   long... pDimensions)
   {
+    return createImage(MemAllocMode.AllocateHostPointer,
+                       pHostAccessType,
+                       pKernelAccessType,
+                       pImageChannelOrder,
+                       pImageChannelType,
+                       pDimensions);
+  }
+
+  /**
+   * Creates 1D, 2D, or 3D image with a given memory allocation and access
+   * policy, channel order, channel data type, and dimensions.
+   * 
+   * 
+   * @param pMemAllocMode
+   *          memory allocation mode
+   * @param pHostAccessType
+   *          host access type
+   * @param pKernelAccessType
+   *          kernel access type
+   * @param pImageChannelOrder
+   *          channel order
+   * @param pImageChannelType
+   *          channel data type
+   * @param pWidth
+   *          width
+   * @param pHeight
+   *          height
+   * @param pDepth
+   *          depth
+   * @return 1D,2D, or 3D image
+   */
+  public ClearCLImage createImage(MemAllocMode pMemAllocMode,
+                                  HostAccessType pHostAccessType,
+                                  KernelAccessType pKernelAccessType,
+                                  ImageChannelOrder pImageChannelOrder,
+                                  ImageChannelDataType pImageChannelType,
+                                  long... pDimensions)
+  {
+    ImageType lImageType = ImageType.fromDimensions(pDimensions);
+
     ClearCLPeerPointer lImage = getBackend().getImagePeerPointer(getPeerPointer(),
+                                                                 pMemAllocMode,
                                                                  pHostAccessType,
                                                                  pKernelAccessType,
-                                                                 pImageType,
+                                                                 lImageType,
                                                                  pImageChannelOrder,
                                                                  pImageChannelType,
                                                                  pDimensions);
@@ -229,7 +343,7 @@ public class ClearCLContext extends ClearCLBase
                                                   lImage,
                                                   pHostAccessType,
                                                   pKernelAccessType,
-                                                  pImageType,
+                                                  lImageType,
                                                   pImageChannelOrder,
                                                   pImageChannelType,
                                                   pDimensions);

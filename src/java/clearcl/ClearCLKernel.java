@@ -33,6 +33,7 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   { 0, 0, 0 };
   private long[] mGlobalSizes = null;
   private long[] mLocalSizes = null;
+  private boolean mLogExecutiontime = true;
 
   private class Argument
   {
@@ -126,7 +127,7 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
    * @param pImage
    *          image
    */
-  public void setGlobalSizesFor(ClearCLImageInterface pImage)
+  public void setGlobalSizes(ClearCLImageInterface pImage)
   {
     mGlobalSizes = pImage.getDimensions();
   }
@@ -191,7 +192,8 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   }
 
   /**
-   * Sets argument for a given argument name.
+   * Sets argument for a given argument name. If argument is unknown for kernel,
+   * an exception is thrown.
    * 
    * @param pIndex
    *          argument name
@@ -209,6 +211,27 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 
     mIndexToArgumentMap.put(lArgumentIndex, new Argument(pObject));
 
+  }
+
+  /**
+   * Sets optional argument for a given argument name.
+   * 
+   * @param pArgumentName
+   *          argument name
+   * @param pObject
+   *          argument
+   * @return true is argument set, false if argument unknown
+   */
+  public boolean setOptionalArgument(String pArgumentName,
+                                     Object pObject)
+  {
+    Integer lArgumentIndex = mNameToIndexMap.get(pArgumentName);
+
+    if (lArgumentIndex == null)
+      return false;
+
+    mIndexToArgumentMap.put(lArgumentIndex, new Argument(pObject));
+    return true;
   }
 
   /**
@@ -277,6 +300,8 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
    */
   public void run(ClearCLQueue pClearCLQueue, boolean pBlockingRun)
   {
+    long lNanosStart = System.nanoTime();
+
     setArgumentsInternal();
     if (getGlobalSizes() == null || getGlobalOffsets() == null)
       throw new CleaCLInvalidExecutionRange(String.format("global offset = %s, global range = %s, local range = %s",
@@ -291,21 +316,41 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
                                         getGlobalSizes(),
                                         getLocalSizes());
 
-    for (Map.Entry<Integer, Argument> lEntry : mIndexToArgumentMap.entrySet())
-    {
-      Object lArgument = lEntry.getValue().argument;
-      if (lArgument instanceof ClearCLMemInterface)
-      {
-        ClearCLMemInterface lClearCLMemInterface = (ClearCLMemInterface) lArgument;
-        AsynchronousNotification.notifyChange(() -> {
-          pClearCLQueue.waitToFinish();
-          lClearCLMemInterface.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
-        });
-      }
-    }
+    
+
+    // for (Map.Entry<Integer, Argument> lEntry :
+    // mIndexToArgumentMap.entrySet())
+    // {
+    // Object lArgument = lEntry.getValue().argument;
+    // if (lArgument instanceof ClearCLMemInterface)
+    // {
+    // ClearCLMemInterface lClearCLMemInterface = (ClearCLMemInterface)
+    // lArgument;
+    //
+    // if (lClearCLMemInterface.getHostAccessType()
+    // .isReadableFromHost())
+    // {
+    // AsynchronousNotification.notifyChange(() -> {
+    // pClearCLQueue.waitToFinish();
+    // lClearCLMemInterface.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+    // });
+    // }
+    // }
+    // }
 
     if (pBlockingRun)
       pClearCLQueue.waitToFinish();
+    
+    long lNanosStop = System.nanoTime();
+
+    if (pBlockingRun && isLogExecutionTime())
+    {
+      long lElapsedNanos = lNanosStop - lNanosStart;
+      double lElapsedTimeInMilliseconds = lElapsedNanos * 1e-6;
+      System.out.format("%g ms needed to run Kernel %s \n",
+                        lElapsedTimeInMilliseconds,
+                        getName());
+    }
   }
 
   /* (non-Javadoc)
@@ -340,7 +385,7 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
     String lSourceCode = getSourceCode();
 
     int lBeginOfDefault = 0;
-    while ((lBeginOfDefault = lSourceCode.indexOf("//default:" + pKernelName,
+    while ((lBeginOfDefault = lSourceCode.indexOf("//default " + pKernelName,
                                                   lBeginOfDefault)) != -1)
     {
       int lEndOfDefault = lSourceCode.indexOf('\n', lBeginOfDefault);
@@ -349,13 +394,13 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 
       // System.out.println(lSubStringKernel);
 
-      String[] lTwoPointsSplit = lSubStringKernel.split(":");
-      // System.out.println(Arrays.toString(lTwoPointsSplit));
-      String[] lEqualSplit = lTwoPointsSplit[lTwoPointsSplit.length - 1].split("=");
-      // System.out.println(Arrays.toString(lEqualSplit));
+      String[] lTwoPointsAndEqualSplit = lSubStringKernel.split("(\\s|=)+");
+      // System.out.println(Arrays.toString(lTwoPointsAndEqualSplit));
 
-      String lArgumentName = lEqualSplit[0].trim().toLowerCase();
-      String lArgumentValue = lEqualSplit[1].trim().toLowerCase();
+      String lArgumentName = lTwoPointsAndEqualSplit[2].trim()
+                                                       .toLowerCase();
+      String lArgumentValue = lTwoPointsAndEqualSplit[3].trim()
+                                                        .toLowerCase();
 
       char lArgumentType = lArgumentValue.charAt(lArgumentValue.length() - 1);
 
@@ -450,6 +495,26 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
       }
     }
     return null;
+  }
+
+  /**
+   * Returns true if execution times for this kernel should be logged.
+   * 
+   * @return true if logging on.
+   */
+  public boolean isLogExecutionTime()
+  {
+    return mLogExecutiontime;
+  }
+
+  /**
+   * Sets whether this kernel should log its execution time.
+   * 
+   * @param plogExecutionTime
+   */
+  public void setLogExecutionTime(boolean plogExecutionTime)
+  {
+    mLogExecutiontime = plogExecutionTime;
   }
 
 }

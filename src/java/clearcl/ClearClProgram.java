@@ -3,6 +3,7 @@ package clearcl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,6 +29,7 @@ public class ClearCLProgram extends ClearCLBase
 
   private volatile boolean mModified = true;
   private volatile String mLastBuiltSourceCode;
+  private ConcurrentHashMap<String, ClearCLKernel> mKernelCache = new ConcurrentHashMap<String, ClearCLKernel>();
 
   /**
    * This constructor is called internally from an OpenCl context.
@@ -181,6 +183,17 @@ public class ClearCLProgram extends ClearCLBase
     return mContext;
   }
 
+  public BuildStatus buildAndLog() throws IOException
+  {
+    BuildStatus lBuildStatus = build();
+    if (lBuildStatus != BuildStatus.Success)
+    {
+      System.out.println(getSourceCode());
+      System.err.println(getBuildLog());
+    }
+    return lBuildStatus;
+  }
+
   /**
    * Builds this program. The source code can be changed after a first build and
    * this method will build a new program from scratch.
@@ -256,7 +269,7 @@ public class ClearCLProgram extends ClearCLBase
 
     int lBeginIndex = 0;
     int lIncludeIndex = 0;
-    while ((lIncludeIndex = pSourceCode.indexOf("//include",
+    while ((lIncludeIndex = pSourceCode.indexOf("#include",
                                                 lBeginIndex)) >= 0)
     {
       lSourceCodeWithIncludes.append(pSourceCode.substring(lBeginIndex,
@@ -312,7 +325,7 @@ public class ClearCLProgram extends ClearCLBase
       {
         lSourceCodeWithIncludes.append("\n");
         lSourceCodeWithIncludes.append("//WARNING!! Could not resolve include given below:\n");
-        lSourceCodeWithIncludes.append(lIncludeLine);
+        lSourceCodeWithIncludes.append("//" + lIncludeLine);
       }
 
       lBeginIndex = lEndOfLine;
@@ -384,6 +397,26 @@ public class ClearCLProgram extends ClearCLBase
                                                 getPeerPointer())
                                    .trim();
     return lBuildLog;
+  }
+
+  /**
+   * Returns the kernel of a given name. If the kernel is not yet created, it is
+   * then created on-demand. Note: this will not recreate a kernel that already
+   * exists.
+   * 
+   * @param pKernelName
+   *          kernel name
+   * @return kernel
+   */
+  public ClearCLKernel getKernel(String pKernelName)
+  {
+    ClearCLKernel lClearCLKernel = mKernelCache.get(pKernelName);
+    if (lClearCLKernel == null)
+    {
+      lClearCLKernel = createKernel(pKernelName);
+      mKernelCache.put(pKernelName, lClearCLKernel);
+    }
+    return lClearCLKernel;
   }
 
   /**

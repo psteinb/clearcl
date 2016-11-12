@@ -7,6 +7,7 @@ import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
+import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.ClearCLException;
 import clearcl.exceptions.OpenCLException;
 
@@ -161,10 +162,27 @@ public class BackendUtils
     }
   }
 
-  public static long getMemTypeFlags(HostAccessType pHostAccessType,
+  public static long getMemTypeFlags(MemAllocMode pMemAllocMode,
+                                     HostAccessType pHostAccessType,
                                      KernelAccessType pKernelAccessType)
   {
     long lMemFlags = 0;
+    
+    switch (pMemAllocMode)
+    {
+    case AllocateHostPointer:
+      lMemFlags |= CL_MEM_ALLOC_HOST_PTR;
+      break;
+    case UseHostPointer:
+      lMemFlags |= CL_MEM_USE_HOST_PTR;
+      break;
+    case None:
+      break;
+    default:
+      break;
+    }
+
+    
     switch (pHostAccessType)
     {
     case ReadOnly:

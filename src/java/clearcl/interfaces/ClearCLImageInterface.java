@@ -1,18 +1,19 @@
 package clearcl.interfaces;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-
+import clearcl.backend.ClearCLBackendInterface;
 import coremem.interfaces.SizedInBytes;
 import coremem.types.NativeTypeEnum;
 
-public interface ClearCLImageInterface extends SizedInBytes
+public interface ClearCLImageInterface extends ClearCLMemInterface
 {
+
+  public ClearCLBackendInterface getBackend();
 
   public NativeTypeEnum getNativeType();
 
   public default long getPixelSizeInBytes()
   {
-    return getNativeType().getSizeInBytes()*getNumberOfChannels();
+    return getNativeType().getSizeInBytes() * getNumberOfChannels();
   }
 
   public long getNumberOfChannels();
@@ -78,5 +79,4 @@ public interface ClearCLImageInterface extends SizedInBytes
     return getWidth() * getHeight() * getDepth();
   }
 
-  
 }

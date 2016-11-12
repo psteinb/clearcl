@@ -11,6 +11,7 @@ import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
+import clearcl.enums.MemAllocMode;
 import coremem.ContiguousMemoryInterface;
 
 /**
@@ -207,6 +208,8 @@ public interface ClearCLBackendInterface
    * 
    * @param pContextPeerPointer
    *          context peer pointer
+   * @param pMemAllocMode
+   *          memory allocation mode
    * @param pHostAccessType
    *          host access type
    * @param pKernelAccessType
@@ -216,6 +219,7 @@ public interface ClearCLBackendInterface
    * @return buffer peer pointer
    */
   ClearCLPeerPointer getBufferPeerPointer(ClearCLPeerPointer pContextPeerPointer,
+                                          MemAllocMode pMemAllocMode,
                                           HostAccessType pHostAccessType,
                                           KernelAccessType pKernelAccessType,
                                           long pBufferSizeInBytes);
@@ -226,6 +230,8 @@ public interface ClearCLBackendInterface
    * 
    * @param pContextPeerPointer
    *          context peer pointer
+   * @param pMemAllocMode
+   *          memory allocation mode
    * @param pHostAccessType
    *          host access type
    * @param pKernelAccessType
@@ -245,6 +251,7 @@ public interface ClearCLBackendInterface
    * @return image peer pointer
    */
   ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pContextPeerPointer,
+                                         MemAllocMode pMemAllocMode,
                                          HostAccessType pHostAccessType,
                                          KernelAccessType pKernelAccessType,
                                          ImageType pImageType,

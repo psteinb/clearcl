@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import clearcl.ClearCLHostImage;
+import clearcl.ClearCL;
+import clearcl.ClearCLDevice;
+import clearcl.ClearCLHostImageBuffer;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 import coremem.types.NativeTypeEnum;
 
@@ -16,13 +18,21 @@ public class ClearCLHostImageTests
   {
     ClearCLBackendJOCL lClearCLJOCLBackend = new ClearCLBackendJOCL();
 
-    ClearCLHostImage lHostImage = new ClearCLHostImage(lClearCLJOCLBackend,
-                                                       NativeTypeEnum.UnsignedShort,
-                                                       10,
-                                                       10,
-                                                       10);
+    try (ClearCL lClearCL = new ClearCL(lClearCLJOCLBackend))
+    {
 
-    assertEquals(10 * 10 * 10 * 2, lHostImage.getSizeInBytes());
+      ClearCLDevice lBestGPUDevice = lClearCL.getBestGPUDevice();
+
+      ClearCLHostImageBuffer lHostImage = new ClearCLHostImageBuffer(lBestGPUDevice.createContext(),
+                                                         NativeTypeEnum.UnsignedShort,
+                                                         10,
+                                                         10,
+                                                         10);
+
+      assertEquals(10 * 10 * 10 * 2, lHostImage.getSizeInBytes());
+      
+      lHostImage.close();
+    }
   }
 
 }

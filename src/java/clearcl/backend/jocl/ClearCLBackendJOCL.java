@@ -47,6 +47,7 @@ import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
+import clearcl.enums.MemAllocMode;
 import coremem.ContiguousMemoryInterface;
 import coremem.util.Size;
 
@@ -330,12 +331,14 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
 
   @Override
   public ClearCLPeerPointer getBufferPeerPointer(ClearCLPeerPointer pContextPointer,
+                                                 MemAllocMode pMemAllocMode,
                                                  HostAccessType pHostAccessType,
                                                  KernelAccessType pKernelAccessType,
                                                  long pBufferSize)
   {
     return BackendUtils.checkExceptions(() -> {
-      long lMemFlags = BackendUtils.getMemTypeFlags(pHostAccessType,
+      long lMemFlags = BackendUtils.getMemTypeFlags(pMemAllocMode,
+                                                    pHostAccessType,
                                                     pKernelAccessType);
 
       int lErrorCode[] = new int[1];
@@ -355,6 +358,7 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
 
   @Override
   public ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pContextPointer,
+                                                MemAllocMode pMemAllocMode,
                                                 HostAccessType pHostAccessType,
                                                 KernelAccessType pKernelAccessType,
                                                 ImageType pImageType,
@@ -374,7 +378,8 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
                                                           : pDimensions[2];
     lImageDescription.image_type = BackendUtils.getImageTypeFlags(pImageType);
 
-    long lMemFlags = BackendUtils.getMemTypeFlags(pHostAccessType,
+    long lMemFlags = BackendUtils.getMemTypeFlags(pMemAllocMode,
+                                                  pHostAccessType,
                                                   pKernelAccessType);
 
     int lErrorCode[] = new int[1];
@@ -705,12 +710,12 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
 
   @Override
   public void enqueueReadFromBufferRegion(ClearCLPeerPointer pQueuePointer,
-                                       ClearCLPeerPointer pBufferPointer,
-                                       boolean pBlockingRead,
-                                       long[] pBufferOrigin,
-                                       long[] pHostOrigin,
-                                       long[] pRegion,
-                                       ClearCLPeerPointer pHostMemPointer)
+                                          ClearCLPeerPointer pBufferPointer,
+                                          boolean pBlockingRead,
+                                          long[] pBufferOrigin,
+                                          long[] pHostOrigin,
+                                          long[] pRegion,
+                                          ClearCLPeerPointer pHostMemPointer)
   {
     BackendUtils.checkExceptions(() -> {
       BackendUtils.checkOpenCLError(CL.clEnqueueReadBufferRect((cl_command_queue) pQueuePointer.getPointer(),

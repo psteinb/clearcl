@@ -225,7 +225,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    * @param pBlockingCopy
    *          true -> blocking call, false -> asynchronous call
    */
-  public void copyTo(ClearCLHostImage pClearCLHostImage,
+  public void copyTo(ClearCLHostImageBuffer pClearCLHostImage,
                      boolean pBlockingCopy)
   {
     if (!getHostAccessType().isReadableFromHost())
@@ -338,6 +338,23 @@ public class ClearCLImage extends ClearCLMemBase implements
   }
 
   /**
+   * Reads from a CoreMem buffer into this image.
+   * 
+   * @param pContiguousMemory
+   *          CoreMem buffer
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void readFrom(ContiguousMemoryInterface pContiguousMemory,
+                       boolean pBlockingRead)
+  {
+    readFrom(pContiguousMemory,
+             Region3.originZero(),
+             Region3.region(getDimensions()),
+             pBlockingRead);
+  }
+
+  /**
    * Reads from a NIO buffer into a nD region of this image.
    * 
    * @param pBuffer
@@ -367,6 +384,32 @@ public class ClearCLImage extends ClearCLMemBase implements
                                      Region3.region(pRegion),
                                      lHostMemPointer);
     notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+  }
+
+  /**
+   * Reads from a NIO buffer into this image.
+   * 
+   * @param pBuffer
+   *          NIO buffer
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void readFrom(Buffer pBuffer, boolean pBlockingRead)
+  {
+    readFrom(pBuffer,
+             Region3.originZero(),
+             Region3.region(getDimensions()),
+             pBlockingRead);
+  }
+
+  /**
+   * Returns the context for this image.
+   * 
+   * @return context
+   */
+  public ClearCLContext getContext()
+  {
+    return mClearCLContext;
   }
 
   /**

@@ -109,7 +109,6 @@ public class ClearCLBasicTests
 
     ClearCLImage lImageSrc = lContext.createImage(HostAccessType.WriteOnly,
                                                   KernelAccessType.ReadWrite,
-                                                  ImageType.IMAGE3D,
                                                   ImageChannelOrder.Intensity,
                                                   ImageChannelDataType.Float,
                                                   100,
@@ -118,14 +117,13 @@ public class ClearCLBasicTests
 
     ClearCLKernel lKernel = pProgram.createKernel("fillimagexor");
 
-    lKernel.setArguments(lImageSrc);
-
+    lKernel.setArgument("image",lImageSrc);
+    lKernel.setArgument("u", 1f);
     lKernel.setGlobalSizes(100, 100, 100);
     lKernel.run();
 
     ClearCLImage lImageDst = lContext.createImage(HostAccessType.ReadOnly,
                                                   KernelAccessType.WriteOnly,
-                                                  ImageType.IMAGE3D,
                                                   ImageChannelOrder.Intensity,
                                                   ImageChannelDataType.Float,
                                                   10,
@@ -149,7 +147,7 @@ public class ClearCLBasicTests
                  lBuffer.getFloatAligned(1 + 2 * 10 + 3 * 10 * 10),
                  0.1);
 
-    // TODO: Finish this...
+    
 
   }
 

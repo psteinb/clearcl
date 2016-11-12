@@ -10,6 +10,8 @@ import clearcl.abs.ClearCLBase;
 public class ClearCLQueue extends ClearCLBase
 {
 
+  private ClearCLContext mClearCLContext;
+
   /**
    * This constructor is called internally from an OpenCl context.
    * 
@@ -20,6 +22,17 @@ public class ClearCLQueue extends ClearCLBase
                       ClearCLPeerPointer pQueuePointer)
   {
     super(pClearCLContext.getBackend(), pQueuePointer);
+    mClearCLContext = pClearCLContext;
+  }
+
+  /**
+   * Returns this queues context.
+   * 
+   * @return context
+   */
+  public ClearCLContext getContext()
+  {
+    return mClearCLContext;
   }
 
   /**

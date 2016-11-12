@@ -79,6 +79,15 @@ public class ClearCL extends ClearCLBase
                                                  GlobalMemorySelector.MAX);
     return lClearClDevice;
   }
+
+  /**
+   * Returns the best GPU device, right now its the fastest one...
+   * @return best GPU device
+   */
+  public ClearCLDevice getBestGPUDevice()
+  {
+    return getFastestGPUDevice();
+  }
   
   /**
    * Returns the best (right now fastest) CPU device.
@@ -91,6 +100,8 @@ public class ClearCL extends ClearCLBase
                                                  FastestDeviceSelector.Fastest);
     return lClearClDevice;
   }
+
+
 
   /**
    * Picks the one (first) of the best devices obtained by using the given

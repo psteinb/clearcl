@@ -30,6 +30,7 @@ import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
+import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.OpenCLException;
 import coremem.ContiguousMemoryInterface;
 import coremem.util.Size;
@@ -311,12 +312,14 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
 
   @Override
   public ClearCLPeerPointer getBufferPeerPointer(ClearCLPeerPointer pContextPointer,
+                                                 MemAllocMode pMemAllocMode,
                                                  HostAccessType pHostAccessType,
                                                  KernelAccessType pKernelAccessType,
                                                  long pBufferSize)
   {
     return BackendUtils.checkExceptions(() -> {
-      long lMemFlags = BackendUtils.getMemTypeFlags(pHostAccessType,
+      long lMemFlags = BackendUtils.getMemTypeFlags(pMemAllocMode,
+                                                    pHostAccessType,
                                                     pKernelAccessType);
 
       Pointer<Integer> lErrorCode = Pointer.allocateInt();
@@ -346,6 +349,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
 
   @Override
   public ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pContextPointer,
+                                                MemAllocMode pMemAllocMode,
                                                 HostAccessType pHostAccessType,
                                                 KernelAccessType pKernelAccessType,
                                                 ImageType pImageType,
@@ -366,7 +370,8 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
                                                         : pDimensions[2]);
     lImageDescription.image_type(BackendUtils.getImageTypeFlags(pImageType));
 
-    long lMemFlags = BackendUtils.getMemTypeFlags(pHostAccessType,
+    long lMemFlags = BackendUtils.getMemTypeFlags(pMemAllocMode,
+                                                  pHostAccessType,
                                                   pKernelAccessType);
 
     Pointer<Integer> lErrorCode = Pointer.allocateInt();
@@ -727,12 +732,12 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
   @SuppressWarnings("rawtypes")
   @Override
   public void enqueueReadFromBufferRegion(ClearCLPeerPointer pQueuePointer,
-                                       ClearCLPeerPointer pBufferPointer,
-                                       boolean pBlockingRead,
-                                       long[] pBufferOrigin,
-                                       long[] pHostOrigin,
-                                       long[] pRegion,
-                                       ClearCLPeerPointer pHostMemPointer)
+                                          ClearCLPeerPointer pBufferPointer,
+                                          boolean pBlockingRead,
+                                          long[] pBufferOrigin,
+                                          long[] pHostOrigin,
+                                          long[] pRegion,
+                                          ClearCLPeerPointer pHostMemPointer)
   {
     BackendUtils.checkExceptions(() -> {
       Utils.checkDirectNIOBuffer(pHostMemPointer);

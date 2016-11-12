@@ -6,6 +6,7 @@ import clearcl.abs.ClearCLMemBase;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.KernelAccessType;
 import clearcl.exceptions.ClearCLHostAccessException;
+import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.interfaces.ClearCLMemInterface;
 import clearcl.util.Region3;
 import coremem.ContiguousMemoryInterface;
@@ -17,14 +18,16 @@ import coremem.types.NativeTypeEnum;
  * @author royer
  */
 public class ClearCLBuffer extends ClearCLMemBase implements
-                                                 ClearCLMemInterface
+                                                 ClearCLMemInterface,
+                                                 ClearCLImageInterface
 {
 
   private final ClearCLContext mClearCLContext;
   private final HostAccessType mHostAccessType;
   private final KernelAccessType mKernelAccessType;
   private final NativeTypeEnum mNativeType;
-  private final long mLength;
+  private long mNumberOfChannels;
+  private final long[] mDimensions;
 
   /**
    * This constructor is called internally from an OpenCl context.
@@ -46,15 +49,17 @@ public class ClearCLBuffer extends ClearCLMemBase implements
                 ClearCLPeerPointer pBufferPointer,
                 HostAccessType pHostAccessType,
                 KernelAccessType pKernelAccessType,
+                long pNumberOfChannels,
                 NativeTypeEnum pNativeType,
-                long pLength)
+                long... pDimensions)
   {
     super(pClearCLContext.getBackend(), pBufferPointer);
     mClearCLContext = pClearCLContext;
     mHostAccessType = pHostAccessType;
     mKernelAccessType = pKernelAccessType;
+    mNumberOfChannels = pNumberOfChannels;
     mNativeType = pNativeType;
-    mLength = pLength;
+    mDimensions = pDimensions;
   }
 
   /**
@@ -110,7 +115,11 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    */
   public void copyTo(ClearCLBuffer pDstBuffer, boolean pBlockingCopy)
   {
-    copyTo(pDstBuffer, 0, 0, getSizeInBytes(), pBlockingCopy);
+    copyTo(pDstBuffer,
+           0,
+           0,
+           getLength() * getNumberOfChannels(),
+           pBlockingCopy);
   }
 
   /**
@@ -234,7 +243,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pBlockingCopy
    *          true -> blocking call, false -> asynchronous call
    */
-  public void copyTo(ClearCLHostImage pClearCLHostImage,
+  public void copyTo(ClearCLHostImageBuffer pClearCLHostImage,
                      boolean pBlockingCopy)
   {
     if (!getHostAccessType().isReadableFromHost())
@@ -261,7 +270,10 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   public void writeTo(ContiguousMemoryInterface pContiguousMemory,
                       boolean pBlockingWrite)
   {
-    writeTo(pContiguousMemory, 0, getSizeInBytes(), pBlockingWrite);
+    writeTo(pContiguousMemory,
+            0,
+            getLength() * getNumberOfChannels(),
+            pBlockingWrite);
   }
 
   /**
@@ -307,7 +319,10 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    */
   public void writeTo(Buffer pBuffer, boolean pBlockingWrite)
   {
-    writeTo(pBuffer, 0, getSizeInBytes(), pBlockingWrite);
+    writeTo(pBuffer,
+            0,
+            getLength() * getNumberOfChannels(),
+            pBlockingWrite);
   }
 
   /**
@@ -352,7 +367,10 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   public void readFrom(ContiguousMemoryInterface pContiguousMemory,
                        boolean pBlockingRead)
   {
-    readFrom(pContiguousMemory, 0, getSizeInBytes(), pBlockingRead);
+    readFrom(pContiguousMemory,
+             0,
+             getLength() * getNumberOfChannels(),
+             pBlockingRead);
   }
 
   /**
@@ -397,7 +415,10 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    */
   public void readFrom(Buffer pBuffer, boolean pBlockingRead)
   {
-    readFrom(pBuffer, 0, getSizeInBytes(), pBlockingRead);
+    readFrom(pBuffer,
+             0,
+             getLength() * getNumberOfChannels(),
+             pBlockingRead);
   }
 
   /**
@@ -576,8 +597,17 @@ public class ClearCLBuffer extends ClearCLMemBase implements
                                             Region3.origin(pSourceOrigin),
                                             Region3.region(pRegion),
                                             lHostMemPointer);
-  
+
     notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+  }
+
+  /* (non-Javadoc)
+   * @see clearcl.interfaces.ClearCLMemInterface#getContext()
+   */
+  @Override
+  public ClearCLContext getContext()
+  {
+    return mClearCLContext;
   }
 
   /**
@@ -611,13 +641,26 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   }
 
   /**
-   * Returns length in elements (not necessarily equal to size bytes!)
+   * Returns length in elements, an element is composed of potentially several
+   * channels and is certainly not equal to the size in bytes!
    * 
    * @return length in elements
    */
-  public long getLengthInElements()
+  public long getLength()
   {
-    return mLength;
+    return getVolume();
+  }
+
+  @Override
+  public long getNumberOfChannels()
+  {
+    return mNumberOfChannels;
+  }
+
+  @Override
+  public long[] getDimensions()
+  {
+    return mDimensions;
   }
 
   /**
@@ -628,7 +671,8 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   @Override
   public long getSizeInBytes()
   {
-    return getLengthInElements() * mNativeType.getSizeInBytes();
+    return getLength() * getNumberOfChannels()
+           * mNativeType.getSizeInBytes();
   }
 
   /* (non-Javadoc)
@@ -637,10 +681,11 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   @Override
   public String toString()
   {
-    return String.format("ClearCLBuffer [mBufferType=%s, mDataType=%s, getLengthInElements()=%s, getSizeInBytes()=%s]",
+    return String.format("ClearCLBuffer [mHostAccessType=%s, mKernelAccessType=%s, mDataType=%s, getLengthInElements()=%s, getSizeInBytes()=%s]",
                          mHostAccessType,
+                         mKernelAccessType,
                          mNativeType,
-                         getLengthInElements(),
+                         getLength(),
                          getSizeInBytes());
   }
 

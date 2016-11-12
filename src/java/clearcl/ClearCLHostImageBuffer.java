@@ -5,16 +5,18 @@ import java.util.Arrays;
 import clearcl.abs.ClearCLBase;
 import clearcl.abs.ClearCLMemBase;
 import clearcl.backend.ClearCLBackendInterface;
+import clearcl.enums.HostAccessType;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.interfaces.ClearCLMemInterface;
 import coremem.ContiguousMemoryInterface;
+import coremem.buffers.ContiguousBuffer;
 import coremem.offheap.OffHeapMemory;
 import coremem.types.NativeTypeEnum;
 import coremem.util.Size;
 
-public class ClearCLHostImage extends ClearCLMemBase implements
-                                                    ClearCLMemInterface,
-                                                    ClearCLImageInterface
+public class ClearCLHostImageBuffer extends ClearCLMemBase implements
+                                                          ClearCLMemInterface,
+                                                          ClearCLImageInterface
 {
 
   private final ContiguousMemoryInterface mContiguousMemory;
@@ -22,49 +24,61 @@ public class ClearCLHostImage extends ClearCLMemBase implements
   private final long[] mDimensions;
   private long mNumberOfChannels;
 
-  public static ClearCLHostImage allocateSameAs(ClearCLImage pClearCLImage)
+  public static ClearCLHostImageBuffer allocateSameAs(ClearCLImageInterface pClearCLImage)
   {
-    ClearCLHostImage lClearCLHostImage = new ClearCLHostImage(pClearCLImage.getBackend(),
-                                                              OffHeapMemory.allocateBytes(pClearCLImage.getSizeInBytes()),
-                                                              pClearCLImage.getChannelDataType()
-                                                                           .getNativeType(),
-                                                              pClearCLImage.getChannelOrder()
-                                                                           .getNumberOfChannels(),
-                                                              pClearCLImage.getDimensions());
+    ClearCLHostImageBuffer lClearCLHostImage = new ClearCLHostImageBuffer(pClearCLImage.getContext(),
+                                                                          OffHeapMemory.allocatePageAlignedBytes("ClearCLHostImageBuffer",pClearCLImage.getSizeInBytes()),
+                                                                          pClearCLImage.getNativeType(),
+                                                                          pClearCLImage.getNumberOfChannels(),
+                                                                          pClearCLImage.getDimensions());
     return lClearCLHostImage;
   }
 
-  public ClearCLHostImage(ClearCLBackendInterface pClearCLBackendInterface,
-                          NativeTypeEnum pNativeType,
-                          long pNumberOfChannels,
-                          long... pDimensions)
+  public ClearCLHostImageBuffer(ClearCLContext pClearCLContext,
+                                NativeTypeEnum pNativeType,
+                                long pNumberOfChannels,
+                                long... pDimensions)
   {
-    this(pClearCLBackendInterface,
-         OffHeapMemory.allocateBytes(pNumberOfChannels * Size.of(pNativeType)
-                                     * getVolume(pDimensions)),
+    this(pClearCLContext,
+         OffHeapMemory.allocatePageAlignedBytes("ClearCLHostImageBuffer",
+                                     pNumberOfChannels * Size.of(pNativeType)
+                                         * getVolume(pDimensions)),
          pNativeType,
          pNumberOfChannels,
          pDimensions);
 
   }
 
-  public ClearCLHostImage(ClearCLBackendInterface pClearCLBackendInterface,
-                          ContiguousMemoryInterface pContiguousMemoryInterface,
-                          NativeTypeEnum pNativeType,
-                          long pNumberOfChannels,
-                          long... pDimensions)
+  public ClearCLHostImageBuffer(ClearCLContext pClearCLContext,
+                                ContiguousMemoryInterface pContiguousMemoryInterface,
+                                NativeTypeEnum pNativeType,
+                                long pNumberOfChannels,
+                                long... pDimensions)
   {
-    super(pClearCLBackendInterface,
-          pClearCLBackendInterface.wrap(pContiguousMemoryInterface));
+    super(pClearCLContext.getBackend(),
+          pClearCLContext.getBackend()
+                         .wrap(pContiguousMemoryInterface));
     mContiguousMemory = pContiguousMemoryInterface;
     mNativeType = pNativeType;
     mNumberOfChannels = pNumberOfChannels;
     mDimensions = pDimensions;
   }
 
+  @Override
+  public ClearCLContext getContext()
+  {
+    return null;
+  }
+
   public ContiguousMemoryInterface getContiguousMemory()
   {
     return mContiguousMemory;
+  }
+
+  @Override
+  public HostAccessType getHostAccessType()
+  {
+    return HostAccessType.ReadWrite;
   }
 
   public long[] getDimensions()

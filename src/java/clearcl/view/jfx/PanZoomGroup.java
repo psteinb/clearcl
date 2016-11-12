@@ -1,7 +1,7 @@
 package clearcl.view.jfx;
 
 import javafx.geometry.Point2D;
-import javafx.scene.Node;
+import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseButton;
@@ -14,59 +14,59 @@ import javafx.scene.transform.Translate;
  *
  * @author royer
  */
-public class PanZoomScene extends Scene
+public class PanZoomGroup extends Group
 {
-  private Node mPanZoomNode;
+  private Scene mScene;
+  private Parent mRoot;
   private volatile double mPressedX, mPressedY;
   private Scale mScale;
   private Translate mTranslate;
   private Point2D mSceneCenterInRoot;
-  private boolean mPivotInitialized;
+
 
   /**
-   * Constructs a PanZoomScene from a root node, a node to pan and zoom, window
-   * dimensions and a fill color.
+   * T
    * 
    * @param pRoot
-   *          root node
-   * @param pNodeToPanZoom
-   *          node to pan and zoom
    * @param pWidth
-   *          window width
    * @param pHeight
-   *          window height
    * @param pFill
-   *          fill color
    */
-  public PanZoomScene(Parent pRoot,
-                      Node pNodeToPanZoom,
+  public PanZoomGroup(Parent pRoot,
                       double pWidth,
                       double pHeight,
                       Paint pFill)
   {
-    super(pRoot, pWidth, pHeight, pFill);
-    mPanZoomNode = pNodeToPanZoom;
+    super(pRoot);
+    mRoot = pRoot;
 
     mScale = new Scale();
     mTranslate = new Translate();
-    mPanZoomNode.getTransforms().add(mScale);
-    mPanZoomNode.getTransforms().add(mTranslate);
+    mRoot.getTransforms().add(mScale);
+    mRoot.getTransforms().add(mTranslate);
 
+
+  }
+  
+  public void init(Scene pScene)
+  {
+    mScene = pScene;
+    
     setOnMousePressed((event) -> {
 
       if (event.getButton() == MouseButton.PRIMARY)
       {
         double lMouseX = event.getX();
         double lMouseY = event.getY();
-        double lSceneWidth = getWidth();
-        double lSceneHeight = getHeight();
+        double lSceneWidth = getScene().getWidth();
+        double lSceneHeight = getScene().getHeight();
 
         if (lMouseX >= 10 && lMouseX <= lSceneWidth - 11
             && lMouseY >= 10
             && lMouseY <= lSceneHeight - 11)
         {
-          Point2D lRootNodePoint = mPanZoomNode.sceneToLocal(event.getX(),
-                                                             event.getY());
+          Point2D lRootNodePoint = mRoot.sceneToLocal(event.getX(),
+                                                      event.getY());
           mPressedX = lRootNodePoint.getX();
           mPressedY = lRootNodePoint.getY();
           event.consume();
@@ -77,17 +77,18 @@ public class PanZoomScene extends Scene
     setOnMouseDragged((event) -> {
       if (event.getButton() == MouseButton.PRIMARY)
       {
+
         double lMouseX = event.getX();
         double lMouseY = event.getY();
-        double lSceneWidth = getWidth();
-        double lSceneHeight = getHeight();
+        double lSceneWidth = getScene().getWidth();
+        double lSceneHeight = getScene().getHeight();
 
         if (lMouseX >= 10 && lMouseX <= lSceneWidth - 11
             && lMouseY >= 10
             && lMouseY <= lSceneHeight - 11)
         {
-          Point2D lRootNodePoint = mPanZoomNode.sceneToLocal(lMouseX,
-                                                             lMouseY);
+          Point2D lRootNodePoint = mRoot.sceneToLocal(lMouseX,
+                                                      lMouseY);
 
           double lDeltaX = mTranslate.getX() + (lRootNodePoint.getX() - mPressedX);
           double lDeltaY = mTranslate.getY() + (lRootNodePoint.getY() - mPressedY);
@@ -107,23 +108,24 @@ public class PanZoomScene extends Scene
 
       scaleScene(lDeltaFactor);
 
-      if (!mPivotInitialized)
+      if (mSceneCenterInRoot == null)
       {
         resetZoomPivot();
-        mPivotInitialized = true;
       }
 
       event.consume();
     });
 
-    widthProperty().addListener((obs, o, n) -> {
+    getScene().widthProperty().addListener((obs, o, n) -> {
+      
+      scaleScene(Math.sqrt(n.doubleValue()/o.doubleValue()));
       resetZoomPivot();
-      scaleScene(Math.sqrt(n.doubleValue() / o.doubleValue()));
     });
 
-    heightProperty().addListener((obs, o, n) -> {
+    getScene().heightProperty().addListener((obs, o, n) -> {
+      
+      scaleScene(Math.sqrt(n.doubleValue()/o.doubleValue()));
       resetZoomPivot();
-      scaleScene(Math.sqrt(n.doubleValue() / o.doubleValue()));
     });
 
   }
@@ -141,11 +143,12 @@ public class PanZoomScene extends Scene
 
   private void resetZoomPivot()
   {
-    double lSceneWidth = getWidth();
-    double lSceneHeight = getHeight();
+    double lSceneWidth = getScene().getWidth();
+    double lSceneHeight = getScene().getHeight();
 
     mScale.setPivotX(lSceneWidth / 2);
     mScale.setPivotY(lSceneHeight / 2);/**/
   }
+
 
 }
