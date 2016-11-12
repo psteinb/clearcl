@@ -57,7 +57,7 @@ public class ClearCLKernelTests
                                                             BadDeviceSelector.NotIntegratedIntel,
                                                             GlobalMemorySelector.MAX);
 
-      System.out.println(lClearClDevice.getInfoString());
+      //System.out.println(lClearClDevice.getInfoString());
 
       ClearCLContext lContext = lClearClDevice.createContext();
 
