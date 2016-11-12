@@ -2,14 +2,11 @@ package clearcl;
 
 import java.util.Arrays;
 
-import clearcl.abs.ClearCLBase;
 import clearcl.abs.ClearCLMemBase;
-import clearcl.backend.ClearCLBackendInterface;
 import clearcl.enums.HostAccessType;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.interfaces.ClearCLMemInterface;
 import coremem.ContiguousMemoryInterface;
-import coremem.buffers.ContiguousBuffer;
 import coremem.offheap.OffHeapMemory;
 import coremem.types.NativeTypeEnum;
 import coremem.util.Size;
@@ -81,21 +78,25 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
     return HostAccessType.ReadWrite;
   }
 
+  @Override
   public long[] getDimensions()
   {
     return mDimensions;
   }
 
+  @Override
   public NativeTypeEnum getNativeType()
   {
     return mNativeType;
   }
 
+  @Override
   public long getPixelSizeInBytes()
   {
     return mNativeType.getSizeInBytes();
   }
 
+  @Override
   public long getNumberOfChannels()
   {
     return mNumberOfChannels;

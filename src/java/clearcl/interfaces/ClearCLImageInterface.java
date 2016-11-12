@@ -1,7 +1,6 @@
 package clearcl.interfaces;
 
 import clearcl.backend.ClearCLBackendInterface;
-import coremem.interfaces.SizedInBytes;
 import coremem.types.NativeTypeEnum;
 
 public interface ClearCLImageInterface extends ClearCLMemInterface

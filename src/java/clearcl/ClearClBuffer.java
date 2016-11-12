@@ -615,6 +615,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * 
    * @return host access type
    */
+  @Override
   public HostAccessType getHostAccessType()
   {
     return mHostAccessType;
@@ -635,6 +636,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * 
    * @return data type
    */
+  @Override
   public NativeTypeEnum getNativeType()
   {
     return mNativeType;

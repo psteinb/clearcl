@@ -1,8 +1,6 @@
 package clearcl.view.demo;
 
 import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
-
 import org.junit.Test;
 
 import clearcl.ClearCL;
@@ -13,20 +11,11 @@ import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
 import clearcl.backend.ClearCLBackendInterface;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
-import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
-import clearcl.enums.ImageType;
-import clearcl.enums.KernelAccessType;
 import clearcl.ocllib.OCLlib;
 import clearcl.test.ClearCLBasicTests;
-import clearcl.util.Region3;
 import clearcl.view.ClearCLImageView;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.stage.Stage;
 
 public class ViewImageDemos
 {
@@ -127,7 +116,7 @@ public class ViewImageDemos
       
       for (int i = 0; i < 10000 && lViewImage.isShowing(); i++)
       {
-        int x= ((64+(int)(i))  %lSize);
+        int x= ((64+(i))  %lSize);
         int y= ((64+(int)(i*1.2)) %lSize);
         int z= ((64+(int)(i*1.3))%lSize);
         

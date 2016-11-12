@@ -5,7 +5,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import clearcl.ClearCLPeerPointer;
 import clearcl.ClearCLQueue;
 import clearcl.backend.ClearCLBackendInterface;
-import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.interfaces.ClearCLMemChangeListener;
 import clearcl.interfaces.ClearCLMemInterface;
 

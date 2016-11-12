@@ -14,7 +14,7 @@ public class ClearCLBackendJavaCLTests
   {
     ClearCLBackendJavaCL lClearCLBackendJavaCL = new ClearCLBackendJavaCL();
 
-    System.out.println(lClearCLBackendJavaCL.getNumberOfPlatforms());
+    //System.out.println(lClearCLBackendJavaCL.getNumberOfPlatforms());
     assertTrue(lClearCLBackendJavaCL.getNumberOfPlatforms() > 0);
 
   }

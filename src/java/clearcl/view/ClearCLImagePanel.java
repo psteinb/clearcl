@@ -22,7 +22,7 @@ import clearcl.exceptions.ClearCLUnsupportedException;
 import clearcl.ocllib.OCLlib;
 import clearcl.ops.Reductions;
 import clearcl.util.Region2;
-import clearcl.util.Timer;
+import clearcl.util.ElapsedTime;
 import coremem.ContiguousMemoryInterface;
 import coremem.types.NativeTypeEnum;
 import javafx.application.Platform;
@@ -36,7 +36,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.CacheHint;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
@@ -147,7 +146,7 @@ public class ClearCLImagePanel extends StackPane
 
     pClearCLImage.addListener((q, s) -> {
 
-      Timer.printTime("q.waitToFinish();", () -> q.waitToFinish());
+      ElapsedTime.measure("q.waitToFinish();", () -> q.waitToFinish());
 
       updateImage();
     });
@@ -238,13 +237,13 @@ public class ClearCLImagePanel extends StackPane
 
         mRenderKernel.setArgument("vmin", lMin);
         mRenderKernel.setArgument("vmax", lMax);
-        mRenderKernel.setArgument("gamma", (float) mGamma.get());
-        mRenderKernel.setOptionalArgument("z", (int) mZ.get());
+        mRenderKernel.setArgument("gamma", mGamma.get());
+        mRenderKernel.setOptionalArgument("z", mZ.get());
         mRenderKernel.setOptionalArgument("zstep",
                                           (int) (mClearCLImage.getDepth() / mNumberOfSteps.get()));
         mRenderKernel.run(true);
 
-        Timer.printTime("mRenderRGBBuffer.copyTo(mClearCLHostImage, true);",
+        ElapsedTime.measure("mRenderRGBBuffer.copyTo(mClearCLHostImage, true);",
                         () -> mRenderRGBBuffer.copyTo(mClearCLHostImage,
                                                       true));
 
@@ -258,7 +257,7 @@ public class ClearCLImagePanel extends StackPane
           mPixelArray = new byte[toIntExact(lContiguousMemory.getSizeInBytes())];
         }
 
-        Timer.printTime("lContiguousMemory.copyTo(mPixelArray)",
+        ElapsedTime.measure("lContiguousMemory.copyTo(mPixelArray)",
                         () -> lContiguousMemory.copyTo(mPixelArray));
 
 

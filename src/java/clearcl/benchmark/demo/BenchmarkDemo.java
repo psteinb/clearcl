@@ -1,4 +1,4 @@
-package clearcl.benchmark.test;
+package clearcl.benchmark.demo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,18 +9,22 @@ import org.junit.Test;
 import clearcl.ClearCL;
 import clearcl.ClearCLDevice;
 import clearcl.backend.ClearCLBackendInterface;
+import clearcl.backend.javacl.ClearCLBackendJavaCL;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.benchmark.Benchmark;
 
-public class BenchmarkTests
+public class BenchmarkDemo
 {
 
   @Test
-  public void test() throws Exception
+  public void demo() throws Exception
   {
-    // ClearCLBackendInterface lClearCLBackendInterface = new
-    // ClearCLBackendJavaCL();
-    ClearCLBackendInterface lClearCLBackendInterface = new ClearCLBackendJOCL();
+    testWithBackend(new ClearCLBackendJOCL());
+    testWithBackend(new ClearCLBackendJavaCL());
+  }
+
+  private void testWithBackend(ClearCLBackendInterface lClearCLBackendInterface)
+  {
     try (ClearCL lClearCL = new ClearCL(lClearCLBackendInterface))
     {
       ArrayList<ClearCLDevice> lAllDevices = lClearCL.getAllDevices();
@@ -29,7 +33,7 @@ public class BenchmarkTests
 
       ClearCLDevice lFastestDevice = Benchmark.getFastestDevice(lAllDevices);
 
-      System.out.println(lFastestDevice);
+      System.out.println("Fastest device: "+lFastestDevice);
     }
   }
 

@@ -13,11 +13,9 @@ import clearcl.ClearCLDevice;
 import clearcl.ClearCLImage;
 import clearcl.backend.ClearCLBackendInterface;
 import clearcl.backend.javacl.ClearCLBackendJavaCL;
-import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
-import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
 import clearcl.ops.Reductions;
 import coremem.offheap.OffHeapMemory;
@@ -54,8 +52,8 @@ public class RecustionsTests
         lBuffer.setFloatAligned(i, lValue);
       }
 
-      System.out.println("lJavaMin=" + lJavaMin);
-      System.out.println("lJavaMax=" + lJavaMax);
+      //System.out.println("lJavaMin=" + lJavaMin);
+      //System.out.println("lJavaMax=" + lJavaMax);
 
       lCLBuffer.readFrom(lBuffer, true);
 
@@ -63,8 +61,8 @@ public class RecustionsTests
 
       float[] lOpenCLMinMax = lReductions.minmax(lCLBuffer, 3712);
 
-      System.out.println("lOpenCL Min=" + lOpenCLMinMax[0]);
-      System.out.println("lOpenCL Max=" + lOpenCLMinMax[1]);
+      //System.out.println("lOpenCL Min=" + lOpenCLMinMax[0]);
+      //System.out.println("lOpenCL Max=" + lOpenCLMinMax[1]);
 
       assertEquals(lJavaMin, lOpenCLMinMax[0], 0.0001);
       assertEquals(lJavaMax, lOpenCLMinMax[1], 0.0001);
@@ -90,9 +88,9 @@ public class RecustionsTests
 
     double lElapsedTime = 10e-9 * (lNanoStop - lNanoStart) / lRepeats;
 
-    System.out.format("elpased time: %g seconds for %d reductions\n",
+    /*System.out.format("elpased time: %g seconds for %d reductions\n",
                       lElapsedTime,
-                      lRed);
+                      lRed);/**/
   }
 
   @Test
@@ -182,19 +180,19 @@ public class RecustionsTests
       lBuffer.setFloatAligned(i, lValue);
     }
 
-    System.out.println("lJavaMin=" + lJavaMin);
-    System.out.println("lJavaMax=" + lJavaMax);
+    //System.out.println("lJavaMin=" + lJavaMin);
+    //System.out.println("lJavaMax=" + lJavaMax);
 
     lClearCLImage.readFrom(lBuffer, true);
 
     Reductions lReductions = new Reductions(lCreateContext.getDefaultQueue());
 
-    System.out.println("before minmax");
+    //System.out.println("before minmax");
     float[] lOpenCLMinMax = lReductions.minmax(lClearCLImage, 32);
-    System.out.println("after minmax");
+    //System.out.println("after minmax");
 
-    System.out.println("lOpenCL Min=" + lOpenCLMinMax[0]);
-    System.out.println("lOpenCL Max=" + lOpenCLMinMax[1]);
+    //System.out.println("lOpenCL Min=" + lOpenCLMinMax[0]);
+    //System.out.println("lOpenCL Max=" + lOpenCLMinMax[1]);
 
     assertEquals(lJavaMin, lOpenCLMinMax[0], 0.0000001);
     assertEquals(lJavaMax, lOpenCLMinMax[1], 0.0000001);

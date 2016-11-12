@@ -40,7 +40,7 @@ public class ClearCLKernelTests
   }
 
   @Test
-  public void testBackenJavaCL() throws Exception
+  public void testBackendJavaCL() throws Exception
   {
     ClearCLBackendJavaCL lClearCLBackendJavaCL = new ClearCLBackendJavaCL();
 
@@ -66,12 +66,9 @@ public class ClearCLKernelTests
       lProgram.addDefine("CONSTANT", "10");
       lProgram.addBuildOptionAllMathOpt();
 
-      System.out.println(lProgram.getSourceCode());
+      BuildStatus lBuildStatus = lProgram.buildAndLog();
 
-      BuildStatus lBuildStatus = lProgram.build();
 
-      System.out.println(lProgram.getBuildLog());
-      System.out.println(lBuildStatus);
       assertEquals(lBuildStatus, BuildStatus.Success);
       // assertTrue(lProgram.getBuildLog().isEmpty());
 
@@ -137,7 +134,6 @@ public class ClearCLKernelTests
       }
       catch (ClearCLArgumentMissingException e)
       {
-        System.out.println("Caught as expected: " + e);
         fail();
       }
 
@@ -153,7 +149,7 @@ public class ClearCLKernelTests
       }
       catch (ClearCLArgumentMissingException e)
       {
-        System.out.println("Caught as expected: " + e);
+        //System.out.println("Caught as expected: " + e);
       }
 
       // what if an unknown argument is added?
@@ -170,7 +166,7 @@ public class ClearCLKernelTests
       }
       catch (ClearCLUnknownArgumentNameException e)
       {
-        System.out.println("Caught as expected: " + e);
+        //System.out.println("Caught as expected: " + e);
       }
 
     }

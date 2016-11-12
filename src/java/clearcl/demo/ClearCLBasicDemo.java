@@ -1,4 +1,4 @@
-package clearcl.test;
+package clearcl.demo;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -31,51 +31,51 @@ import clearcl.exceptions.OpenCLException;
 import coremem.offheap.OffHeapMemory;
 import coremem.types.NativeTypeEnum;
 
-public class ClearCLBasicTests
+public class ClearCLBasicDemo
 {
 
   private static final int cFloatArrayLength = 1024 * 1024;
 
   @Test
-  public void testBackendJOCL() throws Exception
+  public void demoBackendJOCL() throws Exception
   {
     ClearCLBackendJOCL lClearCLJOCLBackend = new ClearCLBackendJOCL();
 
-    testWithBackend(lClearCLJOCLBackend);
+    demoWithBackend(lClearCLJOCLBackend);
 
   }
 
   @Test
-  public void testBackendJavaCL() throws Exception
+  public void demoBackendJavaCL() throws Exception
   {
     ClearCLBackendJavaCL lClearCLBackendJavaCL = new ClearCLBackendJavaCL();
 
-    testWithBackend(lClearCLBackendJavaCL);
+    demoWithBackend(lClearCLBackendJavaCL);
 
   }
 
-  private void testWithBackend(ClearCLBackendInterface pClearCLBackendInterface) throws Exception
+  private void demoWithBackend(ClearCLBackendInterface pClearCLBackendInterface) throws Exception
   {
     try (ClearCL lClearCL = new ClearCL(pClearCLBackendInterface))
     {
 
       int lNumberOfPlatforms = lClearCL.getNumberOfPlatforms();
 
-      //System.out.println("lNumberOfPlatforms=" + lNumberOfPlatforms);
+      System.out.println("lNumberOfPlatforms=" + lNumberOfPlatforms);
 
       for (int p = 0; p < lNumberOfPlatforms; p++)
       {
         ClearCLPlatform lPlatform = lClearCL.getPlatform(p);
 
-        //System.out.println(lPlatform.getInfoString());
+        System.out.println(lPlatform.getInfoString());
 
         for (int d = 0; d < lPlatform.getNumberOfDevices(); d++)
         {
           ClearCLDevice lClearClDevice = lPlatform.getDevice(d);
 
-          /*System.out.println("\t" + d
+          System.out.println("\t" + d
                              + " -> \n"
-                             + lClearClDevice.getInfoString());/**/
+                             + lClearClDevice.getInfoString());
 
           ClearCLContext lContext = lClearClDevice.createContext();
 
@@ -83,18 +83,18 @@ public class ClearCLBasicTests
                                                            "test.cl");
           lProgram.addDefine("CONSTANT", "1");
 
-          //System.out.println(lProgram.getSourceCode());
+          System.out.println(lProgram.getSourceCode());
 
           BuildStatus lBuildStatus = lProgram.build();
 
-          //System.out.println(lProgram.getBuildLog());
-          //System.out.println(lBuildStatus);
+          System.out.println(lProgram.getBuildLog());
+          System.out.println(lBuildStatus);
           assertEquals(lBuildStatus, BuildStatus.Success);
           // assertTrue(lProgram.getBuildLog().isEmpty());
 
-          testBuffers(lContext, lProgram);
+          demoBuffers(lContext, lProgram);
 
-          testImages(lContext, lProgram);
+          demoImages(lContext, lProgram);
 
         }
 
@@ -102,7 +102,7 @@ public class ClearCLBasicTests
     }
   }
 
-  private void testImages(ClearCLContext lContext,
+  private void demoImages(ClearCLContext lContext,
                           ClearCLProgram pProgram)
   {
 
@@ -150,7 +150,7 @@ public class ClearCLBasicTests
 
   }
 
-  private void testBuffers(ClearCLContext lCreateContext,
+  private void demoBuffers(ClearCLContext lCreateContext,
                            ClearCLProgram pProgram) throws IOException
   {
 
@@ -165,7 +165,7 @@ public class ClearCLBasicTests
     }
     catch (OpenCLException e)
     {
-      //System.out.println("ERROR:" + e.getMessage());
+      System.out.println("ERROR:" + e.getMessage());
       assertTrue(e.getErrorCode() == -61 || e.getErrorCode() == -6);
     }
 
@@ -222,15 +222,15 @@ public class ClearCLBasicTests
 
       if (lObservedValue != lTrueValue)
       {
-        /*System.out.format("NOT EQUAL: (c[%d] = %g) != %g \n",
+        System.out.format("NOT EQUAL: (c[%d] = %g) != %g \n",
                           j,
                           lObservedValue,
-                          lTrueValue);/**/
+                          lTrueValue);
         assertTrue(false);
         break;
       }
-      //if (j % 100000 == 0)
-        //System.out.println(lObservedValue + " == " + lTrueValue);
+      if (j % 100000 == 0)
+        System.out.println(lObservedValue + " == " + lTrueValue);
     }
   }
 

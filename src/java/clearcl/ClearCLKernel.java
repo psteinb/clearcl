@@ -9,9 +9,7 @@ import clearcl.exceptions.CleaCLInvalidExecutionRange;
 import clearcl.exceptions.ClearCLArgumentMissingException;
 import clearcl.exceptions.ClearCLUnknownArgumentNameException;
 import clearcl.interfaces.ClearCLImageInterface;
-import clearcl.interfaces.ClearCLMemInterface;
-import clearcl.util.AsynchronousNotification;
-import clearcl.util.Region3;
+import clearcl.util.ElapsedTime;
 
 /**
  * ClearCLKernel is the ClearCL abstraction for OpenCL kernels.
@@ -300,57 +298,51 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
    */
   public void run(ClearCLQueue pClearCLQueue, boolean pBlockingRun)
   {
-    long lNanosStart = System.nanoTime();
 
-    setArgumentsInternal();
-    if (getGlobalSizes() == null || getGlobalOffsets() == null)
-      throw new CleaCLInvalidExecutionRange(String.format("global offset = %s, global range = %s, local range = %s",
-                                                          Arrays.toString(getGlobalOffsets()),
-                                                          Arrays.toString(getGlobalSizes()),
-                                                          Arrays.toString(getLocalSizes())));
+    ElapsedTime.measure(isLogExecutionTime(),
+                        "kernel " + getName(),
+                        () -> {
 
-    getBackend().enqueueKernelExecution(pClearCLQueue.getPeerPointer(),
-                                        getPeerPointer(),
-                                        getGlobalSizes().length,
-                                        getGlobalOffsets(),
-                                        getGlobalSizes(),
-                                        getLocalSizes());
+                          setArgumentsInternal();
+                          if (getGlobalSizes() == null || getGlobalOffsets() == null)
+                            throw new CleaCLInvalidExecutionRange(String.format("global offset = %s, global range = %s, local range = %s",
+                                                                                Arrays.toString(getGlobalOffsets()),
+                                                                                Arrays.toString(getGlobalSizes()),
+                                                                                Arrays.toString(getLocalSizes())));
 
-    
+                          getBackend().enqueueKernelExecution(pClearCLQueue.getPeerPointer(),
+                                                              getPeerPointer(),
+                                                              getGlobalSizes().length,
+                                                              getGlobalOffsets(),
+                                                              getGlobalSizes(),
+                                                              getLocalSizes());
 
-    // for (Map.Entry<Integer, Argument> lEntry :
-    // mIndexToArgumentMap.entrySet())
-    // {
-    // Object lArgument = lEntry.getValue().argument;
-    // if (lArgument instanceof ClearCLMemInterface)
-    // {
-    // ClearCLMemInterface lClearCLMemInterface = (ClearCLMemInterface)
-    // lArgument;
-    //
-    // if (lClearCLMemInterface.getHostAccessType()
-    // .isReadableFromHost())
-    // {
-    // AsynchronousNotification.notifyChange(() -> {
-    // pClearCLQueue.waitToFinish();
-    // lClearCLMemInterface.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
-    // });
-    // }
-    // }
-    // }
+                          // for (Map.Entry<Integer, Argument> lEntry :
+                          // mIndexToArgumentMap.entrySet())
+                          // {
+                          // Object lArgument = lEntry.getValue().argument;
+                          // if (lArgument instanceof ClearCLMemInterface)
+                          // {
+                          // ClearCLMemInterface lClearCLMemInterface =
+                          // (ClearCLMemInterface)
+                          // lArgument;
+                          //
+                          // if (lClearCLMemInterface.getHostAccessType()
+                          // .isReadableFromHost())
+                          // {
+                          // AsynchronousNotification.notifyChange(() -> {
+                          // pClearCLQueue.waitToFinish();
+                          // lClearCLMemInterface.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+                          // });
+                          // }
+                          // }
+                          // }
 
-    if (pBlockingRun)
-      pClearCLQueue.waitToFinish();
-    
-    long lNanosStop = System.nanoTime();
+                          if (pBlockingRun)
+                            pClearCLQueue.waitToFinish();
 
-    if (pBlockingRun && isLogExecutionTime())
-    {
-      long lElapsedNanos = lNanosStop - lNanosStart;
-      double lElapsedTimeInMilliseconds = lElapsedNanos * 1e-6;
-      System.out.format("%g ms needed to run Kernel %s \n",
-                        lElapsedTimeInMilliseconds,
-                        getName());
-    }
+                        });
+
   }
 
   /* (non-Javadoc)

@@ -407,6 +407,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    * 
    * @return context
    */
+  @Override
   public ClearCLContext getContext()
   {
     return mClearCLContext;
@@ -417,6 +418,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    * 
    * @return host acess type
    */
+  @Override
   public HostAccessType getHostAccessType()
   {
     return mHostAccessType;
@@ -472,11 +474,13 @@ public class ClearCLImage extends ClearCLMemBase implements
     return mImageChannelDataType.isNormalized();
   }
 
+  @Override
   public NativeTypeEnum getNativeType()
   {
     return getChannelDataType().getNativeType();
   }
 
+  @Override
   public long getNumberOfChannels()
   {
     return getChannelOrder().getNumberOfChannels();
@@ -487,6 +491,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    * 
    * @return dimensions
    */
+  @Override
   public long[] getDimensions()
   {
     return Arrays.copyOf(mDimensions, mDimensions.length);

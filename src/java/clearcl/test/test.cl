@@ -25,8 +25,8 @@ __kernel void buffersum(         const float p,
 	
 		c[x] = a[x] + b[x] + p * CONSTANT;
 	
-	if(x%100000==1)
-	  printf("this is a test string c[%d] = %f + %f + %f = %f \n", x, a[x], b[x], p,  c[x]);
+	//if(x%100000==1)
+	//  printf("this is a test string c[%d] = %f + %f + %f = %f \n", x, a[x], b[x], p,  c[x]);
  
 }
 

@@ -31,9 +31,9 @@ public class Benchmark
         double lElapsedTimeInSeconds = executeBenchmarkOnDevice(lDevice,
                                                                 cRepeats);
 
-        System.out.format("Device: %s elapsed time: %g ms \n",
+        /*System.out.format("Device: %s elapsed time: %g ms \n",
                           lDevice.getName(),
-                          lElapsedTimeInSeconds);
+                          lElapsedTimeInSeconds);/**/
 
         if (lElapsedTimeInSeconds < lMinElapsedTime)
         {
@@ -61,17 +61,13 @@ public class Benchmark
     lProgram.addBuildOptionAllMathOpt();
 
     long lStartCompileTimeNanos = System.nanoTime();
-    BuildStatus lBuildStatus = lProgram.build();
-    if (lBuildStatus != BuildStatus.Success)
-    {
-      System.out.println(lBuildStatus);
-      System.out.println(lProgram.getBuildLog());
-    }
+    BuildStatus lBuildStatus = lProgram.buildAndLog();
+
     long lStopCompileTimeNanos = System.nanoTime();
     double lCompileElapsedTime = TimeUnit.MICROSECONDS.convert((lStopCompileTimeNanos - lStartCompileTimeNanos),
                                                                TimeUnit.NANOSECONDS) / pRepeats;
-    System.out.format("Compilation time: %g us \n",
-                      lCompileElapsedTime);
+    /*System.out.format("Compilation time: %g us \n",
+                      lCompileElapsedTime);/**/
 
     ClearCLBuffer lBufferA = lContext.createBuffer(HostAccessType.NoAccess,
                                                    KernelAccessType.ReadOnly,
