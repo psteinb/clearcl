@@ -14,7 +14,7 @@ import clearcl.enums.HostAccessType;
 import clearcl.enums.KernelAccessType;
 import clearcl.ocllib.OCLlib;
 import coremem.buffers.ContiguousBuffer;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 public class Reductions
 {

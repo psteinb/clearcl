@@ -28,8 +28,8 @@ import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.KernelAccessType;
 import clearcl.exceptions.OpenCLException;
+import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
-import coremem.types.NativeTypeEnum;
 
 public class ClearCLBasicTests
 {

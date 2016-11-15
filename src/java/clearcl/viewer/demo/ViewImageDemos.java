@@ -1,4 +1,4 @@
-package clearcl.view.demo;
+package clearcl.viewer.demo;
 
 import java.io.IOException;
 import org.junit.Test;
@@ -15,7 +15,7 @@ import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.ocllib.OCLlib;
 import clearcl.test.ClearCLBasicTests;
-import clearcl.view.ClearCLImageView;
+import clearcl.viewer.ClearCLImageViewer;
 
 public class ViewImageDemos
 {
@@ -49,9 +49,9 @@ public class ViewImageDemos
       lKernel.setGlobalSizes(lImage);
       lKernel.run(true);
 
-      ClearCLImageView lViewImage = ClearCLImageView.view(lImage);
+      ClearCLImageViewer lViewImage = ClearCLImageViewer.view(lImage);
 
-      for (int i = 10000; i > 1 && lViewImage.isShowing(); i--)
+      for (int i = 1000; i > 1 && lViewImage.isShowing(); i--)
       {
         
         if (i % 1000 == 0)
@@ -112,7 +112,7 @@ public class ViewImageDemos
       lKernel.run(true);
       lImage.notifyListenersOfChange(lContext.getDefaultQueue());
 
-      ClearCLImageView lViewImage = ClearCLImageView.view(lImage);
+      ClearCLImageViewer lViewImage = ClearCLImageViewer.view(lImage);
       
       for (int i = 0; i < 10000 && lViewImage.isShowing(); i++)
       {

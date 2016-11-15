@@ -1,4 +1,4 @@
-package clearcl.view;
+package clearcl.viewer;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -6,7 +6,7 @@ import com.sun.javafx.application.PlatformImpl;
 
 import clearcl.ClearCLImage;
 import clearcl.enums.ImageType;
-import clearcl.view.jfx.PanZoomScene;
+import clearcl.viewer.jfx.PanZoomScene;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -30,7 +30,7 @@ import javafx.stage.Stage;
  *
  * @author royer
  */
-public class ClearCLImageView
+public class ClearCLImageViewer
 {
 
   private Stage mStage = null;
@@ -43,10 +43,10 @@ public class ClearCLImageView
    * @param pImage
    * @return
    */
-  public static ClearCLImageView view(ClearCLImage pImage)
+  public static ClearCLImageViewer view(ClearCLImage pImage)
   {
-    ClearCLImageView lViewImage = new ClearCLImageView(pImage,
-                                                       "Image");
+    ClearCLImageViewer lViewImage = new ClearCLImageViewer(pImage,
+                                                           "Image");
     return lViewImage;
   }
 
@@ -58,8 +58,8 @@ public class ClearCLImageView
    * @param pWindowTitle
    *          window title
    */
-  public ClearCLImageView(ClearCLImage pClearCLImage,
-                          String pWindowTitle)
+  public ClearCLImageViewer(ClearCLImage pClearCLImage,
+                            String pWindowTitle)
   {
     this(pClearCLImage,
          pWindowTitle,
@@ -79,10 +79,11 @@ public class ClearCLImageView
    * @param pWindowHeight
    *          window height
    */
-  public ClearCLImageView(ClearCLImage pClearCLImage,
-                          String pWindowTitle,
-                          int pWindowWidth,
-                          int pWindowHeight)
+  @SuppressWarnings("restriction")
+  public ClearCLImageViewer(ClearCLImage pClearCLImage,
+                            String pWindowTitle,
+                            int pWindowWidth,
+                            int pWindowHeight)
   {
     super();
 
@@ -112,11 +113,8 @@ public class ClearCLImageView
       row4.setFillHeight(false);
       RowConstraints row5 = new RowConstraints();
       row5.setMinHeight(10);
-      mControlPane.getRowConstraints().addAll(row1,
-                                              row2,
-                                              row3,
-                                              row4,
-                                              row5);/**/
+      mControlPane.getRowConstraints()
+                  .addAll(row1, row2, row3, row4, row5);/**/
 
       ColumnConstraints col1 = new ColumnConstraints();
       col1.setMinWidth(5);
@@ -144,27 +142,33 @@ public class ClearCLImageView
       ColumnConstraints col7 = new ColumnConstraints();
       col7.setMinWidth(5);
 
-      mControlPane.getColumnConstraints().addAll(col1,
-                                                 col2,
-                                                 col3,
-                                                 col4,
-                                                 col5,
-                                                 col6,
-                                                 col7);/**/
+      mControlPane.getColumnConstraints()
+                  .addAll(col1,
+                          col2,
+                          col3,
+                          col4,
+                          col5,
+                          col6,
+                          col7);/**/
 
       mControlPane.backgroundProperty()
                   .set(new Background(new BackgroundFill(Color.TRANSPARENT,
                                                          CornerRadii.EMPTY,
                                                          Insets.EMPTY)));/**/
 
-      ComboBox<RenderMode> lRenderModeComboBox = new ComboBox<>();
-      lRenderModeComboBox.getItems().setAll(RenderMode.values());
-      lRenderModeComboBox.valueProperty()
-                         .bindBidirectional(mImagePanel.getRenderModeProperty());
-      GridPane.setColumnSpan(lRenderModeComboBox, 2);
-      mControlPane.add(lRenderModeComboBox, 4, 1);
+      if (pClearCLImage.getImageType() == ImageType.IMAGE3D)
+      {
+        ComboBox<RenderMode> lRenderModeComboBox = new ComboBox<>();
+        lRenderModeComboBox.getItems().setAll(RenderMode.values());
+        lRenderModeComboBox.valueProperty()
+                           .bindBidirectional(mImagePanel.getRenderModeProperty());
 
-      ToggleButton lAutomaticMinMaxToggleButton = new ToggleButton("Auto");
+        GridPane.setColumnSpan(lRenderModeComboBox, 2);
+        mControlPane.add(lRenderModeComboBox, 4, 1);
+      }
+
+      ToggleButton lAutomaticMinMaxToggleButton =
+                                                new ToggleButton("Auto");
 
       // lAutomaticMinMaxCheckBox.setStyle("-fx-text-fill: white;");
       lAutomaticMinMaxToggleButton.selectedProperty()
@@ -199,12 +203,11 @@ public class ClearCLImageView
       lGamma.setOrientation(Orientation.VERTICAL);
       lAutomaticMinMaxToggleButton.selectedProperty()
                                   .bindBidirectional(lGamma.disableProperty());
-      lGamma.valueProperty()
-            .addListener((v) -> {
-              mImagePanel.getGammaProperty()
-                         .set((float) (Math.pow(2,
-                                                2 * (lGamma.getValue()))));
-            });
+      lGamma.valueProperty().addListener((v) -> {
+        mImagePanel.getGammaProperty()
+                   .set((float) (Math.pow(2,
+                                          2 * (lGamma.getValue()))));
+      });
       GridPane.setVgrow(lGamma, Priority.ALWAYS);
       mControlPane.add(lGamma, 3, 2);
 
@@ -222,13 +225,23 @@ public class ClearCLImageView
         // GridPane.setColumnSpan(lZ, 4);
         // GridPane.setFillWidth(lZ, true);
         mControlPane.add(lZ, 5, 2);
+
+        mImagePanel.getRenderModeProperty().addListener((e) -> {
+          RenderMode lRenderMode = mImagePanel.getRenderModeProperty()
+                                              .get();
+          lZ.setDisable(lRenderMode != RenderMode.Slice);
+        });
+        lZ.setDisable(mImagePanel.getRenderModeProperty()
+                                 .get() != RenderMode.Slice);
+
       }
 
       lAutomaticMinMaxToggleButton.selectedProperty().set(true);
 
       lStackPane.getChildren().addAll(mImagePanel, mControlPane);
 
-      PanZoomScene lPanZoomScene = new PanZoomScene(lStackPane,
+      PanZoomScene lPanZoomScene = new PanZoomScene(mStage,
+                                                    lStackPane,
                                                     mImagePanel,
                                                     pWindowWidth,
                                                     pWindowHeight,

@@ -14,7 +14,7 @@ import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.interfaces.ClearCLMemInterface;
 import clearcl.util.Region3;
 import coremem.ContiguousMemoryInterface;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 /**
  * ClearCLImage is the ClearCL abstraction for OpenCL images.

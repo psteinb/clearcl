@@ -1,6 +1,6 @@
 package clearcl.enums;
 
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 /**
  * OpenCL image channel data type

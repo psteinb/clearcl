@@ -9,7 +9,7 @@ import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 /**
  * ClearCLContext is the ClearCL abstraction for OpenCl contexts.

@@ -8,7 +8,7 @@ import clearcl.ClearCL;
 import clearcl.ClearCLDevice;
 import clearcl.ClearCLHostImageBuffer;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 public class ClearCLHostImageTests
 {

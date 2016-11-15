@@ -7,8 +7,8 @@ import clearcl.enums.HostAccessType;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.interfaces.ClearCLMemInterface;
 import coremem.ContiguousMemoryInterface;
+import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
-import coremem.types.NativeTypeEnum;
 import coremem.util.Size;
 
 public class ClearCLHostImageBuffer extends ClearCLMemBase implements

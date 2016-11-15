@@ -1,4 +1,4 @@
-package clearcl.view.jfx;
+package clearcl.viewer.jfx;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Group;

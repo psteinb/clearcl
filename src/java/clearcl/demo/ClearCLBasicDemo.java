@@ -28,8 +28,9 @@ import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.KernelAccessType;
 import clearcl.exceptions.OpenCLException;
+import clearcl.test.ClearCLBasicTests;
+import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
-import coremem.types.NativeTypeEnum;
 
 public class ClearCLBasicDemo
 {
@@ -48,7 +49,8 @@ public class ClearCLBasicDemo
   @Test
   public void demoBackendJavaCL() throws Exception
   {
-    ClearCLBackendJavaCL lClearCLBackendJavaCL = new ClearCLBackendJavaCL();
+    ClearCLBackendJavaCL lClearCLBackendJavaCL =
+                                               new ClearCLBackendJavaCL();
 
     demoWithBackend(lClearCLBackendJavaCL);
 
@@ -79,8 +81,9 @@ public class ClearCLBasicDemo
 
           ClearCLContext lContext = lClearClDevice.createContext();
 
-          ClearCLProgram lProgram = lContext.createProgram(this.getClass(),
-                                                           "test.cl");
+          ClearCLProgram lProgram =
+                                  lContext.createProgram(ClearCLBasicTests.class,
+                                                         "test.cl");
           lProgram.addDefine("CONSTANT", "1");
 
           System.out.println(lProgram.getSourceCode());
@@ -106,35 +109,38 @@ public class ClearCLBasicDemo
                           ClearCLProgram pProgram)
   {
 
-    ClearCLImage lImageSrc = lContext.createImage(HostAccessType.WriteOnly,
-                                                  KernelAccessType.ReadWrite,
-                                                  ImageChannelOrder.Intensity,
-                                                  ImageChannelDataType.Float,
-                                                  100,
-                                                  100,
-                                                  100);
+    ClearCLImage lImageSrc =
+                           lContext.createImage(HostAccessType.WriteOnly,
+                                                KernelAccessType.ReadWrite,
+                                                ImageChannelOrder.Intensity,
+                                                ImageChannelDataType.Float,
+                                                100,
+                                                100,
+                                                100);
 
     ClearCLKernel lKernel = pProgram.createKernel("fillimagexor");
 
-    lKernel.setArgument("image",lImageSrc);
+    lKernel.setArgument("image", lImageSrc);
     lKernel.setArgument("u", 1f);
     lKernel.setGlobalSizes(100, 100, 100);
     lKernel.run();
 
-    ClearCLImage lImageDst = lContext.createImage(HostAccessType.ReadOnly,
-                                                  KernelAccessType.WriteOnly,
-                                                  ImageChannelOrder.Intensity,
-                                                  ImageChannelDataType.Float,
-                                                  10,
-                                                  10,
-                                                  10);
+    ClearCLImage lImageDst =
+                           lContext.createImage(HostAccessType.ReadOnly,
+                                                KernelAccessType.WriteOnly,
+                                                ImageChannelOrder.Intensity,
+                                                ImageChannelDataType.Float,
+                                                10,
+                                                10,
+                                                10);
 
     lImageSrc.copyTo(lImageDst, new long[]
     { 10, 20, 30 }, new long[]
     { 0, 0, 0 }, new long[]
     { 10, 10, 10 }, true);
 
-    OffHeapMemory lBuffer = OffHeapMemory.allocateBytes(lImageDst.getSizeInBytes());
+    OffHeapMemory lBuffer =
+                          OffHeapMemory.allocateBytes(lImageDst.getSizeInBytes());
     lImageDst.writeTo(lBuffer, new long[]
     { 0, 0, 0 }, new long[]
     { 10, 10, 10 }, true);
@@ -142,11 +148,10 @@ public class ClearCLBasicDemo
     // for(int i=0; i<lBuffer.getSizeInBytes()/4; i++)
     // System.out.println(lBuffer.getFloatAligned(i));
 
-    assertEquals((10 + 1) ^ (20 + 2 + 1) ^ (30 + 3 + 2),
+    assertEquals((10 + 1) ^ (20 + 2 + 1)
+                 ^ (30 + 3 + 2),
                  lBuffer.getFloatAligned(1 + 2 * 10 + 3 * 10 * 10),
                  0.1);
-
-    
 
   }
 
@@ -157,10 +162,11 @@ public class ClearCLBasicDemo
     try
     {
       @SuppressWarnings("unused")
-      ClearCLBuffer lBufferTooBig = lCreateContext.createBuffer(HostAccessType.WriteOnly,
-                                                                KernelAccessType.ReadOnly,
-                                                                NativeTypeEnum.Float,
-                                                                Long.MAX_VALUE);
+      ClearCLBuffer lBufferTooBig =
+                                  lCreateContext.createBuffer(HostAccessType.WriteOnly,
+                                                              KernelAccessType.ReadOnly,
+                                                              NativeTypeEnum.Float,
+                                                              Long.MAX_VALUE);
       fail();
     }
     catch (OpenCLException e)
@@ -178,20 +184,23 @@ public class ClearCLBasicDemo
       lArrayB[j] = 1.5f * j;
     }
 
-    ClearCLBuffer lBufferA = lCreateContext.createBuffer(HostAccessType.WriteOnly,
-                                                         KernelAccessType.ReadOnly,
-                                                         NativeTypeEnum.Float,
-                                                         cFloatArrayLength);
+    ClearCLBuffer lBufferA =
+                           lCreateContext.createBuffer(HostAccessType.WriteOnly,
+                                                       KernelAccessType.ReadOnly,
+                                                       NativeTypeEnum.Float,
+                                                       cFloatArrayLength);
 
-    ClearCLBuffer lBufferB = lCreateContext.createBuffer(HostAccessType.WriteOnly,
-                                                         KernelAccessType.ReadOnly,
-                                                         NativeTypeEnum.Float,
-                                                         cFloatArrayLength);
+    ClearCLBuffer lBufferB =
+                           lCreateContext.createBuffer(HostAccessType.WriteOnly,
+                                                       KernelAccessType.ReadOnly,
+                                                       NativeTypeEnum.Float,
+                                                       cFloatArrayLength);
 
-    ClearCLBuffer lBufferC = lCreateContext.createBuffer(HostAccessType.ReadOnly,
-                                                         KernelAccessType.WriteOnly,
-                                                         NativeTypeEnum.Float,
-                                                         cFloatArrayLength);
+    ClearCLBuffer lBufferC =
+                           lCreateContext.createBuffer(HostAccessType.ReadOnly,
+                                                       KernelAccessType.WriteOnly,
+                                                       NativeTypeEnum.Float,
+                                                       cFloatArrayLength);
 
     lBufferA.readFrom(FloatBuffer.wrap(lArrayA),
                       0L,
@@ -209,7 +218,9 @@ public class ClearCLBasicDemo
     lKernel.setGlobalSizes(cFloatArrayLength);
     lKernel.run();
 
-    FloatBuffer lArrayC = ByteBuffer.allocateDirect(4 * cFloatArrayLength)
+    FloatBuffer lArrayC = ByteBuffer
+                                    .allocateDirect(4
+                                                    * cFloatArrayLength)
                                     .order(ByteOrder.nativeOrder())
                                     .asFloatBuffer();
 

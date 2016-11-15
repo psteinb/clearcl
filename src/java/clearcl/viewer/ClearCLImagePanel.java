@@ -1,4 +1,4 @@
-package clearcl.view;
+package clearcl.viewer;
 
 import static java.lang.Math.toIntExact;
 
@@ -24,7 +24,7 @@ import clearcl.ops.Reductions;
 import clearcl.util.Region2;
 import clearcl.util.ElapsedTime;
 import coremem.ContiguousMemoryInterface;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;

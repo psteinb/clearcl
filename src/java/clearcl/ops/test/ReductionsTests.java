@@ -18,10 +18,10 @@ import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.KernelAccessType;
 import clearcl.ops.Reductions;
+import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
-import coremem.types.NativeTypeEnum;
 
-public class RecustionsTests
+public class ReductionsTests
 {
 
   @Test

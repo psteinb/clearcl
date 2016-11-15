@@ -12,7 +12,7 @@ import clearcl.ClearCLProgram;
 import clearcl.enums.BuildStatus;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.KernelAccessType;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 public class Benchmark
 {

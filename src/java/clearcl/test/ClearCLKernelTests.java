@@ -23,7 +23,7 @@ import clearcl.exceptions.ClearCLUnknownArgumentNameException;
 import clearcl.selector.BadDeviceSelector;
 import clearcl.selector.DeviceTypeSelector;
 import clearcl.selector.GlobalMemorySelector;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 public class ClearCLKernelTests
 {
