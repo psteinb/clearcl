@@ -26,6 +26,8 @@ public class PanZoomScene extends Scene
   private Point2D mSceneCenterInRoot;
   private boolean mPivotInitialized;
 
+  private volatile float mMouseX, mMouseY;
+
   /**
    * Constructs a PanZoomScene from a stage, root node, a node to pan and zoom,
    * window dimensions and a fill color.
@@ -57,12 +59,15 @@ public class PanZoomScene extends Scene
 
     mScale = new Scale();
     mTranslate = new Translate();
-    //mAffine.
-    //mPanZoomNode.getTransforms().append(mAffine);
-    mPanZoomNode.getTransforms().add(mScale);
-    mPanZoomNode.getTransforms().add(mTranslate);
+    mAffine = new Affine();
+    mPanZoomNode.getTransforms().add(mAffine);
 
     pStage.setFullScreenExitHint("Double click gain to exit fullscreen mode");
+
+    setOnMouseMoved((e) -> {
+      mMouseX = (float) e.getX();
+      mMouseY = (float) e.getY();
+    });
 
     setOnMousePressed((event) -> {
 
@@ -71,8 +76,14 @@ public class PanZoomScene extends Scene
 
         if (event.getClickCount() == 2)
         {
+          double lSceneWidthBefore = getWidth();
+          double lSceneHeightBefore = getHeight();
           pStage.setFullScreen(!pStage.isFullScreen());
-          resetZoomPivot();
+          double lSceneWidthAfter = getWidth();
+          double lSceneHeightAfter = getHeight();
+
+          scaleScene(Math.sqrt(lSceneHeightAfter
+                               / lSceneHeightBefore));
         }
         else
         {
@@ -113,13 +124,13 @@ public class PanZoomScene extends Scene
           Point2D lRootNodePoint = mPanZoomNode.sceneToLocal(lMouseX,
                                                              lMouseY);
 
-          double lDeltaX = mTranslate.getX()
-                           + (lRootNodePoint.getX() - mPressedX);
-          double lDeltaY = mTranslate.getY()
-                           + (lRootNodePoint.getY() - mPressedY);
+          double lDeltaX = lRootNodePoint.getX() - mPressedX;
+          double lDeltaY = lRootNodePoint.getY() - mPressedY;
 
           mTranslate.setX(lDeltaX);
           mTranslate.setY(lDeltaY);
+
+          mAffine.append(mTranslate);
 
           event.consume();
         }
@@ -143,12 +154,12 @@ public class PanZoomScene extends Scene
     });
 
     widthProperty().addListener((obs, o, n) -> {
-      resetZoomPivot();
+      // resetZoomPivot();
       scaleScene(Math.sqrt(n.doubleValue() / o.doubleValue()));
     });
 
     heightProperty().addListener((obs, o, n) -> {
-      resetZoomPivot();
+      // resetZoomPivot();
       scaleScene(Math.sqrt(n.doubleValue() / o.doubleValue()));
     });
 
@@ -161,8 +172,12 @@ public class PanZoomScene extends Scene
     else if (lDeltaFactor > 2)
       lDeltaFactor = 2;
 
-    mScale.setX(mScale.getX() * lDeltaFactor);
-    mScale.setY(mScale.getY() * lDeltaFactor);
+    resetZoomPivot();
+
+    mScale.setX(lDeltaFactor);
+    mScale.setY(lDeltaFactor);
+
+    mAffine.append(mScale);
   }
 
   public void resetZoomPivot()
@@ -170,8 +185,23 @@ public class PanZoomScene extends Scene
     double lSceneWidth = getWidth();
     double lSceneHeight = getHeight();
 
-    mScale.setPivotX(lSceneWidth / 2);
-    mScale.setPivotY(lSceneHeight / 2);/**/
+    Point2D lRootNodePoint = mPanZoomNode.sceneToLocal(lSceneWidth
+                                                       / 2,
+                                                       lSceneHeight
+                                                            / 2);
+
+    mScale.setPivotX(lRootNodePoint.getX());
+    mScale.setPivotY(lRootNodePoint.getY());/**/
+  }
+
+  public float getMouseX()
+  {
+    return mMouseX;
+  }
+
+  public float getMouseY()
+  {
+    return mMouseY;
   }
 
 }
