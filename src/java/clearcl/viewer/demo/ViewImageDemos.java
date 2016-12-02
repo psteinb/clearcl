@@ -10,6 +10,7 @@ import clearcl.ClearCLImage;
 import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
 import clearcl.backend.ClearCLBackendInterface;
+import clearcl.backend.ClearCLBackends;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
@@ -25,7 +26,7 @@ public class ViewImageDemos
                                IOException
   {
 
-    ClearCLBackendInterface lClearCLBackendInterface = new ClearCLBackendJOCL();
+    ClearCLBackendInterface lClearCLBackendInterface = ClearCLBackends.getBestBackend();
     try (ClearCL lClearCL = new ClearCL(lClearCLBackendInterface))
     {
       ClearCLDevice lFastestGPUDevice = lClearCL.getFastestGPUDevice();
@@ -74,7 +75,7 @@ public class ViewImageDemos
                                IOException
   {
 
-    ClearCLBackendInterface lClearCLBackendInterface = new ClearCLBackendJOCL();
+    ClearCLBackendInterface lClearCLBackendInterface = ClearCLBackends.getBestBackend();
     try (ClearCL lClearCL = new ClearCL(lClearCLBackendInterface))
     {
       ClearCLDevice lFastestGPUDevice = lClearCL.getFastestGPUDevice();
@@ -87,7 +88,7 @@ public class ViewImageDemos
                                                        "phantoms/phantoms.cl");
       lProgram.buildAndLog();
       
-      int lSize = 512;
+      int lSize = 213;
 
       ClearCLImage lImage = lContext.createImage(ImageChannelOrder.R,
                                                  ImageChannelDataType.UnsignedInt8,

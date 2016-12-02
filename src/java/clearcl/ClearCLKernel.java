@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import clearcl.abs.ClearCLBase;
-import clearcl.exceptions.CleaCLInvalidExecutionRange;
+import clearcl.exceptions.ClearCLInvalidExecutionRange;
 import clearcl.exceptions.ClearCLArgumentMissingException;
 import clearcl.exceptions.ClearCLUnknownArgumentNameException;
 import clearcl.interfaces.ClearCLImageInterface;
@@ -305,7 +305,7 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 
                           setArgumentsInternal();
                           if (getGlobalSizes() == null || getGlobalOffsets() == null)
-                            throw new CleaCLInvalidExecutionRange(String.format("global offset = %s, global range = %s, local range = %s",
+                            throw new ClearCLInvalidExecutionRange(String.format("global offset = %s, global range = %s, local range = %s",
                                                                                 Arrays.toString(getGlobalOffsets()),
                                                                                 Arrays.toString(getGlobalSizes()),
                                                                                 Arrays.toString(getLocalSizes())));

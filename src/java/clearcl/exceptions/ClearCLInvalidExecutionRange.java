@@ -6,12 +6,12 @@ package clearcl.exceptions;
  *
  * @author royer
  */
-public class CleaCLInvalidExecutionRange extends ClearCLException
+public class ClearCLInvalidExecutionRange extends ClearCLException
 {
 
   private static final long serialVersionUID = 1L;
 
-  public CleaCLInvalidExecutionRange(String pMessage)
+  public ClearCLInvalidExecutionRange(String pMessage)
   {
     super(pMessage);
   }

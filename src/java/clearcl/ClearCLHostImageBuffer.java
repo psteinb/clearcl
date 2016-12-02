@@ -12,8 +12,8 @@ import coremem.offheap.OffHeapMemory;
 import coremem.util.Size;
 
 public class ClearCLHostImageBuffer extends ClearCLMemBase implements
-                                                          ClearCLMemInterface,
-                                                          ClearCLImageInterface
+                                    ClearCLMemInterface,
+                                    ClearCLImageInterface
 {
 
   private final ContiguousMemoryInterface mContiguousMemory;
@@ -23,11 +23,12 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
 
   public static ClearCLHostImageBuffer allocateSameAs(ClearCLImageInterface pClearCLImage)
   {
-    ClearCLHostImageBuffer lClearCLHostImage = new ClearCLHostImageBuffer(pClearCLImage.getContext(),
-                                                                          OffHeapMemory.allocatePageAlignedBytes("ClearCLHostImageBuffer",pClearCLImage.getSizeInBytes()),
-                                                                          pClearCLImage.getNativeType(),
-                                                                          pClearCLImage.getNumberOfChannels(),
-                                                                          pClearCLImage.getDimensions());
+    ClearCLHostImageBuffer lClearCLHostImage =
+                                             new ClearCLHostImageBuffer(pClearCLImage.getContext(),
+                                                                        allocate(pClearCLImage.getSizeInBytes()),
+                                                                        pClearCLImage.getNativeType(),
+                                                                        pClearCLImage.getNumberOfChannels(),
+                                                                        pClearCLImage.getDimensions());
     return lClearCLHostImage;
   }
 
@@ -37,13 +38,18 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
                                 long... pDimensions)
   {
     this(pClearCLContext,
-         OffHeapMemory.allocatePageAlignedBytes("ClearCLHostImageBuffer",
-                                     pNumberOfChannels * Size.of(pNativeType)
-                                         * getVolume(pDimensions)),
+         allocate(pNumberOfChannels * Size.of(pNativeType)
+                  * getVolume(pDimensions)),
          pNativeType,
          pNumberOfChannels,
          pDimensions);
 
+  }
+
+  private static OffHeapMemory allocate(long pSizeInBytes)
+  {
+    return OffHeapMemory.allocatePageAlignedBytes("ClearCLHostImageBuffer",
+                                                  pSizeInBytes);
   }
 
   public ClearCLHostImageBuffer(ClearCLContext pClearCLContext,

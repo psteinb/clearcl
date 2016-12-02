@@ -8,6 +8,7 @@ import clearcl.ClearCLImage;
 import clearcl.enums.ImageType;
 import clearcl.viewer.jfx.PanZoomScene;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -261,6 +262,18 @@ public class ClearCLImageViewer
     catch (InterruptedException e)
     {
     }
+
+  }
+
+  /**
+   * Returns the render mode property.
+   * 
+   * @return
+   */
+  public void setRenderMode(RenderMode pRenderMode)
+  {
+    Platform.runLater(() -> mImagePanel.getRenderModeProperty()
+                                       .set(pRenderMode));
 
   }
 

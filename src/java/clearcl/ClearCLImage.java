@@ -9,6 +9,7 @@ import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
+import clearcl.exceptions.ClearCLException;
 import clearcl.exceptions.ClearCLHostAccessException;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.interfaces.ClearCLMemInterface;
@@ -22,8 +23,8 @@ import coremem.enums.NativeTypeEnum;
  * @author royer
  */
 public class ClearCLImage extends ClearCLMemBase implements
-                                                ClearCLMemInterface,
-                                                ClearCLImageInterface
+                          ClearCLMemInterface,
+                          ClearCLImageInterface
 {
   private final ClearCLContext mClearCLContext;
   private final HostAccessType mHostAccessType;
@@ -74,6 +75,17 @@ public class ClearCLImage extends ClearCLMemBase implements
     mImageChannelOrder = pImageChannelOrder;
     mImageChannelDataType = pImageChannelType;
     mDimensions = pDimensions;
+  }
+
+  /**
+   * Fills this image with zeros.
+   * 
+   * @param pBlocking  true -> blocking call, false -> asynchronous call 
+   */
+  public void fillZero(boolean pBlocking)
+  {
+    fill(new byte[]
+    { 0 }, pBlocking);
   }
 
   /**
@@ -206,6 +218,7 @@ public class ClearCLImage extends ClearCLMemBase implements
                      long pOffsetInDstBuffer,
                      boolean pBlockingCopy)
   {
+
     getBackend().enqueueCopyImageToBuffer(mClearCLContext.getDefaultQueue()
                                                          .getPeerPointer(),
                                           getPeerPointer(),
@@ -230,6 +243,9 @@ public class ClearCLImage extends ClearCLMemBase implements
   {
     if (!getHostAccessType().isReadableFromHost())
       throw new ClearCLHostAccessException("Buffer not readable from host");
+
+    if (pClearCLHostImage.getSizeInBytes() != getSizeInBytes())
+      throw new ClearCLException("Incompatible length");
 
     getBackend().enqueueReadFromImage(mClearCLContext.getDefaultQueue()
                                                      .getPeerPointer(),
@@ -263,7 +279,8 @@ public class ClearCLImage extends ClearCLMemBase implements
     if (!getHostAccessType().isReadableFromHost())
       throw new ClearCLHostAccessException("Image not readable from host");
 
-    ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pContiguousMemory);
+    ClearCLPeerPointer lHostMemPointer =
+                                       getBackend().wrap(pContiguousMemory);
 
     getBackend().enqueueReadFromImage(mClearCLContext.getDefaultQueue()
                                                      .getPeerPointer(),
@@ -325,7 +342,8 @@ public class ClearCLImage extends ClearCLMemBase implements
     if (!getHostAccessType().isWritableFromHost())
       throw new ClearCLHostAccessException("Image not writable from host");
 
-    ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pContiguousMemory);
+    ClearCLPeerPointer lHostMemPointer =
+                                       getBackend().wrap(pContiguousMemory);
 
     getBackend().enqueueWriteToImage(mClearCLContext.getDefaultQueue()
                                                     .getPeerPointer(),
@@ -503,8 +521,8 @@ public class ClearCLImage extends ClearCLMemBase implements
   @Override
   public long getSizeInBytes()
   {
-    return getVolume() * getChannelDataType().getNativeType()
-                                             .getSizeInBytes()
+    return getVolume()
+           * getChannelDataType().getNativeType().getSizeInBytes()
            * getChannelOrder().getNumberOfChannels();
   }
 

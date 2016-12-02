@@ -68,15 +68,17 @@ public class ClearCLImagePanel extends StackPane
 
   private ReentrantLock mLock = new ReentrantLock();
 
-  private final BooleanProperty mAuto = new SimpleBooleanProperty(true);
+  private final BooleanProperty mAuto =
+                                      new SimpleBooleanProperty(true);
   private final FloatProperty mMin = new SimpleFloatProperty(0);
   private final FloatProperty mMax = new SimpleFloatProperty(1);
   private final FloatProperty mGamma = new SimpleFloatProperty(1);
   private final IntegerProperty mZ = new SimpleIntegerProperty(0);
-  private final IntegerProperty mNumberOfSteps = new SimpleIntegerProperty(128);
+  private final IntegerProperty mNumberOfSteps =
+                                               new SimpleIntegerProperty(128);
 
-  private final ObjectProperty<RenderMode> mRenderMode = new SimpleObjectProperty<>(RenderMode.ColorProjection);
-
+  private final ObjectProperty<RenderMode> mRenderMode =
+                                                       new SimpleObjectProperty<>(RenderMode.ColorProjection);
 
   private Float mTrueMin = 0f, mTrueMax = 1f;
 
@@ -97,12 +99,13 @@ public class ClearCLImagePanel extends StackPane
       throw new ClearCLUnsupportedException("1D image visualizationnot supported");
     }
 
-    mRenderRGBBuffer = lContext.createBuffer(MemAllocMode.AllocateHostPointer,
-                                             HostAccessType.ReadOnly,
-                                             KernelAccessType.WriteOnly,
-                                             4,
-                                             NativeTypeEnum.Byte,
-                                             Region2.region(mClearCLImage.getDimensions()));
+    mRenderRGBBuffer =
+                     lContext.createBuffer(MemAllocMode.AllocateHostPointer,
+                                           HostAccessType.ReadOnly,
+                                           KernelAccessType.WriteOnly,
+                                           4,
+                                           NativeTypeEnum.Byte,
+                                           Region2.region(mClearCLImage.getDimensions()));
 
     try
     {
@@ -127,7 +130,8 @@ public class ClearCLImagePanel extends StackPane
       throw new RuntimeException("Cannot build program", e);
     }
 
-    mClearCLHostImage = ClearCLHostImageBuffer.allocateSameAs(mRenderRGBBuffer);
+    mClearCLHostImage =
+                      ClearCLHostImageBuffer.allocateSameAs(mRenderRGBBuffer);
 
     backgroundProperty().set(new Background(new BackgroundFill(Color.BLACK,
                                                                CornerRadii.EMPTY,
@@ -135,7 +139,7 @@ public class ClearCLImagePanel extends StackPane
 
     mCanvas = new Canvas(pClearCLImage.getWidth(),
                          pClearCLImage.getHeight());
-    mCanvas.setCache(false);
+    // mCanvas.setCache(false);
     // mCanvas.setCacheHint(CacheHint.SPEED);
     mGraphicsContext2D = mCanvas.getGraphicsContext2D();
 
@@ -146,7 +150,8 @@ public class ClearCLImagePanel extends StackPane
 
     pClearCLImage.addListener((q, s) -> {
 
-      ElapsedTime.measure("q.waitToFinish();", () -> q.waitToFinish());
+      ElapsedTime.measure("q.waitToFinish();",
+                          () -> q.waitToFinish());
 
       updateImage();
     });
@@ -160,6 +165,15 @@ public class ClearCLImagePanel extends StackPane
     mGamma.addListener((e) -> {
       updateImage();
     });
+    mZ.addListener((e) -> {
+      updateImage();
+    });
+    mRenderMode.addListener((e) -> {
+      updateImage();
+    });
+
+    mNumberOfSteps.set((int) Math.min(mNumberOfSteps.get(),
+                                      pClearCLImage.getDepth()));
 
     updateImage();
   }
@@ -174,8 +188,7 @@ public class ClearCLImagePanel extends StackPane
     boolean lTryLock = false;
     try
     {
-      lTryLock = true;
-      mLock.tryLock(1, TimeUnit.MILLISECONDS);
+      lTryLock = mLock.tryLock(1, TimeUnit.MILLISECONDS);
     }
     catch (InterruptedException e)
     {
@@ -214,17 +227,21 @@ public class ClearCLImagePanel extends StackPane
           switch (getRenderModeProperty().get())
           {
           case AvgProjection:
-            mRenderKernel = mProgram.getKernel("image_render_avgproj_3df");
+            mRenderKernel =
+                          mProgram.getKernel("image_render_avgproj_3df");
             break;
           case ColorProjection:
-            mRenderKernel = mProgram.getKernel("image_render_colorproj_3df");
+            mRenderKernel =
+                          mProgram.getKernel("image_render_colorproj_3df");
             break;
           case MaxProjection:
-            mRenderKernel = mProgram.getKernel("image_render_maxproj_3df");
+            mRenderKernel =
+                          mProgram.getKernel("image_render_maxproj_3df");
             break;
           default:
           case Slice:
-            mRenderKernel = mProgram.getKernel("image_render_slice_3df");
+            mRenderKernel =
+                          mProgram.getKernel("image_render_slice_3df");
             break;
           }
 
@@ -239,33 +256,39 @@ public class ClearCLImagePanel extends StackPane
         mRenderKernel.setArgument("vmax", lMax);
         mRenderKernel.setArgument("gamma", mGamma.get());
         mRenderKernel.setOptionalArgument("z", mZ.get());
-        mRenderKernel.setOptionalArgument("zstep",
-                                          (int) (mClearCLImage.getDepth() / mNumberOfSteps.get()));
+
+        final int lZStep = (int) (1.0 * mClearCLImage.getDepth()
+                                  / mNumberOfSteps.get());
+        mRenderKernel.setOptionalArgument("zstep", lZStep);
+
         mRenderKernel.run(true);
 
         ElapsedTime.measure("mRenderRGBBuffer.copyTo(mClearCLHostImage, true);",
-                        () -> mRenderRGBBuffer.copyTo(mClearCLHostImage,
-                                                      true));
+                            () -> mRenderRGBBuffer.copyTo(mClearCLHostImage,
+                                                          true));
 
         long lWidth = mClearCLHostImage.getWidth();
         long lHeight = mClearCLHostImage.getHeight();
 
-        ContiguousMemoryInterface lContiguousMemory = mClearCLHostImage.getContiguousMemory();
+        ContiguousMemoryInterface lContiguousMemory =
+                                                    mClearCLHostImage.getContiguousMemory();
 
-        if (mPixelArray == null || mPixelArray.length != lContiguousMemory.getSizeInBytes())
+        if (mPixelArray == null
+            || mPixelArray.length != lContiguousMemory.getSizeInBytes())
         {
-          mPixelArray = new byte[toIntExact(lContiguousMemory.getSizeInBytes())];
+          mPixelArray =
+                      new byte[toIntExact(lContiguousMemory.getSizeInBytes())];
         }
 
         ElapsedTime.measure("lContiguousMemory.copyTo(mPixelArray)",
-                        () -> lContiguousMemory.copyTo(mPixelArray));
+                            () -> lContiguousMemory.copyTo(mPixelArray));
 
-
-        
         Platform.runLater(() -> {
 
-          PixelFormat<ByteBuffer> lPixelFormat = PixelFormat.getByteBgraInstance();
-          PixelWriter pixelWriter = mGraphicsContext2D.getPixelWriter();
+          PixelFormat<ByteBuffer> lPixelFormat =
+                                               PixelFormat.getByteBgraInstance();
+          PixelWriter pixelWriter =
+                                  mGraphicsContext2D.getPixelWriter();
 
           pixelWriter.setPixels(0,
                                 0,
