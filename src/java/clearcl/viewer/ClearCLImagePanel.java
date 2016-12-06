@@ -198,6 +198,7 @@ public class ClearCLImagePanel extends StackPane
     {
       try
       {
+        //System.out.println("Update View");
         float lMin = 0;
         float lMax = 1;
 
@@ -207,7 +208,8 @@ public class ClearCLImagePanel extends StackPane
           mTrueMin = lMinMax[0];
           mTrueMax = lMinMax[1];
 
-          // System.out.format("min=%f, max=%f \n", mTrueMin, mTrueMax);
+          //if(mTrueMin!=0 || mTrueMax!=0)
+            //System.out.format("min=%f, max=%f \n", mTrueMin, mTrueMax);
 
           lMin = mTrueMin;
           lMax = mTrueMax;

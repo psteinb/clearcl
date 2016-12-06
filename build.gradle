@@ -68,7 +68,7 @@ dependencies
 	//compile 'net.sf.trove4j:trove4j:3.0.3'
 
 	// CoreMem:
-	compile group: "net.coremem", name: "CoreMem", version: "[0.3.0,)", changing: true, transitive:true
+	compile group: "net.coremem", name: "CoreMem", version: "[0.3.1,)", changing: true, transitive:true
 	
 	// JAVACL Backend:
 	compile 'com.nativelibs4java:javacl:1.0.0-RC4'
