@@ -138,6 +138,7 @@ public class ClearCLPlatform extends ClearCLBase
   @Override
   public void close()
   {
+    setPeerPointer(null);
   }
 
 }

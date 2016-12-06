@@ -13,6 +13,7 @@ import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
 import coremem.ContiguousMemoryInterface;
+import coremem.fragmented.FragmentedMemoryInterface;
 
 /**
  * ClearCL backend interface
@@ -692,14 +693,24 @@ public interface ClearCLBackendInterface
   ClearCLPeerPointer wrap(Buffer pBuffer);
 
   /**
-   * Wraps a CoreMem buffer inside of a peer pointer.
+   * Wraps a CoreMem contiguous buffer inside of a peer pointer.
    * 
    * @param pContiguousMemory
-   *          CoreMem buffer
+   *          CoreMem contiguous buffer
    * @return corresponding buffer peer pointer
    */
   ClearCLPeerPointer wrap(ContiguousMemoryInterface pContiguousMemory);
 
+  
+  /**
+   * Wraps a CoreMem fragmented buffer inside of a peer pointer.
+   * 
+   * @param pFragmentedMemory
+   *          CoreMem fragmented buffer
+   * @return corresponding buffer peer pointer
+   */
+  ClearCLPeerPointer wrap(FragmentedMemoryInterface pFragmentedMemory);
+  
   /**
    * Waits for queue to finish all enqueued tasks.
    * 
@@ -707,5 +718,7 @@ public interface ClearCLBackendInterface
    *          queue peer pointer
    */
   void waitQueueToFinish(ClearCLPeerPointer pQueuePeerPointer);
+
+
 
 }

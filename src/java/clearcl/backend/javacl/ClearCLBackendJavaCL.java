@@ -31,8 +31,10 @@ import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
+import clearcl.exceptions.ClearCLUnsupportedException;
 import clearcl.exceptions.OpenCLException;
 import coremem.ContiguousMemoryInterface;
+import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.util.Size;
 
 public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
@@ -1052,6 +1054,12 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
       return lPeerPointer;
     });
   }
+  
+  @Override
+  public ClearCLPeerPointer wrap(FragmentedMemoryInterface pFragmentedMemory)
+  {
+    throw new ClearCLUnsupportedException("fragmented buffers not supported.");
+  }
 
   @Override
   public void releaseBuffer(ClearCLPeerPointer pPeerPointer)
@@ -1117,5 +1125,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
       BackendUtils.checkOpenCLError(mOpenCLLibrary.clFinish((OpenCLLibrary.cl_command_queue) pQueuePointer.getPointer()));
     });
   }
+
+
 
 }

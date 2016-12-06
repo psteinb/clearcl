@@ -457,14 +457,7 @@ public class ClearCLProgram extends ClearCLBase
     return lCounter;
   }
 
-  /* (non-Javadoc)
-   * @see clearcl.ClearCLBase#close()
-   */
-  @Override
-  public void close()
-  {
-    getBackend().releaseProgram(getPeerPointer());
-  }
+
 
   /* (non-Javadoc)
    * @see java.lang.Object#toString()
@@ -625,4 +618,13 @@ public class ClearCLProgram extends ClearCLBase
     addBuildOption("-cl-nv-opt-level=" + N);
   }
 
+  /* (non-Javadoc)
+   * @see clearcl.ClearCLBase#close()
+   */
+  @Override
+  public void close()
+  {
+    getBackend().releaseProgram(getPeerPointer());
+    setPeerPointer(null);
+  }
 }

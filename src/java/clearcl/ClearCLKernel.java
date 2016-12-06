@@ -345,14 +345,7 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 
   }
 
-  /* (non-Javadoc)
-   * @see clearcl.ClearCLBase#close()
-   */
-  @Override
-  public void close()
-  {
-    getBackend().releaseKernel(getPeerPointer());
-  }
+
 
   /* (non-Javadoc)
    * @see java.lang.Object#toString()
@@ -509,4 +502,13 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
     mLogExecutiontime = plogExecutionTime;
   }
 
+  /* (non-Javadoc)
+   * @see clearcl.ClearCLBase#close()
+   */
+  @Override
+  public void close()
+  {
+    getBackend().releaseKernel(getPeerPointer());
+    setPeerPointer(null);
+  }
 }

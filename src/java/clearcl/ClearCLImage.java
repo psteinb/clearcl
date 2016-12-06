@@ -16,6 +16,7 @@ import clearcl.interfaces.ClearCLMemInterface;
 import clearcl.util.Region3;
 import coremem.ContiguousMemoryInterface;
 import coremem.enums.NativeTypeEnum;
+import coremem.fragmented.FragmentedMemoryInterface;
 
 /**
  * ClearCLImage is the ClearCL abstraction for OpenCL images.
@@ -80,7 +81,8 @@ public class ClearCLImage extends ClearCLMemBase implements
   /**
    * Fills this image with zeros.
    * 
-   * @param pBlocking  true -> blocking call, false -> asynchronous call 
+   * @param pBlocking
+   *          true -> blocking call, false -> asynchronous call
    */
   public void fillZero(boolean pBlocking)
   {
@@ -258,6 +260,31 @@ public class ClearCLImage extends ClearCLMemBase implements
     pClearCLHostImage.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
 
   }
+  
+  /**
+   * Writes a nD region of this image to a NIO buffer.
+   * 
+   * @param pBuffer
+   *          NIO buffer
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void writeTo(Buffer pBuffer,
+                      boolean pBlockingRead)
+  {
+    if (!getHostAccessType().isReadableFromHost())
+      throw new ClearCLHostAccessException("Image not readable from host");
+
+    ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pBuffer);
+
+    getBackend().enqueueReadFromImage(mClearCLContext.getDefaultQueue()
+                                                     .getPeerPointer(),
+                                      getPeerPointer(),
+                                      pBlockingRead,
+                                      Region3.originZero(),
+                                      Region3.region(getDimensions()),
+                                      lHostMemPointer);
+  }
 
   /**
    * Writes a nD region of this image to a CoreMem buffer.
@@ -356,7 +383,7 @@ public class ClearCLImage extends ClearCLMemBase implements
   }
 
   /**
-   * Reads from a CoreMem buffer into this image.
+   * Reads from a CoreMem contiguous buffer into this image.
    * 
    * @param pContiguousMemory
    *          CoreMem buffer
@@ -367,6 +394,56 @@ public class ClearCLImage extends ClearCLMemBase implements
                        boolean pBlockingRead)
   {
     readFrom(pContiguousMemory,
+             Region3.originZero(),
+             Region3.region(getDimensions()),
+             pBlockingRead);
+  }
+
+  /**
+   * Reads from a CoreMem fragmented buffer into a nD region of this image.
+   * 
+   * @param pFragmentedMemory
+   *          CoreMem fragmented buffer
+   * @param pOrigin
+   *          origin in image
+   * @param pRegion
+   *          region dimensions in image
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void readFrom(FragmentedMemoryInterface pFragmentedMemory,
+                       long[] pOrigin,
+                       long[] pRegion,
+                       boolean pBlockingRead)
+  {
+    if (!getHostAccessType().isWritableFromHost())
+      throw new ClearCLHostAccessException("Image not writable from host");
+
+    ClearCLPeerPointer lHostMemPointer =
+                                       getBackend().wrap(pFragmentedMemory);
+
+    getBackend().enqueueWriteToImage(mClearCLContext.getDefaultQueue()
+                                                    .getPeerPointer(),
+                                     getPeerPointer(),
+                                     pBlockingRead,
+                                     Region3.origin(pOrigin),
+                                     Region3.region(pRegion),
+                                     lHostMemPointer);
+    notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+  }
+
+  /**
+   * Reads from a CoreMem fragmented buffer into this image.
+   * 
+   * @param pFragmentedMemory
+   *          CoreMem fragmented buffer
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void readFrom(FragmentedMemoryInterface pFragmentedMemory,
+                       boolean pBlockingRead)
+  {
+    readFrom(pFragmentedMemory,
              Region3.originZero(),
              Region3.region(getDimensions()),
              pBlockingRead);
@@ -549,6 +626,7 @@ public class ClearCLImage extends ClearCLMemBase implements
   public void close()
   {
     getBackend().releaseImage(getPeerPointer());
+    setPeerPointer(null);
   }
 
 }

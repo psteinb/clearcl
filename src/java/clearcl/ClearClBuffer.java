@@ -85,9 +85,9 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pPattern
    *          pattern as a sequence of bytes
    * @param pOffsetInBuffer
-   *          offset in buffer
+   *          offset in buffer in bytes
    * @param pLengthInBuffer
-   *          length in buffer
+   *          length in buffer in bytes
    * @param pBlockingFill
    *          true -> blocking call, false -> asynchronous call
    */
@@ -298,9 +298,9 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pContiguousMemory
    *          destination CoreMem buffer
    * @param pOffsetInBuffer
-   *          offset in destination buffer
+   *          offset in destination buffer in bytes
    * @param pLengthInBuffer
-   *          length to write
+   *          length to write in bytes
    * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
    */
@@ -353,9 +353,9 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pBuffer
    *          destination NIO buffer
    * @param pOffsetInBuffer
-   *          offset in destination buffer
+   *          offset in destination buffer in bytes
    * @param pLengthInBuffer
-   *          length to write
+   *          length to write in bytes
    * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
    */
@@ -407,9 +407,9 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pContiguousMemory
    *          source NIO buffer
    * @param pOffsetInBuffer
-   *          offset in source buffer
+   *          offset in source buffer in bytes
    * @param pLengthInBuffer
-   *          length to read
+   *          length to read in bytes
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
    */
@@ -462,9 +462,9 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pBuffer
    *          source NIO buffer
    * @param pOffsetInBuffer
-   *          offset in source buffer
+   *          offset in source buffer in bytes
    * @param pLengthInBuffer
-   *          length to read
+   *          length to read in bytes
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
    */
@@ -741,6 +741,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   public void close()
   {
     getBackend().releaseBuffer(getPeerPointer());
+    setPeerPointer(null);
   }
 
 }

@@ -16,7 +16,7 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
                                     ClearCLImageInterface
 {
 
-  private final ContiguousMemoryInterface mContiguousMemory;
+  private ContiguousMemoryInterface mContiguousMemory;
   private NativeTypeEnum mNativeType;
   private final long[] mDimensions;
   private long mNumberOfChannels;
@@ -146,6 +146,7 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
   public void close()
   {
     mContiguousMemory.free();
+    mContiguousMemory=null;
   }
 
 }

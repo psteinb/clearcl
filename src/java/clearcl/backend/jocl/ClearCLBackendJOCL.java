@@ -48,7 +48,9 @@ import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
+import clearcl.exceptions.ClearCLUnsupportedException;
 import coremem.ContiguousMemoryInterface;
+import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.util.Size;
 
 public class ClearCLBackendJOCL implements ClearCLBackendInterface
@@ -1020,6 +1022,12 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
       ByteBuffer lByteBuffer = pContiguousMemory.getByteBuffer();
       return wrap(lByteBuffer);
     });
+  }
+  
+  @Override
+  public ClearCLPeerPointer wrap(FragmentedMemoryInterface pFragmentedMemory)
+  {
+    throw new ClearCLUnsupportedException("fragmented buffers not supported.");
   }
 
   @Override

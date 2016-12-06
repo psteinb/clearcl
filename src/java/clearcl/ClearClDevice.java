@@ -180,6 +180,7 @@ public class ClearCLDevice extends ClearCLBase
   public void close()
   {
     getBackend().releaseDevice(getPeerPointer());
+    setPeerPointer(null);
   }
 
 }
