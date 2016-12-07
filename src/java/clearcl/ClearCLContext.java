@@ -375,10 +375,12 @@ public class ClearCLContext extends ClearCLBase
    */
   public ClearCLProgram createProgram(String... pSourceCode)
   {
-
     ClearCLProgram lClearCLProgram = new ClearCLProgram(mDevice,
                                                         this,
                                                         null);
+    for (String lSourceCode : pSourceCode)
+      lClearCLProgram.addSource(lSourceCode);
+
     return lClearCLProgram;
   }
 
@@ -397,12 +399,12 @@ public class ClearCLContext extends ClearCLBase
   public ClearCLProgram createProgram(Class<?> pClassForRessource,
                                       String... pRessourceNames) throws IOException
   {
-    ClearCLProgram lProgram = createProgram();
+    ClearCLProgram lClearCLProgram = createProgram();
 
     for (String lRessourceName : pRessourceNames)
-      lProgram.addSource(pClassForRessource, lRessourceName);
+      lClearCLProgram.addSource(pClassForRessource, lRessourceName);
 
-    return lProgram;
+    return lClearCLProgram;
   }
 
   /* (non-Javadoc)
