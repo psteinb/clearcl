@@ -12,6 +12,7 @@ import clearcl.backend.ClearCLBackendInterface;
 import clearcl.backend.javacl.ClearCLBackendJavaCL;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.benchmark.Benchmark;
+import clearcl.enums.BenchmarkTest;
 
 public class BenchmarkDemo
 {
@@ -19,6 +20,7 @@ public class BenchmarkDemo
   @Test
   public void demo() throws Exception
   {
+    Benchmark.sStdOutVerbose = true;
     testWithBackend(new ClearCLBackendJOCL());
     testWithBackend(new ClearCLBackendJavaCL());
   }
@@ -31,9 +33,16 @@ public class BenchmarkDemo
 
       Collections.shuffle(lAllDevices, new Random(System.nanoTime()));
 
-      ClearCLDevice lFastestDevice = Benchmark.getFastestDevice(lAllDevices);
+      for (BenchmarkTest lBenchmarkTest : BenchmarkTest.values())
+      {
+        ClearCLDevice lFastestDevice =
+                                     Benchmark.getFastestDevice(lAllDevices,
+                                                                lBenchmarkTest);
 
-      System.out.println("Fastest device: "+lFastestDevice);
+        System.out.format("Fastest device for test '%s': %s \n",
+                          lBenchmarkTest,
+                          lFastestDevice);
+      }
     }
   }
 

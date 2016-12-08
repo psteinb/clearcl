@@ -1,55 +1,58 @@
 
-inline float getPixelValue(__global const float *a, int w, int h, int x, int y)
-{
-	if(x<0) x=0;
-	if(x>=w) x=w-1;
-	if(y<0) y=0;
-	if(y>=h) y=h-1;
-	
-	int i = x+w*y;
 
-	return a[i];
-}
-
-__kernel void fill(__global float *a)
+__kernel void buffer(__global const float *a, __global float *b)
 {
 	int w = get_global_size(0);
 	int h = get_global_size(1);
 	int x = get_global_id(0);
 	int y = get_global_id(1);
 
-	int i =  x+w*y;
-	a[i] = (x*y);
+  float acc=0;
+  
+  for(int i=0; i<8; i++)
+  {
+	 int is =  ((i*x)^(y+i)) % (w*h);
+	 acc += a[is];
+	}
+	
+	acc = acc/64;
+
+  int id = (w-1-x)+w*(h-1-y);
+	b[id] = acc;
 }
 
-__kernel void benchmark1(__global const float *a, __global float *b)
+
+// Render function,
+// performs max projection and then uses the transfer function to obtain a color per pixel:
+__kernel void image(	__read_only image3d_t image,
+                          const uint  imageW,
+                         global uint *output						
+						            )
 {
-	int w = get_global_size(0);
-	int h = get_global_size(1);
-	int x = get_global_id(0);
-	int y = get_global_id(1);
-	
-	float acc = 0;
-	
-	for(int v=-2; v>=2; v++)
-		for(int u=-2; u>=2; u++)
-			acc += getPixelValue(a,w,h,x+u,y+v);
-	acc = acc/(5*5);
-	
-	int i =  x+w*y;
-	b[i] = acc;
-}
+  // thread int coordinates:
+  const uint x = get_global_id(0);
+  const uint y = get_global_id(1);
 
-__kernel void benchmark2(__global const float *a, __global float *b)
-{
-	int w = get_global_size(0);
-	int h = get_global_size(1);
-	int x = get_global_id(0);
-	int y = get_global_id(1);
+	// samplers:
+  const sampler_t volumeSampler   =   CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR;
 
-	int is =  x+w*y;
-	int id = (w-1-x)+w*(h-1-y);
+  // precompute vectors: 
+  const float4 vecstep = 0.5f*float4(1,1,1,0);
+  float4 pos = float4(0,0,0,0);
 
-	b[id] = a[is];
+  // raycasting loop:
+  float maxp = 0.0f;
+	for(int i=0; i<64; i++) 
+	{
+	  	maxp = fmax(maxp,read_imagef(image, volumeSampler, pos).x);
+	  	pos+=vecstep;
+	}
+
+	// lookup in transfer function texture:
+  const float4 color = float4(maxp,maxp,maxp,1);
+  
+  // write output color:
+  output[x + y*imageW] = (uint)color.x;
+
 }
 

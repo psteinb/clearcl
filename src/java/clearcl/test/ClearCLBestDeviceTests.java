@@ -52,7 +52,23 @@ public class ClearCLBestDeviceTests
       {
         ClearCLDevice lClearClDevice = lClearCL.getBestDevice(DeviceTypeSelector.GPU,
                                                               BadDeviceSelector.NotIntegratedIntel,
-                                                              FastestDeviceSelector.Fastest);
+                                                              FastestDeviceSelector.FastestForImages);
+
+        //System.out.println(lClearClDevice);
+        assertTrue(lClearClDevice != null);
+      }
+      
+      {
+        ClearCLDevice lClearClDevice = lClearCL.getBestDevice(DeviceTypeSelector.GPU,
+                                                              FastestDeviceSelector.FastestForImages);
+
+        //System.out.println(lClearClDevice);
+        assertTrue(lClearClDevice != null);
+      }
+      
+      {
+        ClearCLDevice lClearClDevice = lClearCL.getBestDevice(DeviceTypeSelector.GPU,
+                                                              FastestDeviceSelector.FastestForBuffers);
 
         //System.out.println(lClearClDevice);
         assertTrue(lClearClDevice != null);

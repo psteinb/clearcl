@@ -49,21 +49,37 @@ public class ClearCL extends ClearCLBase
    */
   public ClearCLPlatform getPlatform(int pPlatformIndex)
   {
-    ClearCLPeerPointer lPlatformIdPointer = getBackend().getPlatformPeerPointer(pPlatformIndex);
+    ClearCLPeerPointer lPlatformIdPointer =
+                                          getBackend().getPlatformPeerPointer(pPlatformIndex);
     return new ClearCLPlatform(this, lPlatformIdPointer);
   }
 
   /**
-   * Returns the fastest GPU device available. This method does its best to
-   * avoid crappy Intel integrated cards (except Iris which is not too shabby).
+   * Returns the fastest GPU device available for image processing (OpenCL
+   * images). This method does its best to avoid crappy Intel integrated cards
+   * (except Iris which is not too shabby).
    * 
    * @return fastest GPU device
    */
-  public ClearCLDevice getFastestGPUDevice()
+  public ClearCLDevice getFastestGPUDeviceForImages()
   {
-    ClearCLDevice lClearClDevice = getBestDevice(DeviceTypeSelector.GPU,
-                                                 BadDeviceSelector.NotSlowIntegratedIntel,
-                                                 FastestDeviceSelector.Fastest);
+    ClearCLDevice lClearClDevice =
+                                 getBestDevice(DeviceTypeSelector.GPU,
+                                               BadDeviceSelector.NotSlowIntegratedIntel,
+                                               FastestDeviceSelector.FastestForImages);
+    return lClearClDevice;
+  }
+
+  /**
+   * Returns the fastest GPU device available for buffer processing (OpenCL
+   * buffers).
+   * 
+   * @return fastest GPU device for buffers
+   */
+  public ClearCLDevice getFastestGPUDeviceForBuffers()
+  {
+    ClearCLDevice lClearClDevice =
+                                 getBestDevice(FastestDeviceSelector.FastestForBuffers);
     return lClearClDevice;
   }
 
@@ -74,21 +90,23 @@ public class ClearCL extends ClearCLBase
    */
   public ClearCLDevice getLargestGPUDevice()
   {
-    ClearCLDevice lClearClDevice = getBestDevice(DeviceTypeSelector.GPU,
-                                                 BadDeviceSelector.NotIntegratedIntel,
-                                                 GlobalMemorySelector.MAX);
+    ClearCLDevice lClearClDevice =
+                                 getBestDevice(DeviceTypeSelector.GPU,
+                                               BadDeviceSelector.NotIntegratedIntel,
+                                               GlobalMemorySelector.MAX);
     return lClearClDevice;
   }
 
   /**
    * Returns the best GPU device, right now its the fastest one...
+   * 
    * @return best GPU device
    */
   public ClearCLDevice getBestGPUDevice()
   {
-    return getFastestGPUDevice();
+    return getFastestGPUDeviceForImages();
   }
-  
+
   /**
    * Returns the best (right now fastest) CPU device.
    * 
@@ -96,12 +114,11 @@ public class ClearCL extends ClearCLBase
    */
   public ClearCLDevice getBestCPUDevice()
   {
-    ClearCLDevice lClearClDevice = getBestDevice(DeviceTypeSelector.CPU,
-                                                 FastestDeviceSelector.Fastest);
+    ClearCLDevice lClearClDevice =
+                                 getBestDevice(DeviceTypeSelector.CPU,
+                                               FastestDeviceSelector.FastestForImages);
     return lClearClDevice;
   }
-
-
 
   /**
    * Picks the one (first) of the best devices obtained by using the given
@@ -128,7 +145,8 @@ public class ClearCL extends ClearCLBase
    */
   public ClearCLDevice getBestDevice(DeviceSelector... pDeviceSelectors)
   {
-    ArrayList<ClearCLDevice> lBestDevices = getBestDevices(pDeviceSelectors);
+    ArrayList<ClearCLDevice> lBestDevices =
+                                          getBestDevices(pDeviceSelectors);
     if (lBestDevices.size() > 0)
       return lBestDevices.get(0);
     else

@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 
 import clearcl.ClearCLDevice;
 import clearcl.benchmark.Benchmark;
+import clearcl.enums.BenchmarkTest;
 import clearcl.util.ClearCLFolder;
 
 /**
@@ -18,16 +19,22 @@ import clearcl.util.ClearCLFolder;
 public class FastestDeviceSelector implements DeviceSelector
 {
 
-  public static FastestDeviceSelector Fastest = new FastestDeviceSelector();
+  public static FastestDeviceSelector FastestForImages =
+                                                       new FastestDeviceSelector(BenchmarkTest.Image);
+  public static FastestDeviceSelector FastestForBuffers =
+                                                       new FastestDeviceSelector(BenchmarkTest.Buffer);
 
   private ClearCLDevice mFastestDevice;
+
+  private BenchmarkTest mBenchmarkTest;
 
   /**
    * prevents direct instantiation.
    */
-  private FastestDeviceSelector()
+  private FastestDeviceSelector(BenchmarkTest pBenchmarkTest)
   {
     super();
+    mBenchmarkTest = pBenchmarkTest;
   }
 
   @Override
@@ -37,19 +44,23 @@ public class FastestDeviceSelector implements DeviceSelector
     {
       File lClearCLFolder = ClearCLFolder.get();
 
-      File lFastestDeviceFile = new File(lClearCLFolder,
-                                         "fastestdevice.txt");
+      File lFastestDeviceFile =
+                              new File(lClearCLFolder,
+                                       String.format("fastestdevice_%s.txt",
+                                                     mBenchmarkTest));
 
       if (lFastestDeviceFile.exists())
       {
-        String lFastestDeviceName = FileUtils.readFileToString(lFastestDeviceFile)
-                                             .trim();
+        String lFastestDeviceName =
+                                  FileUtils.readFileToString(lFastestDeviceFile)
+                                           .trim();
         mFastestDevice = getDeviceWithName(pDevices,
                                            lFastestDeviceName);
       }
       else
       {
-        mFastestDevice = Benchmark.getFastestDevice(pDevices);
+        mFastestDevice = Benchmark.getFastestDevice(pDevices,
+                                                    mBenchmarkTest);
         FileUtils.writeStringToFile(lFastestDeviceFile,
                                     mFastestDevice.getName());
       }
