@@ -45,23 +45,25 @@ public class Benchmark
   public static ClearCLDevice getFastestDevice(ArrayList<ClearCLDevice> pDevices,
                                                BenchmarkTest pBenchmarkTest)
   {
-    try
+
+    ClearCLDevice lFastestDevice = null;
+    double lMinElapsedTime = Double.POSITIVE_INFINITY;
+
+    format("IMPORTANT: Benchmarking available OpenCl devices, please wait \n");
+
+    for (ClearCLDevice lDevice : pDevices)
     {
-      ClearCLDevice lFastestDevice = null;
-      double lMinElapsedTime = Double.POSITIVE_INFINITY;
 
-      format("IMPORTANT: Benchmarking available OpenCl devices, please wait \n");
+      println("_______________________________________________________________________");
+      println(lDevice.getInfoString());
 
-      for (ClearCLDevice lDevice : pDevices)
+      double lElapsedTimeInSeconds;
+
+      try
       {
-
-        println("_______________________________________________________________________");
-        println(lDevice.getInfoString());
-
-        double lElapsedTimeInSeconds =
-                                     executeBenchmarkOnDevice(lDevice,
-                                                              pBenchmarkTest,
-                                                              cRepeats);
+        lElapsedTimeInSeconds = executeBenchmarkOnDevice(lDevice,
+                                                         pBenchmarkTest,
+                                                         cRepeats);
 
         format("---> Elapsed time: %g ms \n",
                lElapsedTimeInSeconds);/**/
@@ -72,17 +74,18 @@ public class Benchmark
           lFastestDevice = lDevice;
         }
       }
+      catch (Throwable e)
+      {
+        e.printStackTrace();
+      }
 
-      println("_______________________________________________________________________");
-      format("fastest device: %s \n", lFastestDevice);
+    }
 
-      return lFastestDevice;
-    }
-    catch (IOException e)
-    {
-      e.printStackTrace();
-      return null;
-    }
+    println("_______________________________________________________________________");
+    format("fastest device: %s \n", lFastestDevice);
+
+    return lFastestDevice;
+
   }
 
   /**

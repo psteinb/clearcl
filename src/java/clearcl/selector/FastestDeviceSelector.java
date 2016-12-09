@@ -22,7 +22,7 @@ public class FastestDeviceSelector implements DeviceSelector
   public static FastestDeviceSelector FastestForImages =
                                                        new FastestDeviceSelector(BenchmarkTest.Image);
   public static FastestDeviceSelector FastestForBuffers =
-                                                       new FastestDeviceSelector(BenchmarkTest.Buffer);
+                                                        new FastestDeviceSelector(BenchmarkTest.Buffer);
 
   private ClearCLDevice mFastestDevice;
 
@@ -61,8 +61,9 @@ public class FastestDeviceSelector implements DeviceSelector
       {
         mFastestDevice = Benchmark.getFastestDevice(pDevices,
                                                     mBenchmarkTest);
-        FileUtils.writeStringToFile(lFastestDeviceFile,
-                                    mFastestDevice.getName());
+        if (mFastestDevice != null)
+          FileUtils.writeStringToFile(lFastestDeviceFile,
+                                      mFastestDevice.getName());
       }
     }
     catch (Throwable e)

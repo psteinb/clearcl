@@ -249,6 +249,35 @@ public class ClearCLContext extends ClearCLBase
   }
 
   /**
+   * Creates 1D, 2D, or 3D single channel images with a given channel data type,
+   * and dimensions. The host and kernel access policy is read and write access
+   * for both.
+   * 
+   * 
+   * @param pImageChannelType
+   *          channel data type
+   * @param pWidth
+   *          width
+   * @param pHeight
+   *          height
+   * @param pDepth
+   *          depth
+   * @return 1D,2D, or 3D image
+   */
+  public ClearCLImage createSingleChannelImage(ImageChannelDataType pImageChannelType,
+                                               long... pDimensions)
+  {
+    return createImage(MemAllocMode.AllocateHostPointer,
+                       HostAccessType.ReadWrite,
+                       KernelAccessType.ReadWrite,
+                       mDevice.getType()
+                              .isCPU() ? ImageChannelOrder.Intensity
+                                       : ImageChannelOrder.R,
+                       pImageChannelType,
+                       pDimensions);
+  }
+
+  /**
    * Creates 1D, 2D, or 3D image with a given channel order, channel data type,
    * and dimensions. The host and kernel access policy is read and write access
    * for both.
@@ -278,12 +307,43 @@ public class ClearCLContext extends ClearCLBase
   }
 
   /**
+   * Creates 1D, 2D, or 3D single channel image with a given memory allocation
+   * and access policy, channel data type, and dimensions.
+   * 
+   * @param pHostAccessType
+   *          host access type
+   * @param pKernelAccessType
+   *          kernel access type
+   * @param pImageChannelType
+   *          channel data type
+   * @param pWidth
+   *          width
+   * @param pHeight
+   *          height
+   * @param pDepth
+   *          depth
+   * @return 1D,2D, or 3D image
+   */
+  public ClearCLImage createSingleChannelImage(HostAccessType pHostAccessType,
+                                               KernelAccessType pKernelAccessType,
+                                               ImageChannelDataType pImageChannelType,
+                                               long... pDimensions)
+  {
+    return createImage(MemAllocMode.AllocateHostPointer,
+                       pHostAccessType,
+                       pKernelAccessType,
+                       mDevice.getType()
+                              .isCPU() ? ImageChannelOrder.Intensity
+                                       : ImageChannelOrder.R,
+                       pImageChannelType,
+                       pDimensions);
+  }
+
+  /**
    * Creates 1D, 2D, or 3D image with a given memory allocation and access
    * policy, channel order, channel data type, and dimensions.
    * 
    * 
-   * @param pMemAllocMode
-   *          memory allocation mode
    * @param pHostAccessType
    *          host access type
    * @param pKernelAccessType
