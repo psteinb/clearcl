@@ -6,11 +6,12 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.io.IOUtils;
+import com.nativelibs4java.util.IOUtils;
 
 import clearcl.abs.ClearCLBase;
 import clearcl.enums.BuildStatus;
 import clearcl.exceptions.ClearCLProgramNotBuiltException;
+import clearcl.util.StringUtils;
 
 /**
  * ClearCLProgram is the ClearCL abstraction for OpenCl programs.
@@ -85,7 +86,7 @@ public class ClearCLProgram extends ClearCLBase
                           + "\n");
 
     InputStream lResourceAsStream = pClassForRessource.getResourceAsStream(pIncludeRessourceName);
-    String lSourceCode = IOUtils.toString(lResourceAsStream, "UTF-8");
+    String lSourceCode = StringUtils.streamToString(lResourceAsStream, "UTF-8");
     lStringBuilder.append(lSourceCode);
     lStringBuilder.append("\n\n");
 
@@ -306,7 +307,7 @@ public class ClearCLProgram extends ClearCLBase
       if (lResourceAsStream != null)
       {
 
-        String lSourceCode = IOUtils.toString(lResourceAsStream,
+        String lSourceCode = StringUtils.streamToString(lResourceAsStream,
                                               "UTF-8");
 
         lSourceCodeWithIncludes.append("\n\n");

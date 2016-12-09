@@ -3,12 +3,11 @@ package clearcl.selector;
 import java.io.File;
 import java.util.ArrayList;
 
-import org.apache.commons.io.FileUtils;
-
 import clearcl.ClearCLDevice;
 import clearcl.benchmark.Benchmark;
 import clearcl.enums.BenchmarkTest;
 import clearcl.util.ClearCLFolder;
+import clearcl.util.StringUtils;
 
 /**
  * Selects a device based on the actual computation speed based on benchmarking.
@@ -52,8 +51,8 @@ public class FastestDeviceSelector implements DeviceSelector
       if (lFastestDeviceFile.exists())
       {
         String lFastestDeviceName =
-                                  FileUtils.readFileToString(lFastestDeviceFile)
-                                           .trim();
+                                  StringUtils.readFileToString(lFastestDeviceFile)
+                                             .trim();
         mFastestDevice = getDeviceWithName(pDevices,
                                            lFastestDeviceName);
       }
@@ -62,8 +61,8 @@ public class FastestDeviceSelector implements DeviceSelector
         mFastestDevice = Benchmark.getFastestDevice(pDevices,
                                                     mBenchmarkTest);
         if (mFastestDevice != null)
-          FileUtils.writeStringToFile(lFastestDeviceFile,
-                                      mFastestDevice.getName());
+          StringUtils.writeStringToFile(lFastestDeviceFile,
+                                        mFastestDevice.getName());
       }
     }
     catch (Throwable e)
