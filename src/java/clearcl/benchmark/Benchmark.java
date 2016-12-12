@@ -180,27 +180,27 @@ public class Benchmark
 
     ClearCLBuffer lBufferA =
                            lContext.createBuffer(MemAllocMode.None,
-                                                 HostAccessType.NoAccess,
-                                                 KernelAccessType.ReadOnly,
+                                                 HostAccessType.Undefined,
+                                                 KernelAccessType.Undefined,
                                                  NativeTypeEnum.Float,
                                                  c2DBufferSize * c2DBufferSize);
     ClearCLBuffer lBufferB =
                            lContext.createBuffer(MemAllocMode.None,
-                                                 HostAccessType.NoAccess,
-                                                 KernelAccessType.ReadWrite,
+                                                 HostAccessType.Undefined,
+                                                 KernelAccessType.Undefined,
                                                  NativeTypeEnum.Float,
                                                  c2DBufferSize * c2DBufferSize);
 
     ClearCLBuffer lBufferC =
                            lContext.createBuffer(MemAllocMode.None,
-                                                 HostAccessType.NoAccess,
-                                                 KernelAccessType.ReadWrite,
+                                                 HostAccessType.Undefined,
+                                                 KernelAccessType.Undefined,
                                                  NativeTypeEnum.UnsignedInt,
                                                  c2DBufferSize * c2DBufferSize);
 
     ClearCLImage lImage = lContext.createImage(MemAllocMode.None,
-                                               HostAccessType.NoAccess,
-                                               KernelAccessType.ReadWrite,
+                                               HostAccessType.Undefined,
+                                               KernelAccessType.Undefined,
                                                ImageChannelOrder.R,
                                                ImageChannelDataType.UnsignedInt16,
                                                c3DImageSize,

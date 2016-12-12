@@ -354,7 +354,7 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
       long lMemFlags =
                      BackendUtils.getMemTypeFlags(pMemAllocMode,
                                                   pHostAccessType,
-                                                  lOpenCL1p1o0 ? KernelAccessType.None
+                                                  lOpenCL1p1o0 ? KernelAccessType.Undefined
                                                                : pKernelAccessType);
 
       int lErrorCode[] = new int[1];

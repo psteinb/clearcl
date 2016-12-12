@@ -7,10 +7,11 @@ package clearcl.enums;
  */
 public enum HostAccessType
 {
-  ReadOnly(true, false),
-  WriteOnly(false, true),
-  ReadWrite(true, true),
-  NoAccess(false, false);
+ ReadOnly(true, false),
+ WriteOnly(false, true),
+ ReadWrite(true, true),
+ NoAccess(false, false),
+ Undefined(true, true);
 
   private boolean mReadable, mWritable;
 

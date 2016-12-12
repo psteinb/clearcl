@@ -197,6 +197,8 @@ public class BackendUtils
     case NoAccess:
       lMemFlags |= CL_MEM_HOST_NO_ACCESS;
       break;
+    case Undefined:
+      break;
     }
 
     switch (pKernelAccessType)
@@ -210,7 +212,7 @@ public class BackendUtils
     case ReadWrite:
       lMemFlags |= CL_MEM_READ_WRITE;
       break;
-    case None:
+    case Undefined:
     }
     return lMemFlags;
   }
