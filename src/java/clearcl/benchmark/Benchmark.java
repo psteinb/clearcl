@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
+import clearcl.ClearCL;
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLContext;
 import clearcl.ClearCLDevice;
 import clearcl.ClearCLImage;
 import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
+import clearcl.backend.ClearCLBackendInterface;
 import clearcl.enums.BenchmarkTest;
 import clearcl.enums.BuildStatus;
 import clearcl.enums.DeviceType;
@@ -34,6 +36,38 @@ public class Benchmark
   private static final int cRepeats = 10;
 
   /**
+   * Returns the fastest device available for a given backend and benchmark
+   * test.
+   * 
+   * @param pClearCLBackend
+   *          backend
+   * @return name of device, null if any error occured.
+   */
+  public static String getFastestDevice(ClearCLBackendInterface pClearCLBackend,
+                                        BenchmarkTest pBenchmarkTest,
+                                        int pRepeats)
+  {
+    try(ClearCL lClearCL = new ClearCL(pClearCLBackend))
+    {
+
+      ClearCLDevice lFastestDevice =
+                                   getFastestDevice(lClearCL.getAllDevices(),
+                                                    pBenchmarkTest,
+                                                    pRepeats);
+
+      lClearCL.close();
+
+      return lFastestDevice.toString();
+    }
+    catch (Throwable e)
+    {
+      e.printStackTrace();
+      return null;
+    }
+
+  }
+
+  /**
    * Returns the fastest device for a given benchmark test.
    * 
    * @param pDevices
@@ -44,6 +78,23 @@ public class Benchmark
    */
   public static ClearCLDevice getFastestDevice(ArrayList<ClearCLDevice> pDevices,
                                                BenchmarkTest pBenchmarkTest)
+  {
+    return getFastestDevice(pDevices, pBenchmarkTest, cRepeats);
+  }
+
+  /**
+   * Returns the fastest device for a given benchmark test.
+   * 
+   * @param pDevices
+   *          list of devices
+   * @param pBenchmarkTest
+   *          benchmark type.
+   * @param pRepeats number of repeats (for high accuracy > 1000)
+   * @return fastest device
+   */
+  public static ClearCLDevice getFastestDevice(ArrayList<ClearCLDevice> pDevices,
+                                               BenchmarkTest pBenchmarkTest,
+                                               int pRepeats)
   {
 
     ClearCLDevice lFastestDevice = null;
