@@ -107,6 +107,10 @@ public class ClearCLBackends
       lClearCLBackend = getFunctionalBackend();
       break;
     }
+    
+    if(lClearCLBackend==null)
+      lClearCLBackend = new ClearCLBackendJOCL();
+    
     println(" --> Using backend: "
             + lClearCLBackend.getClass().getSimpleName());
 
