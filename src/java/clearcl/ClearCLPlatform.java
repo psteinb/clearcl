@@ -2,6 +2,7 @@ package clearcl;
 
 import clearcl.abs.ClearCLBase;
 import clearcl.enums.DeviceType;
+import clearcl.exceptions.OpenCLException;
 
 /**
  * ClearCLPlatform is the ClearCL abstraction for OpenCl platforms.
@@ -36,8 +37,13 @@ public class ClearCLPlatform extends ClearCLBase
    */
   public int getNumberOfDevices(DeviceType pDeviceType)
   {
-    return getBackend().getNumberOfDevicesForPlatform(mPlatformPointer,
-                                                      pDeviceType);
+    try {
+		return getBackend().getNumberOfDevicesForPlatform(mPlatformPointer,
+		                                                  pDeviceType);
+	} catch (OpenCLException e) {
+		
+		return 0;
+	}
   }
 
   /**

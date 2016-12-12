@@ -88,7 +88,9 @@ public class ClearCLBasicTests
           BuildStatus lBuildStatus = lProgram.build();
 
           //System.out.println(lProgram.getBuildLog());
-          //System.out.println(lBuildStatus);
+          
+          System.out.println(lBuildStatus);
+          
           assertEquals(lBuildStatus, BuildStatus.Success);
           // assertTrue(lProgram.getBuildLog().isEmpty());
 

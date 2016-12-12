@@ -37,8 +37,8 @@ __kernel void image(	__read_only image3d_t image,
   const sampler_t volumeSampler   =   CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR;
 
   // precompute vectors: 
-  const float4 vecstep = 0.5f*float4(1,1,1,0);
-  float4 pos = float4(0,0,0,0);
+  const float4 vecstep = 0.5f*(float4)(1.f,1.f,1.f,0.f);
+  float4 pos = (float4)(0.f,0.f,0.f,0.f);
 
   // raycasting loop:
   float maxp = 0.0f;
@@ -49,7 +49,7 @@ __kernel void image(	__read_only image3d_t image,
 	}
 
 	// lookup in transfer function texture:
-  const float4 color = float4(maxp,maxp,maxp,1);
+  const float4 color = (float4)(maxp,maxp,maxp,1.f);
   
   // write output color:
   output[x + y*imageW] = (uint)color.x;
