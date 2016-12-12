@@ -344,7 +344,8 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase
       long lMemFlags =
                      BackendUtils.getMemTypeFlags(pMemAllocMode,
                                                   pHostAccessType,
-                                                  lOpenCL1p1o0?pKernelAccessType:KernelAccessType.None);
+                                                  lOpenCL1p1o0 ? KernelAccessType.None
+                                                               : pKernelAccessType);
 
       Pointer<Integer> lErrorCode = Pointer.allocateInt();
 
