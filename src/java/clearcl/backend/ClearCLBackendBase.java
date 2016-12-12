@@ -149,7 +149,8 @@ public abstract class ClearCLBackendBase implements
   }
 
   @Override
-  public ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pContextPeerPointer,
+  public ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pDevicePointer,
+                                                ClearCLPeerPointer pContextPeerPointer,
                                                 MemAllocMode pMemAllocMode,
                                                 HostAccessType pHostAccessType,
                                                 KernelAccessType pKernelAccessType,

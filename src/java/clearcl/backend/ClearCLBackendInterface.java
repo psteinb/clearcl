@@ -229,6 +229,8 @@ public interface ClearCLBackendInterface
    * Returns image peer pointer for given context, access policy, image type,
    * and dimensions.
    * 
+   * @param pDevicePointer
+   *          device peer pointer
    * @param pContextPeerPointer
    *          context peer pointer
    * @param pMemAllocMode
@@ -251,7 +253,8 @@ public interface ClearCLBackendInterface
    *          depth
    * @return image peer pointer
    */
-  ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pContextPeerPointer,
+  ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pDevicePointer,
+                                         ClearCLPeerPointer pContextPeerPointer,
                                          MemAllocMode pMemAllocMode,
                                          HostAccessType pHostAccessType,
                                          KernelAccessType pKernelAccessType,
@@ -701,7 +704,6 @@ public interface ClearCLBackendInterface
    */
   ClearCLPeerPointer wrap(ContiguousMemoryInterface pContiguousMemory);
 
-  
   /**
    * Wraps a CoreMem fragmented buffer inside of a peer pointer.
    * 
@@ -710,7 +712,7 @@ public interface ClearCLBackendInterface
    * @return corresponding buffer peer pointer
    */
   ClearCLPeerPointer wrap(FragmentedMemoryInterface pFragmentedMemory);
-  
+
   /**
    * Waits for queue to finish all enqueued tasks.
    * 
@@ -718,7 +720,5 @@ public interface ClearCLBackendInterface
    *          queue peer pointer
    */
   void waitQueueToFinish(ClearCLPeerPointer pQueuePeerPointer);
-
-
 
 }

@@ -37,13 +37,14 @@ import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.util.Size;
 
-public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
-                                                            ClearCLBackendInterface
+public class ClearCLBackendJavaCL extends ClearCLBackendBase
+                                  implements ClearCLBackendInterface
 {
 
   private OpenCLLibrary mOpenCLLibrary;
 
-  private ThreadLocal<Pointer<?>> mTempPointerThreadLocal = new ThreadLocal<>();
+  private ThreadLocal<Pointer<?>> mTempPointerThreadLocal =
+                                                          new ThreadLocal<>();
 
   public ClearCLBackendJavaCL()
   {
@@ -75,12 +76,14 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
   {
     return BackendUtils.checkExceptions(() -> {
       int lNumberOfPlatforms = getNumberOfPlatforms();
-      Pointer<OpenCLLibrary.cl_platform_id> lPlatformsList = Pointer.allocateArray(OpenCLLibrary.cl_platform_id.class,
-                                                                                   lNumberOfPlatforms);
+      Pointer<OpenCLLibrary.cl_platform_id> lPlatformsList =
+                                                           Pointer.allocateArray(OpenCLLibrary.cl_platform_id.class,
+                                                                                 lNumberOfPlatforms);
       BackendUtils.checkOpenCLError(mOpenCLLibrary.clGetPlatformIDs(lNumberOfPlatforms,
                                                                     lPlatformsList,
                                                                     null));
-      OpenCLLibrary.cl_platform_id lPlatform = lPlatformsList.get(pPlatformIndex);
+      OpenCLLibrary.cl_platform_id lPlatform =
+                                             lPlatformsList.get(pPlatformIndex);
       return new ClearCLPeerPointer(lPlatform);
     });
   }
@@ -156,15 +159,18 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
                                          int pDeviceIndex)
   {
     return BackendUtils.checkExceptions(() -> {
-      int lNumberOfDevicesForPlatform = getNumberOfDevicesForPlatform(pPlatformPointer);
-      Pointer<OpenCLLibrary.cl_device_id> lDeviceIdArray = Pointer.allocateArray(OpenCLLibrary.cl_device_id.class,
-                                                                                 lNumberOfDevicesForPlatform);
+      int lNumberOfDevicesForPlatform =
+                                      getNumberOfDevicesForPlatform(pPlatformPointer);
+      Pointer<OpenCLLibrary.cl_device_id> lDeviceIdArray =
+                                                         Pointer.allocateArray(OpenCLLibrary.cl_device_id.class,
+                                                                               lNumberOfDevicesForPlatform);
       BackendUtils.checkOpenCLError(mOpenCLLibrary.clGetDeviceIDs((OpenCLLibrary.cl_platform_id) pPlatformPointer.getPointer(),
                                                                   pDeviceType,
                                                                   lNumberOfDevicesForPlatform,
                                                                   lDeviceIdArray,
                                                                   null));
-      OpenCLLibrary.cl_device_id device = lDeviceIdArray.get(pDeviceIndex);
+      OpenCLLibrary.cl_device_id device =
+                                        lDeviceIdArray.get(pDeviceIndex);
       return new ClearCLPeerPointer(device);
     });
   }
@@ -197,8 +203,9 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
   public DeviceType getDeviceType(ClearCLPeerPointer pDevicePointer)
   {
     return BackendUtils.checkExceptions(() -> {
-      long lDeviceType = getDeviceInfoLong(pDevicePointer,
-                                           IOpenCLLibrary.CL_DEVICE_TYPE);
+      long lDeviceType =
+                       getDeviceInfoLong(pDevicePointer,
+                                         IOpenCLLibrary.CL_DEVICE_TYPE);
       if (lDeviceType == IOpenCLLibrary.CL_DEVICE_TYPE_CPU)
         return DeviceType.CPU;
       else if (lDeviceType == IOpenCLLibrary.CL_DEVICE_TYPE_GPU)
@@ -260,28 +267,33 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
   {
     return BackendUtils.checkExceptions(() -> {
 
-      OpenCLLibrary.cl_platform_id lPlatform = (OpenCLLibrary.cl_platform_id) pPlatformPointer.getPointer();
+      OpenCLLibrary.cl_platform_id lPlatform =
+                                             (OpenCLLibrary.cl_platform_id) pPlatformPointer.getPointer();
 
       // Initialize the context properties
-      Map<ContextProperties, Object> lContextProperties = new HashMap<>();
+      Map<ContextProperties, Object> lContextProperties =
+                                                        new HashMap<>();
       lContextProperties.put(ContextProperties.Platform, lPlatform);
 
       long[] props = Utils.getContextProps(mOpenCLLibrary,
                                            lPlatform,
                                            lContextProperties);
-      Pointer<SizeT> lContextPropertiesPointer = props == null ? null
-                                                              : pointerToSizeTs(props);
+      Pointer<SizeT> lContextPropertiesPointer =
+                                               props == null ? null
+                                                             : pointerToSizeTs(props);
 
-      Pointer<OpenCLLibrary.cl_device_id> lDevicesArrayPointer = Utils.convertDevicePointers(pDevicePointers);
+      Pointer<OpenCLLibrary.cl_device_id> lDevicesArrayPointer =
+                                                               Utils.convertDevicePointers(pDevicePointers);
 
       Pointer<Integer> lErrorCode = Pointer.allocateInt();
 
-      OpenCLLibrary.cl_context context = mOpenCLLibrary.clCreateContext(lContextPropertiesPointer,
-                                                                        pDevicePointers.length,
-                                                                        lDevicesArrayPointer,
-                                                                        null,
-                                                                        null,
-                                                                        lErrorCode);
+      OpenCLLibrary.cl_context context =
+                                       mOpenCLLibrary.clCreateContext(lContextPropertiesPointer,
+                                                                      pDevicePointers.length,
+                                                                      lDevicesArrayPointer,
+                                                                      null,
+                                                                      null,
+                                                                      lErrorCode);
 
       BackendUtils.checkOpenCLErrorCode(lErrorCode.get());
 
@@ -298,15 +310,17 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
       @SuppressWarnings("deprecation")
       Pointer<Integer> lErrorCode = Pointer.allocateInt();
 
-      OpenCLLibrary.cl_command_queue commandQueue = mOpenCLLibrary.clCreateCommandQueue((OpenCLLibrary.cl_context) pContextPointer.getPointer(),
-                                                                                        (OpenCLLibrary.cl_device_id) pDevicePointer.getPointer(),
-                                                                                        pInOrder ? 0
-                                                                                                : IOpenCLLibrary.CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
-                                                                                        lErrorCode);
+      OpenCLLibrary.cl_command_queue commandQueue =
+                                                  mOpenCLLibrary.clCreateCommandQueue((OpenCLLibrary.cl_context) pContextPointer.getPointer(),
+                                                                                      (OpenCLLibrary.cl_device_id) pDevicePointer.getPointer(),
+                                                                                      pInOrder ? 0
+                                                                                               : IOpenCLLibrary.CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
+                                                                                      lErrorCode);
 
       BackendUtils.checkOpenCLErrorCode(lErrorCode.get());
 
-      ClearCLPeerPointer lCommandQueuePointer = new ClearCLPeerPointer(commandQueue);
+      ClearCLPeerPointer lCommandQueuePointer =
+                                              new ClearCLPeerPointer(commandQueue);
 
       return lCommandQueuePointer;
     });
@@ -320,20 +334,22 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
                                                  long pBufferSize)
   {
     return BackendUtils.checkExceptions(() -> {
-      long lMemFlags = BackendUtils.getMemTypeFlags(pMemAllocMode,
-                                                    pHostAccessType,
-                                                    pKernelAccessType);
+      long lMemFlags =
+                     BackendUtils.getMemTypeFlags(pMemAllocMode,
+                                                  pHostAccessType,
+                                                  pKernelAccessType);
 
       Pointer<Integer> lErrorCode = Pointer.allocateInt();
 
       OpenCLLibrary.cl_mem lBufferPointer = null;
       try
       {
-        lBufferPointer = mOpenCLLibrary.clCreateBuffer((OpenCLLibrary.cl_context) pContextPointer.getPointer(),
-                                                       lMemFlags,
-                                                       pBufferSize,
-                                                       null,
-                                                       lErrorCode);
+        lBufferPointer =
+                       mOpenCLLibrary.clCreateBuffer((OpenCLLibrary.cl_context) pContextPointer.getPointer(),
+                                                     lMemFlags,
+                                                     pBufferSize,
+                                                     null,
+                                                     lErrorCode);
       }
       catch (IllegalArgumentException e)
       {
@@ -344,13 +360,15 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
 
       BackendUtils.checkOpenCLErrorCode(lErrorCode.get());
 
-      ClearCLPeerPointer lClearCLPointer = new ClearCLPeerPointer(lBufferPointer);
+      ClearCLPeerPointer lClearCLPointer =
+                                         new ClearCLPeerPointer(lBufferPointer);
       return lClearCLPointer;
     });
   }
 
   @Override
-  public ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pContextPointer,
+  public ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pDevicePointer,
+                                                ClearCLPeerPointer pContextPointer,
                                                 MemAllocMode pMemAllocMode,
                                                 HostAccessType pHostAccessType,
                                                 KernelAccessType pKernelAccessType,
@@ -359,47 +377,121 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
                                                 ImageChannelDataType pImageChannelDataType,
                                                 long... pDimensions)
   {
+    String lDeviceVersion = getDeviceVersion(pDevicePointer);
 
-    cl_image_format lImageFormat = new cl_image_format();
-    lImageFormat.image_channel_order(BackendUtils.getImageChannelOrderFlags(pImageChannelOrder));
-    lImageFormat.image_channel_data_type(BackendUtils.getImageChannelDataTypeFlags(pImageChannelDataType));
+    if (lDeviceVersion.contains("1.0")
+        || lDeviceVersion.contains("1.1"))
+    {
 
-    cl_image_desc lImageDescription = new cl_image_desc();
-    lImageDescription.image_width(pDimensions[0]);
-    lImageDescription.image_height(pDimensions.length < 2 ? 1
-                                                         : pDimensions[1]);
-    lImageDescription.image_depth(pDimensions.length < 3 ? 1
-                                                        : pDimensions[2]);
-    lImageDescription.image_type(BackendUtils.getImageTypeFlags(pImageType));
+      cl_image_format lImageFormat = new cl_image_format();
+      lImageFormat.image_channel_order(BackendUtils.getImageChannelOrderFlags(pImageChannelOrder));
+      lImageFormat.image_channel_data_type(BackendUtils.getImageChannelDataTypeFlags(pImageChannelDataType));
 
-    long lMemFlags = BackendUtils.getMemTypeFlags(pMemAllocMode,
+      long image_width = (pDimensions[0]);
+      long image_height =
+                        (pDimensions.length < 2 ? 1 : pDimensions[1]);
+      long image_depth =
+                       (pDimensions.length < 3 ? 1 : pDimensions[2]);
+
+      long lMemFlags =
+                     BackendUtils.getMemTypeFlags(pMemAllocMode,
                                                   pHostAccessType,
                                                   pKernelAccessType);
 
-    Pointer<Integer> lErrorCode = Pointer.allocateInt();
+      Pointer<Integer> lErrorCode = Pointer.allocateInt();
 
-    OpenCLLibrary.cl_mem lImageMem = null;
-    try
+      OpenCLLibrary.cl_mem lImageMem = null;
+      try
+      {
+        if (pDimensions.length <= 2)
+        {
+          lImageMem =
+                    mOpenCLLibrary.clCreateImage2D((OpenCLLibrary.cl_context) pContextPointer.getPointer(),
+                                                   lMemFlags,
+                                                   Pointer.getPointer(lImageFormat),
+                                                   image_width,
+                                                   image_height,
+                                                   0,
+                                                   null,
+                                                   lErrorCode);
+        }
+        else if (pDimensions.length == 3)
+        {
+          lImageMem =
+                    mOpenCLLibrary.clCreateImage3D((OpenCLLibrary.cl_context) pContextPointer.getPointer(),
+                                                   lMemFlags,
+                                                   Pointer.getPointer(lImageFormat),
+                                                   image_width,
+                                                   image_height,
+                                                   image_depth,
+                                                   0,
+                                                   0,
+                                                   null,
+                                                   lErrorCode);
+        }
+      }
+      catch (IllegalArgumentException e)
+      {
+        if (e.getMessage()
+             .contains("Pointer instance cannot have NULL peer"))
+          throw new OpenCLException(-6);
+      }
+
+      BackendUtils.checkOpenCLErrorCode(lErrorCode.get());
+
+      ClearCLPeerPointer lClearCLPeerPointer =
+                                             new ClearCLPeerPointer(lImageMem);
+
+      return lClearCLPeerPointer;
+    }
+    else if (lDeviceVersion.contains("1.2"))
     {
-      lImageMem = mOpenCLLibrary.clCreateImage((OpenCLLibrary.cl_context) pContextPointer.getPointer(),
+
+      cl_image_format lImageFormat = new cl_image_format();
+      lImageFormat.image_channel_order(BackendUtils.getImageChannelOrderFlags(pImageChannelOrder));
+      lImageFormat.image_channel_data_type(BackendUtils.getImageChannelDataTypeFlags(pImageChannelDataType));
+
+      cl_image_desc lImageDescription = new cl_image_desc();
+      lImageDescription.image_width(pDimensions[0]);
+      lImageDescription.image_height(pDimensions.length < 2 ? 1
+                                                            : pDimensions[1]);
+      lImageDescription.image_depth(pDimensions.length < 3 ? 1
+                                                           : pDimensions[2]);
+      lImageDescription.image_type(BackendUtils.getImageTypeFlags(pImageType));
+
+      long lMemFlags =
+                     BackendUtils.getMemTypeFlags(pMemAllocMode,
+                                                  pHostAccessType,
+                                                  pKernelAccessType);
+
+      Pointer<Integer> lErrorCode = Pointer.allocateInt();
+
+      OpenCLLibrary.cl_mem lImageMem = null;
+      try
+      {
+        lImageMem =
+                  mOpenCLLibrary.clCreateImage((OpenCLLibrary.cl_context) pContextPointer.getPointer(),
                                                lMemFlags,
                                                Pointer.getPointer(lImageFormat),
                                                Pointer.getPointer(lImageDescription),
                                                null,
                                                lErrorCode);
+      }
+      catch (IllegalArgumentException e)
+      {
+        if (e.getMessage()
+             .contains("Pointer instance cannot have NULL peer"))
+          throw new OpenCLException(-6);
+      }
+
+      BackendUtils.checkOpenCLErrorCode(lErrorCode.get());
+
+      ClearCLPeerPointer lClearCLPeerPointer =
+                                             new ClearCLPeerPointer(lImageMem);
+
+      return lClearCLPeerPointer;
     }
-    catch (IllegalArgumentException e)
-    {
-      if (e.getMessage()
-           .contains("Pointer instance cannot have NULL peer"))
-        throw new OpenCLException(-6);
-    }
-
-    BackendUtils.checkOpenCLErrorCode(lErrorCode.get());
-
-    ClearCLPeerPointer lClearCLPeerPointer = new ClearCLPeerPointer(lImageMem);
-
-    return lClearCLPeerPointer;
+    return null;
   }
 
   @Override
@@ -408,18 +500,21 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
   {
     return BackendUtils.checkExceptions(() -> {
 
-      Pointer<Pointer<Byte>> lStringPointers = Pointer.pointerToCStrings(pSourceCode);
+      Pointer<Pointer<Byte>> lStringPointers =
+                                             Pointer.pointerToCStrings(pSourceCode);
 
       Pointer<Integer> lErrorCode = Pointer.allocateInt();
 
-      OpenCLLibrary.cl_program program = mOpenCLLibrary.clCreateProgramWithSource((OpenCLLibrary.cl_context) pContextPointer.getPointer(),
-                                                                                  pSourceCode.length,
-                                                                                  lStringPointers,
-                                                                                  null,
-                                                                                  lErrorCode);
+      OpenCLLibrary.cl_program program =
+                                       mOpenCLLibrary.clCreateProgramWithSource((OpenCLLibrary.cl_context) pContextPointer.getPointer(),
+                                                                                pSourceCode.length,
+                                                                                lStringPointers,
+                                                                                null,
+                                                                                lErrorCode);
       BackendUtils.checkOpenCLErrorCode(lErrorCode.get());
 
-      ClearCLPeerPointer lClearCLPointer = new ClearCLPeerPointer(program);
+      ClearCLPeerPointer lClearCLPointer =
+                                         new ClearCLPeerPointer(program);
       return lClearCLPointer;
     });
   }
@@ -430,16 +525,18 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
   {
     return BackendUtils.checkExceptions(() -> {
 
-      String lOptions = (pOptions == null || pOptions.isEmpty()) ? null
-                                                                : pOptions;
-      Pointer<Byte> lOptionsStringPointers = Pointer.pointerToCString(lOptions);
+      String lOptions = (pOptions == null
+                         || pOptions.isEmpty()) ? null : pOptions;
+      Pointer<Byte> lOptionsStringPointers =
+                                           Pointer.pointerToCString(lOptions);
 
-      int lError = mOpenCLLibrary.clBuildProgram((OpenCLLibrary.cl_program) pProgramPointer.getPointer(),
-                                                 0,
-                                                 null,
-                                                 lOptionsStringPointers,
-                                                 null,
-                                                 null);
+      int lError =
+                 mOpenCLLibrary.clBuildProgram((OpenCLLibrary.cl_program) pProgramPointer.getPointer(),
+                                               0,
+                                               null,
+                                               lOptionsStringPointers,
+                                               null,
+                                               null);
 
       return lError == 0;
     });
@@ -527,12 +624,14 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
 
       Pointer<Integer> lErrorCode = Pointer.allocateInt();
 
-      OpenCLLibrary.cl_kernel kernel = mOpenCLLibrary.clCreateKernel((OpenCLLibrary.cl_program) pProgramPointer.getPointer(),
-                                                                     Pointer.pointerToCString(pKernelName),
-                                                                     lErrorCode);
+      OpenCLLibrary.cl_kernel kernel =
+                                     mOpenCLLibrary.clCreateKernel((OpenCLLibrary.cl_program) pProgramPointer.getPointer(),
+                                                                   Pointer.pointerToCString(pKernelName),
+                                                                   lErrorCode);
       BackendUtils.checkOpenCLErrorCode(lErrorCode.get());
 
-      ClearCLPeerPointer lClearCLPointer = new ClearCLPeerPointer(kernel);
+      ClearCLPeerPointer lClearCLPointer =
+                                         new ClearCLPeerPointer(kernel);
       return lClearCLPointer;
     });
   }
@@ -553,7 +652,8 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
         mTempPointerThreadLocal.set(lTempPointer);
       }
 
-      OpenCLLibrary.cl_kernel lKernelPointer = (OpenCLLibrary.cl_kernel) pKernelPeerPointer.getPointer();
+      OpenCLLibrary.cl_kernel lKernelPointer =
+                                             (OpenCLLibrary.cl_kernel) pKernelPeerPointer.getPointer();
 
       // PRIMITIVE TYPES
       if (pObject instanceof Byte)
@@ -631,8 +731,9 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
       else if (pObject instanceof ClearCLBuffer)
       {
         ClearCLBuffer lClearCLBuffer = (ClearCLBuffer) pObject;
-        OpenCLLibrary.cl_mem lCLMem = (OpenCLLibrary.cl_mem) lClearCLBuffer.getPeerPointer()
-                                                                           .getPointer();
+        OpenCLLibrary.cl_mem lCLMem =
+                                    (OpenCLLibrary.cl_mem) lClearCLBuffer.getPeerPointer()
+                                                                         .getPointer();
 
         BackendUtils.checkOpenCLError(mOpenCLLibrary.clSetKernelArg(lKernelPointer,
                                                                     pIndex,
@@ -642,8 +743,9 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
       else if (pObject instanceof ClearCLImage)
       {
         ClearCLImage lClearCLImage = (ClearCLImage) pObject;
-        OpenCLLibrary.cl_mem lCLmem = (OpenCLLibrary.cl_mem) lClearCLImage.getPeerPointer()
-                                                                          .getPointer();
+        OpenCLLibrary.cl_mem lCLmem =
+                                    (OpenCLLibrary.cl_mem) lClearCLImage.getPeerPointer()
+                                                                        .getPointer();
         BackendUtils.checkOpenCLError(mOpenCLLibrary.clSetKernelArg(lKernelPointer,
                                                                     pIndex,
                                                                     SizeOf.cl_mem,
@@ -697,7 +799,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
       BackendUtils.checkOpenCLError(mOpenCLLibrary.clEnqueueReadBuffer((OpenCLLibrary.cl_command_queue) pQueuePointer.getPointer(),
                                                                        (OpenCLLibrary.cl_mem) pBufferPointer.getPointer(),
                                                                        pBlockingRead ? 1
-                                                                                    : 0,
+                                                                                     : 0,
                                                                        pOffsetInBuffer,
                                                                        pLengthInBytes,
                                                                        (Pointer) pHostMemPointer.getPointer(),
@@ -721,7 +823,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
       BackendUtils.checkOpenCLError(mOpenCLLibrary.clEnqueueWriteBuffer((OpenCLLibrary.cl_command_queue) pQueuePointer.getPointer(),
                                                                         (OpenCLLibrary.cl_mem) pBufferPointer.getPointer(),
                                                                         pBlockingWrite ? 1
-                                                                                      : 0,
+                                                                                       : 0,
                                                                         pOffsetInBuffer,
                                                                         pLengthInBytes,
                                                                         (Pointer) pHostMemPointer.getPointer(),
@@ -746,7 +848,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
       BackendUtils.checkOpenCLError(mOpenCLLibrary.clEnqueueReadBufferRect((OpenCLLibrary.cl_command_queue) pQueuePointer.getPointer(),
                                                                            (OpenCLLibrary.cl_mem) pBufferPointer.getPointer(),
                                                                            pBlockingRead ? 1
-                                                                                        : 0,
+                                                                                         : 0,
                                                                            Pointer.pointerToSizeTs(pBufferOrigin),
                                                                            Pointer.pointerToSizeTs(pHostOrigin),
                                                                            Pointer.pointerToSizeTs(pRegion),
@@ -775,7 +877,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
       BackendUtils.checkOpenCLError(mOpenCLLibrary.clEnqueueWriteBufferRect((OpenCLLibrary.cl_command_queue) pQueuePointer.getPointer(),
                                                                             (OpenCLLibrary.cl_mem) pBufferPointer.getPointer(),
                                                                             pBlockingWrite ? 1
-                                                                                          : 0,
+                                                                                           : 0,
                                                                             Pointer.pointerToSizeTs(pBufferOrigin),
                                                                             Pointer.pointerToSizeTs(pHostOrigin),
                                                                             Pointer.pointerToSizeTs(pRegion),
@@ -800,7 +902,8 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
   {
     BackendUtils.checkExceptions(() -> {
 
-      Pointer<Byte> lPatternPointer = Pointer.pointerToBytes(pPattern);
+      Pointer<Byte> lPatternPointer =
+                                    Pointer.pointerToBytes(pPattern);
 
       BackendUtils.checkOpenCLError(mOpenCLLibrary.clEnqueueFillBuffer((OpenCLLibrary.cl_command_queue) pQueuePointer.getPointer(),
                                                                        (OpenCLLibrary.cl_mem) pBufferPointer.getPointer(),
@@ -917,7 +1020,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
       BackendUtils.checkOpenCLError(mOpenCLLibrary.clEnqueueReadImage((OpenCLLibrary.cl_command_queue) pQueuePointer.getPointer(),
                                                                       (OpenCLLibrary.cl_mem) pImagePointer.getPointer(),
                                                                       pReadWrite ? 1
-                                                                                : 0,
+                                                                                 : 0,
                                                                       Pointer.pointerToSizeTs(pOrigin),
                                                                       Pointer.pointerToSizeTs(pRegion),
                                                                       0,
@@ -942,7 +1045,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
       BackendUtils.checkOpenCLError(mOpenCLLibrary.clEnqueueWriteImage((OpenCLLibrary.cl_command_queue) pQueuePointer.getPointer(),
                                                                        (OpenCLLibrary.cl_mem) pImagePointer.getPointer(),
                                                                        pBlockingWrite ? 1
-                                                                                     : 0,
+                                                                                      : 0,
                                                                        Pointer.pointerToSizeTs(pOrigin),
                                                                        Pointer.pointerToSizeTs(pRegion),
                                                                        0,
@@ -1040,7 +1143,8 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
   {
     return BackendUtils.checkExceptions(() -> {
       Pointer<?> lPointer = Pointer.pointerToBuffer(pBuffer);
-      ClearCLPeerPointer lPeerPointer = new ClearCLPeerPointer(lPointer);
+      ClearCLPeerPointer lPeerPointer =
+                                      new ClearCLPeerPointer(lPointer);
       return lPeerPointer;
     });
   }
@@ -1049,12 +1153,14 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
   public ClearCLPeerPointer wrap(ContiguousMemoryInterface pContiguousMemory)
   {
     return BackendUtils.checkExceptions(() -> {
-      Pointer<Byte> lByteBuffer = pContiguousMemory.getBridJPointer(Byte.class);
-      ClearCLPeerPointer lPeerPointer = new ClearCLPeerPointer(lByteBuffer);
+      Pointer<Byte> lByteBuffer =
+                                pContiguousMemory.getBridJPointer(Byte.class);
+      ClearCLPeerPointer lPeerPointer =
+                                      new ClearCLPeerPointer(lByteBuffer);
       return lPeerPointer;
     });
   }
-  
+
   @Override
   public ClearCLPeerPointer wrap(FragmentedMemoryInterface pFragmentedMemory)
   {
@@ -1125,7 +1231,5 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase implements
       BackendUtils.checkOpenCLError(mOpenCLLibrary.clFinish((OpenCLLibrary.cl_command_queue) pQueuePointer.getPointer()));
     });
   }
-
-
 
 }

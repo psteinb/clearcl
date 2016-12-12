@@ -85,7 +85,8 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
   public ClearCLPeerPointer getPlatformPeerPointer(int pPlatformIndex)
   {
     return BackendUtils.checkExceptions(() -> {
-      cl_platform_id platforms[] = new cl_platform_id[getNumberOfPlatforms()];
+      cl_platform_id platforms[] =
+                                 new cl_platform_id[getNumberOfPlatforms()];
       BackendUtils.checkOpenCLError(clGetPlatformIDs(platforms.length,
                                                      platforms,
                                                      null));
@@ -165,7 +166,8 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
   {
     return BackendUtils.checkExceptions(() -> {
       // Obtain a device ID
-      cl_device_id devices[] = new cl_device_id[getNumberOfDevicesForPlatform(pPlatformPointer)];
+      cl_device_id devices[] =
+                             new cl_device_id[getNumberOfDevicesForPlatform(pPlatformPointer)];
       BackendUtils.checkOpenCLError(clGetDeviceIDs((cl_platform_id) pPlatformPointer.getPointer(),
                                                    pDeviceType,
                                                    devices.length,
@@ -288,7 +290,8 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
   {
     return BackendUtils.checkExceptions(() -> {
       // Initialize the context properties
-      cl_context_properties contextProperties = new cl_context_properties();
+      cl_context_properties contextProperties =
+                                              new cl_context_properties();
       contextProperties.addProperty(CL_CONTEXT_PLATFORM,
                                     (cl_platform_id) pPlatformPointer.getPointer());
 
@@ -317,15 +320,17 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
       int lErrorCode[] = new int[1];
 
       @SuppressWarnings("deprecation")
-      cl_command_queue commandQueue = clCreateCommandQueue((cl_context) pContextPointer.getPointer(),
-                                                           (cl_device_id) pDevicePointer.getPointer(),
-                                                           pInOrder ? 0
-                                                                   : CL.CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
-                                                           lErrorCode);
+      cl_command_queue commandQueue =
+                                    clCreateCommandQueue((cl_context) pContextPointer.getPointer(),
+                                                         (cl_device_id) pDevicePointer.getPointer(),
+                                                         pInOrder ? 0
+                                                                  : CL.CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
+                                                         lErrorCode);
 
       BackendUtils.checkOpenCLErrorCode(lErrorCode[0]);
 
-      ClearCLPeerPointer lCommandQueuePointer = new ClearCLPeerPointer(commandQueue);
+      ClearCLPeerPointer lCommandQueuePointer =
+                                              new ClearCLPeerPointer(commandQueue);
 
       return lCommandQueuePointer;
     });
@@ -339,27 +344,31 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
                                                  long pBufferSize)
   {
     return BackendUtils.checkExceptions(() -> {
-      long lMemFlags = BackendUtils.getMemTypeFlags(pMemAllocMode,
-                                                    pHostAccessType,
-                                                    pKernelAccessType);
+      long lMemFlags =
+                     BackendUtils.getMemTypeFlags(pMemAllocMode,
+                                                  pHostAccessType,
+                                                  pKernelAccessType);
 
       int lErrorCode[] = new int[1];
 
-      cl_mem lBufferPointer = clCreateBuffer((cl_context) pContextPointer.getPointer(),
-                                             lMemFlags,
-                                             pBufferSize,
-                                             null,// lPointer,
-                                             lErrorCode);
+      cl_mem lBufferPointer =
+                            clCreateBuffer((cl_context) pContextPointer.getPointer(),
+                                           lMemFlags,
+                                           pBufferSize,
+                                           null, // lPointer,
+                                           lErrorCode);
 
       BackendUtils.checkOpenCLErrorCode(lErrorCode[0]);
 
-      ClearCLPeerPointer lClearCLPointer = new ClearCLPeerPointer(lBufferPointer);
+      ClearCLPeerPointer lClearCLPointer =
+                                         new ClearCLPeerPointer(lBufferPointer);
       return lClearCLPointer;
     });
   }
 
   @Override
-  public ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pContextPointer,
+  public ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pDevicePointer,
+                                                ClearCLPeerPointer pContextPointer,
                                                 MemAllocMode pMemAllocMode,
                                                 HostAccessType pHostAccessType,
                                                 KernelAccessType pKernelAccessType,
@@ -368,36 +377,103 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
                                                 ImageChannelDataType pImageChannelType,
                                                 long... pDimensions)
   {
-    cl_image_format lImageFormat = new cl_image_format();
-    lImageFormat.image_channel_order = BackendUtils.getImageChannelOrderFlags(pImageChannelOrder);
-    lImageFormat.image_channel_data_type = BackendUtils.getImageChannelDataTypeFlags(pImageChannelType);
+    String lDeviceVersion = getDeviceVersion(pDevicePointer);
 
-    cl_image_desc lImageDescription = new cl_image_desc();
-    lImageDescription.image_width = pDimensions[0];
-    lImageDescription.image_height = pDimensions.length < 2 ? 1
-                                                           : pDimensions[1];
-    lImageDescription.image_depth = pDimensions.length < 3 ? 1
-                                                          : pDimensions[2];
-    lImageDescription.image_type = BackendUtils.getImageTypeFlags(pImageType);
+    if (lDeviceVersion.contains("1.0")
+        || lDeviceVersion.contains("1.1"))
+    {
+      cl_image_format lImageFormat = new cl_image_format();
+      lImageFormat.image_channel_order =
+                                       BackendUtils.getImageChannelOrderFlags(pImageChannelOrder);
+      lImageFormat.image_channel_data_type =
+                                           BackendUtils.getImageChannelDataTypeFlags(pImageChannelType);
 
-    long lMemFlags = BackendUtils.getMemTypeFlags(pMemAllocMode,
+      long image_width = (int) pDimensions[0];
+      long image_height =
+                        (int) (pDimensions.length < 2 ? 1
+                                                      : pDimensions[1]);
+      long image_depth =
+                       (int) (pDimensions.length < 3 ? 1
+                                                     : pDimensions[2]);
+
+      long lMemFlags =
+                     BackendUtils.getMemTypeFlags(pMemAllocMode,
                                                   pHostAccessType,
                                                   pKernelAccessType);
 
-    int lErrorCode[] = new int[1];
+      int lErrorCode[] = new int[1];
 
-    cl_mem lImageMem = CL.clCreateImage((cl_context) pContextPointer.getPointer(),
+      cl_mem lImageMem = null;
+
+      if (pDimensions.length <= 2)
+      {
+        lImageMem =
+                  CL.clCreateImage2D((cl_context) pContextPointer.getPointer(),
+                                     lMemFlags,
+                                     new cl_image_format[]
+                                     { lImageFormat }, image_width, image_height, 0, null, lErrorCode);
+      }
+      else if (pDimensions.length == 3)
+      {
+        lImageMem =
+                  CL.clCreateImage3D((cl_context) pContextPointer.getPointer(),
+                                     lMemFlags,
+                                     new cl_image_format[]
+                                     { lImageFormat }, image_width, image_height, image_depth, 0, 0, null, lErrorCode);
+      }
+
+      BackendUtils.checkOpenCLErrorCode(lErrorCode[0]);
+
+      ClearCLPeerPointer lClearCLPeerPointer =
+                                             new ClearCLPeerPointer(lImageMem);
+
+      return lClearCLPeerPointer;
+    }
+    if (lDeviceVersion.contains("1.2"))
+    {
+
+      cl_image_format lImageFormat = new cl_image_format();
+      lImageFormat.image_channel_order =
+                                       BackendUtils.getImageChannelOrderFlags(pImageChannelOrder);
+      lImageFormat.image_channel_data_type =
+                                           BackendUtils.getImageChannelDataTypeFlags(pImageChannelType);
+
+      cl_image_desc lImageDescription = new cl_image_desc();
+      lImageDescription.image_width = pDimensions[0];
+      lImageDescription.image_height =
+                                     pDimensions.length < 2 ? 1
+                                                            : pDimensions[1];
+      lImageDescription.image_depth =
+                                    pDimensions.length < 3 ? 1
+                                                           : pDimensions[2];
+      lImageDescription.image_type =
+                                   BackendUtils.getImageTypeFlags(pImageType);
+
+      long lMemFlags =
+                     BackendUtils.getMemTypeFlags(pMemAllocMode,
+                                                  pHostAccessType,
+                                                  pKernelAccessType);
+
+      int lErrorCode[] = new int[1];
+
+      cl_mem lImageMem =
+                       CL.clCreateImage((cl_context) pContextPointer.getPointer(),
                                         lMemFlags,
                                         lImageFormat,
                                         lImageDescription,
                                         null,
                                         lErrorCode);
 
-    BackendUtils.checkOpenCLErrorCode(lErrorCode[0]);
+      BackendUtils.checkOpenCLErrorCode(lErrorCode[0]);
 
-    ClearCLPeerPointer lClearCLPeerPointer = new ClearCLPeerPointer(lImageMem);
+      ClearCLPeerPointer lClearCLPeerPointer =
+                                             new ClearCLPeerPointer(lImageMem);
 
-    return lClearCLPeerPointer;
+      return lClearCLPeerPointer;
+    }
+
+    return null;
+
   }
 
   @Override
@@ -408,15 +484,17 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
 
       int lErrorCode[] = new int[1];
 
-      cl_program program = clCreateProgramWithSource((cl_context) pContextPointer.getPointer(),
-                                                     pSourceCode.length,
-                                                     pSourceCode,
-                                                     null,
-                                                     null);
+      cl_program program =
+                         clCreateProgramWithSource((cl_context) pContextPointer.getPointer(),
+                                                   pSourceCode.length,
+                                                   pSourceCode,
+                                                   null,
+                                                   null);
 
       BackendUtils.checkOpenCLErrorCode(lErrorCode[0]);
 
-      ClearCLPeerPointer lClearCLPointer = new ClearCLPeerPointer(program);
+      ClearCLPeerPointer lClearCLPointer =
+                                         new ClearCLPeerPointer(program);
       return lClearCLPointer;
     });
   }
@@ -426,13 +504,15 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
                               String pOptions)
   {
     return BackendUtils.checkExceptions(() -> {
-      int lError = clBuildProgram((cl_program) pProgramPointer.getPointer(),
-                                  0,
-                                  null,
-                                  (pOptions == null || pOptions.isEmpty()) ? null
-                                                                          : pOptions,
-                                  null,
-                                  null);
+      int lError =
+                 clBuildProgram((cl_program) pProgramPointer.getPointer(),
+                                0,
+                                null,
+                                (pOptions == null
+                                 || pOptions.isEmpty()) ? null
+                                                        : pOptions,
+                                null,
+                                null);
       return lError == 0;
     });
   }
@@ -518,12 +598,14 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
 
       int lErrorCode[] = new int[1];
 
-      cl_kernel kernel = clCreateKernel((cl_program) pProgramPointer.getPointer(),
-                                        pKernelName,
-                                        lErrorCode);
+      cl_kernel kernel =
+                       clCreateKernel((cl_program) pProgramPointer.getPointer(),
+                                      pKernelName,
+                                      lErrorCode);
       BackendUtils.checkOpenCLErrorCode(lErrorCode[0]);
 
-      ClearCLPeerPointer lClearCLPointer = new ClearCLPeerPointer(kernel);
+      ClearCLPeerPointer lClearCLPointer =
+                                         new ClearCLPeerPointer(kernel);
       return lClearCLPointer;
     });
   }
@@ -534,7 +616,8 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
                                 Object pObject)
   {
     BackendUtils.checkExceptions(() -> {
-      cl_kernel lKernelPointer = (cl_kernel) pKernelPeerPointer.getPointer();
+      cl_kernel lKernelPointer =
+                               (cl_kernel) pKernelPeerPointer.getPointer();
 
       // PRIMITIVE TYPES:
       if (pObject instanceof Byte)
@@ -542,43 +625,43 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
                                                         pIndex,
                                                         Size.of(pObject.getClass()),
                                                         Pointer.to(new byte[]
-                                                        { (byte) pObject })));
+        { (byte) pObject })));
       else if (pObject instanceof Character)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
                                                         Size.of(pObject.getClass()),
                                                         Pointer.to(new char[]
-                                                        { (char) pObject })));
+        { (char) pObject })));
       else if (pObject instanceof Short)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
                                                         Size.of(pObject.getClass()),
                                                         Pointer.to(new short[]
-                                                        { (short) pObject })));
+        { (short) pObject })));
       else if (pObject instanceof Integer)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
                                                         Size.of(pObject.getClass()),
                                                         Pointer.to(new int[]
-                                                        { (int) pObject })));
+        { (int) pObject })));
       else if (pObject instanceof Long)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
                                                         Size.of(pObject.getClass()),
                                                         Pointer.to(new long[]
-                                                        { (long) pObject })));
+        { (long) pObject })));
       else if (pObject instanceof Float)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
                                                         Size.of(pObject.getClass()),
                                                         Pointer.to(new float[]
-                                                        { (float) pObject })));
+        { (float) pObject })));
       else if (pObject instanceof Double)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
                                                         Size.of(pObject.getClass()),
                                                         Pointer.to(new double[]
-                                                        { (double) pObject })));
+        { (double) pObject })));
       // ARRAY TYPES:
       else if (pObject instanceof byte[])
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
@@ -1010,7 +1093,8 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
   {
     return BackendUtils.checkExceptions(() -> {
       Pointer lPointer = Pointer.to(pBuffer);
-      ClearCLPeerPointer lPeerPointer = new ClearCLPeerPointer(lPointer);
+      ClearCLPeerPointer lPeerPointer =
+                                      new ClearCLPeerPointer(lPointer);
       return lPeerPointer;
     });
   }
@@ -1023,7 +1107,7 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
       return wrap(lByteBuffer);
     });
   }
-  
+
   @Override
   public ClearCLPeerPointer wrap(FragmentedMemoryInterface pFragmentedMemory)
   {

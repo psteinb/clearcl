@@ -407,7 +407,8 @@ public class ClearCLContext extends ClearCLBase
     ImageType lImageType = ImageType.fromDimensions(pDimensions);
 
     ClearCLPeerPointer lImage =
-                              getBackend().getImagePeerPointer(getPeerPointer(),
+                              getBackend().getImagePeerPointer(mDevice.getPeerPointer(),
+                                                               getPeerPointer(),
                                                                pMemAllocMode,
                                                                pHostAccessType,
                                                                pKernelAccessType,
