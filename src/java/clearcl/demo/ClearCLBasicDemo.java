@@ -86,16 +86,9 @@ public class ClearCLBasicDemo
                                                          "test.cl");
           lProgram.addDefine("CONSTANT", "1");
 
-//          System.out.println(lProgram.getSourceCode());
-
-          BuildStatus lBuildStatus = lProgram.build();
-
-//          System.out.println(lProgram.getBuildLog());
-//          System.out.println(lBuildStatus);
-//          
+          BuildStatus lBuildStatus = lProgram.buildAndLog();
           
           assertEquals(lBuildStatus, BuildStatus.Success);
-          // assertTrue(lProgram.getBuildLog().isEmpty());
 
           demoBuffers(lContext, lProgram);
 
