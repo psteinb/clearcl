@@ -210,6 +210,7 @@ public class BackendUtils
     case ReadWrite:
       lMemFlags |= CL_MEM_READ_WRITE;
       break;
+    case None:
     }
     return lMemFlags;
   }

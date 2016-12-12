@@ -337,17 +337,25 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
   }
 
   @Override
-  public ClearCLPeerPointer getBufferPeerPointer(ClearCLPeerPointer pContextPointer,
+  public ClearCLPeerPointer getBufferPeerPointer(ClearCLPeerPointer pDevicePointer,
+                                                 ClearCLPeerPointer pContextPointer,
                                                  MemAllocMode pMemAllocMode,
                                                  HostAccessType pHostAccessType,
                                                  KernelAccessType pKernelAccessType,
                                                  long pBufferSize)
   {
     return BackendUtils.checkExceptions(() -> {
+
+      String lDeviceVersion = getDeviceVersion(pDevicePointer);
+
+      boolean lOpenCL1p1o0 = (lDeviceVersion.contains("1.0")
+                              || lDeviceVersion.contains("1.1"));
+
       long lMemFlags =
                      BackendUtils.getMemTypeFlags(pMemAllocMode,
                                                   pHostAccessType,
-                                                  pKernelAccessType);
+                                                  lOpenCL1p1o0 ? null
+                                                               : KernelAccessType.None);
 
       int lErrorCode[] = new int[1];
 

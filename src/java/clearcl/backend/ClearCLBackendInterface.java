@@ -207,6 +207,8 @@ public interface ClearCLBackendInterface
    * Returns buffer peer pointer for a given context, access policy and size in
    * bytes.
    * 
+   * @param pDevicePointer
+   *          device peer pointer
    * @param pContextPeerPointer
    *          context peer pointer
    * @param pMemAllocMode
@@ -219,7 +221,8 @@ public interface ClearCLBackendInterface
    *          buffer size in bytes
    * @return buffer peer pointer
    */
-  ClearCLPeerPointer getBufferPeerPointer(ClearCLPeerPointer pContextPeerPointer,
+  ClearCLPeerPointer getBufferPeerPointer(ClearCLPeerPointer pDevicePointer,
+                                          ClearCLPeerPointer pContextPeerPointer,
                                           MemAllocMode pMemAllocMode,
                                           HostAccessType pHostAccessType,
                                           KernelAccessType pKernelAccessType,

@@ -232,7 +232,8 @@ public class ClearCLContext extends ClearCLBase
                               * pNativeType.getSizeInBytes();
 
     ClearCLPeerPointer lBufferPointer =
-                                      getBackend().getBufferPeerPointer(getPeerPointer(),
+                                      getBackend().getBufferPeerPointer(mDevice.getPeerPointer(),
+                                                                        getPeerPointer(),
                                                                         pMemAllocMode,
                                                                         pHostAccessType,
                                                                         pKernelAccessType,

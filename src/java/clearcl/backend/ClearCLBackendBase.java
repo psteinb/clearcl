@@ -16,7 +16,7 @@ import clearcl.exceptions.ClearCLUnsupportedException;
 import coremem.ContiguousMemoryInterface;
 
 public abstract class ClearCLBackendBase implements
-                                        ClearCLBackendInterface
+                                         ClearCLBackendInterface
 {
 
   @Override
@@ -139,7 +139,8 @@ public abstract class ClearCLBackendBase implements
   }
 
   @Override
-  public ClearCLPeerPointer getBufferPeerPointer(ClearCLPeerPointer pContextPeerPointer,
+  public ClearCLPeerPointer getBufferPeerPointer(ClearCLPeerPointer pDevicePointer,
+                                                 ClearCLPeerPointer pContextPeerPointer,
                                                  MemAllocMode pMemAllocMode,
                                                  HostAccessType pHostAccessType,
                                                  KernelAccessType pKernelAccessType,
@@ -240,12 +241,12 @@ public abstract class ClearCLBackendBase implements
 
   @Override
   public void enqueueReadFromBufferRegion(ClearCLPeerPointer pQueuePeerPointer,
-                                       ClearCLPeerPointer pBufferPeerPointer,
-                                       boolean pBlockingRead,
-                                       long[] pBufferOrigin,
-                                       long[] pHostOrigin,
-                                       long[] pRegion,
-                                       ClearCLPeerPointer pHostMemPeerPointer)
+                                          ClearCLPeerPointer pBufferPeerPointer,
+                                          boolean pBlockingRead,
+                                          long[] pBufferOrigin,
+                                          long[] pHostOrigin,
+                                          long[] pRegion,
+                                          ClearCLPeerPointer pHostMemPeerPointer)
   {
     throw new ClearCLUnsupportedException();
   }
