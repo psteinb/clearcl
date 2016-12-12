@@ -92,7 +92,7 @@ public class ClearCLBackends
       break;
     case MacOS:
       print("MacOS");
-      lClearCLBackend = getFunctionalBackend();
+      lClearCLBackend = new ClearCLBackendJOCL();
       break;
     case Windows:
       print("Windows");
