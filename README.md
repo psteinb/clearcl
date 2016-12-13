@@ -18,7 +18,7 @@ ClearVolume 2.0 GPU code will be built on top of ClearCL to offer flexibility an
 
 ## In progress:
 1. Full support for events
-2. Robustness 
+2. Improve robustness: ClearCL is used the current ClearVolume ImageJ plugin.
 
 ## Planned features:
 1. Basic set of OpenCL kernels for image processing: denoising, deconvolution, image quality, correlation, projection...
