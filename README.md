@@ -2,42 +2,37 @@
 
 Multi-backend Java Object Oriented Facade API for OpenCL. 
 
-## Planned features:
-
-1. Support all existing Java OpenCL bindings (JOCL, JavaCL, Jogamp, LWJGL)
-2. Full support of OpenCL 1.2
-3. Support for offheap memory (> 2G) via CoreMem (http://github.com/ClearControl/CoreMem)
-4. Basic set of OpenCL kernels for image processing: denoising, deconvolution, image quality, correlation, projection...
-5. Scatter-gather for processing images and buffers that don't fit in GPU mem.
-6. Upload-and-scaledown functionality to load and scale down images into GPU memory
-7. Live-coding infrastructire to be able to edit kernel code and immediately see the result.
-
 ## Why?
 
 OpenCL libraries come and go in Java, some are great but then one day the lead developper goes on to greener pastures and you are left with code that needs to be rewritten to take advantage of a new up-to-date library with better support. Maybe a particular library has a bug or does not support the function you need? or it does not give you access to the underlying native pointers, making difficult to process large buffers/images or interoperate with hardware? or maybe it just does not support your exotic OS of choice. To protect your code from complete rewrites ClearCL offers a very clean and complete API to write your code against. Changing backend requires just changing one line of code.   
 
-ClearVolume 2.0 GPU code will be built on top of ClearCL to offer flexibility and robsutness against OpenCL library deprecation.
+ClearVolume 2.0 GPU code will be built on top of ClearCL to offer flexibility and robsutness against OpenCL library idiosyncrasies and eventual deprecation.
 
-## Current state:
+## Features:
+1. Support all for JOCL and JavaCL OpenCL bindings.
+2. Full support of OpenCL 1.2
+3. Support for offheap memory (> 2G) via CoreMem (http://github.com/ClearControl/CoreMem)
+4. Automatic backend selection (different backends works better on some platforms).
+5. Automatic device selection via kernel benchmarking.
+6. Supports OpenCL 1.0/1.1 devices by automatically using alternative functions.
 
-Full Object Oriented API supporting all OpenCL 1.2 features except events. 
-Currently the only supported backend is JOCL (http://www.jocl.org/).
-A JavaCL backend is next.
+## In progress:
+1. Full support for events
+2. Robustness 
 
-## Internals & how to implement backends:
+## Planned features:
+1. Basic set of OpenCL kernels for image processing: denoising, deconvolution, image quality, correlation, projection...
+2. Scatter-gather for processing images and buffers that don't fit in GPU mem.
+3. Upload-and-scaledown functionality to load and scale down images into GPU memory
+4. Live-coding infrastructire to be able to edit kernel code and immediately see the result.
 
-Implementing backends simply consists in implementing classes against this (interface)[https://github.com/ClearVolume/ClearCL/blob/master/src/java/clearcl/backend/ClearCLBackendInterface.java].
-
-OpenCL binding libraries such as (or wthin) JOCL, JavaCL, Jogamp, and LWJGL encapsulate native pointers/handles
-using specific classes. ClearCL backends further encapsulate these within (ClearCLPeerPointers)[https://github.com/ClearVolume/ClearCL/blob/master/src/java/clearcl/ClearCLPeerPointer.java]. This pointer wrapper class is not exposed by the Object Oriented API but instead is only used from within the backend implementations and within the OO classes.
-
-
-     
 ## How to add ClearCL as a dependency to your project:
+
+Find the latest version on (BinTray)[https://bintray.com/clearvolume/ClearVolume/ClearCL]
 
 ### With Gradle:
 ~~~~
-     compile 'net.clearvolume:clearcl:0.1.0'
+     compile 'net.clearvolume:clearcl:0.3.20'
 ~~~~
 
 ~~~~
@@ -53,7 +48,7 @@ repositories {
 <dependency>
   <groupId>net.clearvolume</groupId>
   <artifactId>clearcl</artifactId>
-  <version>0.1.0</version>
+  <version>0.3.20</version>
   <type>pom</type>
 </dependency>
 ~~~~
@@ -75,13 +70,24 @@ Just check the test (here)[https://github.com/ClearVolume/ClearCL/blob/master/sr
 
 ## How to build project with Gradle
 
-* Get Gradle [here](http://www.gradle.org/)
-
-* Go to the project folder root and run:
-
-     gradle build cleanEclipse eclipse
+1. Clone the project
+2. run the Gradle Wrapper that comes with the repo:
+     ''' 
+     ./gradlew cleanEclipse eclipse build 
+     '''
      
+     ''' 
+     ./gradlew idea build 
+     '''
+
+## Internals & how to implement backends:
+
+Implementing backends simply consists in implementing classes against this (interface)[https://github.com/ClearVolume/ClearCL/blob/master/src/java/clearcl/backend/ClearCLBackendInterface.java].
+
+OpenCL binding libraries such as (or wthin) JOCL, JavaCL, Jogamp, and LWJGL encapsulate native pointers/handles
+using specific classes. ClearCL backends further encapsulate these within (ClearCLPeerPointers)[https://github.com/ClearVolume/ClearCL/blob/master/src/java/clearcl/ClearCLPeerPointer.java]. This pointer wrapper class is not exposed by the Object Oriented API but instead is only used from within the backend implementations and within the OO classes.
 
 ## Contributors
 
-* Loic Royer (royer -at- mpi-cbg -point- de)
+* Loic Royer ( royer -at- mpi-cbg -point- de )
+* Martin Weigert ( mweigert -at- mpi-cbg -point- de )
