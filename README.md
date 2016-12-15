@@ -72,13 +72,13 @@ Just check the test (here)[https://github.com/ClearVolume/ClearCL/blob/master/sr
 
 1. Clone the project
 2. run the Gradle Wrapper that comes with the repo:
-     ''' 
+~~~~ 
      ./gradlew cleanEclipse eclipse build 
-     '''
+~~~~
      
-     ''' 
+~~~~
      ./gradlew idea build 
-     '''
+~~~~
 
 ## Internals & how to implement backends:
 
@@ -91,3 +91,4 @@ using specific classes. ClearCL backends further encapsulate these within (Clear
 
 * Loic Royer ( royer -at- mpi-cbg -point- de )
 * Martin Weigert ( mweigert -at- mpi-cbg -point- de )
+* you?
