@@ -9,7 +9,7 @@ OpenCL libraries come and go in Java, some are great but then one day the lead d
 ClearVolume 2.0 GPU code will be built on top of ClearCL to offer flexibility and robsutness against OpenCL library idiosyncrasies and eventual deprecation.
 
 ## Features:
-1. implemented backnds: JOCL (www.jocl.org/) and JavaCL (github.com/nativelibs4java/JavaCL).
+1. implemented backends: JOCL (www.jocl.org/) and JavaCL (github.com/nativelibs4java/JavaCL).
 2. Full support of OpenCL 1.2
 3. Support for offheap memory (> 2G) via CoreMem (http://github.com/ClearControl/CoreMem)
 4. Automatic backend selection (different backends works better on some platforms).
@@ -29,7 +29,7 @@ ClearVolume 2.0 GPU code will be built on top of ClearCL to offer flexibility an
 
 ## How to add ClearCL as a dependency to your project:
 
-Find the latest version on (BinTray)[https://bintray.com/clearvolume/ClearVolume/ClearCL]
+Find the latest version on [BinTray](https://bintray.com/clearvolume/ClearVolume/ClearCL)
 
 ### With Gradle:
 ~~~~
@@ -83,10 +83,10 @@ Just check the test (here)[https://github.com/ClearVolume/ClearCL/blob/master/sr
 
 ## Internals & how to implement backends:
 
-Implementing backends simply consists in implementing classes against this (interface)[https://github.com/ClearVolume/ClearCL/blob/master/src/java/clearcl/backend/ClearCLBackendInterface.java].
+Implementing backends simply consists in implementing classes against this [interface](https://github.com/ClearVolume/ClearCL/blob/master/src/java/clearcl/backend/ClearCLBackendInterface.java).
 
 OpenCL binding libraries such as (or wthin) JOCL, JavaCL, Jogamp, and LWJGL encapsulate native pointers/handles
-using specific classes. ClearCL backends further encapsulate these within (ClearCLPeerPointers)[https://github.com/ClearVolume/ClearCL/blob/master/src/java/clearcl/ClearCLPeerPointer.java]. This pointer wrapper class is not exposed by the Object Oriented API but instead is only used from within the backend implementations and within the OO classes.
+using specific classes. ClearCL backends further encapsulate these within [ClearCLPeerPointers](https://github.com/ClearVolume/ClearCL/blob/master/src/java/clearcl/ClearCLPeerPointer.java). This pointer wrapper class is not exposed by the Object Oriented API but instead is only used from within the backend implementations and within the OO classes.
 
 ## Contributors
 
