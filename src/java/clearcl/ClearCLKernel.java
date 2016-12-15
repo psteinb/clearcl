@@ -10,6 +10,7 @@ import clearcl.exceptions.ClearCLArgumentMissingException;
 import clearcl.exceptions.ClearCLUnknownArgumentNameException;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.util.ElapsedTime;
+import coremem.enums.NativeTypeEnum;
 
 /**
  * ClearCLKernel is the ClearCL abstraction for OpenCL kernels.
@@ -18,20 +19,6 @@ import clearcl.util.ElapsedTime;
  */
 public class ClearCLKernel extends ClearCLBase implements Runnable
 {
-  private final ClearCLContext mClearCLContext;
-  private final ClearCLProgram mClearCLProgram;
-  private final String mName;
-  private final String mSourceCode;
-
-  private final ConcurrentHashMap<String, Integer> mNameToIndexMap;
-  private final ConcurrentHashMap<Integer, Argument> mIndexToArgumentMap = new ConcurrentHashMap<>();
-  private final ConcurrentHashMap<String, Number> mDefaultArgumentsMap;
-
-  private long[] mGlobalOffsets = new long[]
-  { 0, 0, 0 };
-  private long[] mGlobalSizes = null;
-  private long[] mLocalSizes = null;
-  private boolean mLogExecutiontime = true;
 
   private class Argument
   {
@@ -42,6 +29,22 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
       argument = pObject;
     }
   }
+
+  private final ClearCLContext mClearCLContext;
+  private final ClearCLProgram mClearCLProgram;
+  private final String mName;
+  private final String mSourceCode;
+
+  private final ConcurrentHashMap<String, Integer> mNameToIndexMap;
+  private final ConcurrentHashMap<Integer, Argument> mIndexToArgumentMap =
+                                                                         new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, Number> mDefaultArgumentsMap;
+
+  private long[] mGlobalOffsets = new long[]
+  { 0, 0, 0 };
+  private long[] mGlobalSizes = null;
+  private long[] mLocalSizes = null;
+  private boolean mLogExecutiontime = true;
 
   /**
    * This constructor is called internally from an OpenCl program.
@@ -212,6 +215,25 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   }
 
   /**
+   * Sets a local memory argument for the kernel.
+   * 
+   * @param pArgumentName
+   *          argument name
+   * @param pNativeTypeEnum
+   *          native type for elements
+   * @param pNumberOfElements
+   *          number of elements
+   */
+  public void setLocalMemoryArgument(String pArgumentName,
+                                     NativeTypeEnum pNativeTypeEnum,
+                                     long pNumberOfElements)
+  {
+    setArgument(pArgumentName,
+                new ClearCLLocalMemory(pNativeTypeEnum,
+                                       pNumberOfElements));
+  }
+
+  /**
    * Sets optional argument for a given argument name.
    * 
    * @param pArgumentName
@@ -246,7 +268,8 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 
       if (lArgument == null)
       {
-        Number lDefaultValue = mDefaultArgumentsMap.get(lArgumentName);
+        Number lDefaultValue =
+                             mDefaultArgumentsMap.get(lArgumentName);
         if (lDefaultValue != null)
           lArgument = new Argument(lDefaultValue);
       }
@@ -256,9 +279,21 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
                                                   lArgumentName,
                                                   lArgumentIndex);
 
-      getBackend().setKernelArgument(this.getPeerPointer(),
-                                     lArgumentIndex,
-                                     lArgument.argument);/**/
+      if (lArgument.argument instanceof ClearCLLocalMemory)
+      {
+        ClearCLLocalMemory lLocalMemory =
+                                        (ClearCLLocalMemory) lArgument.argument;
+        getBackend().setKernelArgument(this.getPeerPointer(),
+                                       lArgumentIndex,
+                                       lArgument.argument);/**/
+
+      }
+      else
+      {
+        getBackend().setKernelArgument(this.getPeerPointer(),
+                                       lArgumentIndex,
+                                       lArgument.argument);/**/
+      }
     }
 
   }
@@ -304,11 +339,12 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
                         () -> {
 
                           setArgumentsInternal();
-                          if (getGlobalSizes() == null || getGlobalOffsets() == null)
+                          if (getGlobalSizes() == null
+                              || getGlobalOffsets() == null)
                             throw new ClearCLInvalidExecutionRange(String.format("global offset = %s, global range = %s, local range = %s",
-                                                                                Arrays.toString(getGlobalOffsets()),
-                                                                                Arrays.toString(getGlobalSizes()),
-                                                                                Arrays.toString(getLocalSizes())));
+                                                                                 Arrays.toString(getGlobalOffsets()),
+                                                                                 Arrays.toString(getGlobalSizes()),
+                                                                                 Arrays.toString(getLocalSizes())));
 
                           getBackend().enqueueKernelExecution(pClearCLQueue.getPeerPointer(),
                                                               getPeerPointer(),
@@ -345,8 +381,6 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 
   }
 
-
-
   /* (non-Javadoc)
    * @see java.lang.Object#toString()
    */
@@ -365,13 +399,16 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 
   public ConcurrentHashMap<String, Number> getKernelDefaultArgumentsMap(String pKernelName)
   {
-    ConcurrentHashMap<String, Number> lNameToDefaultArgumentMapMap = new ConcurrentHashMap<String, Number>();
+    ConcurrentHashMap<String, Number> lNameToDefaultArgumentMapMap =
+                                                                   new ConcurrentHashMap<String, Number>();
 
     String lSourceCode = getSourceCode();
 
     int lBeginOfDefault = 0;
-    while ((lBeginOfDefault = lSourceCode.indexOf("//default " + pKernelName,
-                                                  lBeginOfDefault)) != -1)
+    while ((lBeginOfDefault =
+                            lSourceCode.indexOf("//default "
+                                                + pKernelName,
+                                                lBeginOfDefault)) != -1)
     {
       int lEndOfDefault = lSourceCode.indexOf('\n', lBeginOfDefault);
       String lSubStringKernel = lSourceCode.substring(lBeginOfDefault,
@@ -379,18 +416,23 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 
       // System.out.println(lSubStringKernel);
 
-      String[] lTwoPointsAndEqualSplit = lSubStringKernel.split("(\\s|=)+");
+      String[] lTwoPointsAndEqualSplit =
+                                       lSubStringKernel.split("(\\s|=)+");
       // System.out.println(Arrays.toString(lTwoPointsAndEqualSplit));
 
       String lArgumentName = lTwoPointsAndEqualSplit[2].trim()
                                                        .toLowerCase();
-      String lArgumentValue = lTwoPointsAndEqualSplit[3].trim()
-                                                        .toLowerCase();
+      String lArgumentValue =
+                            lTwoPointsAndEqualSplit[3].trim()
+                                                      .toLowerCase();
 
-      char lArgumentType = lArgumentValue.charAt(lArgumentValue.length() - 1);
+      char lArgumentType =
+                         lArgumentValue.charAt(lArgumentValue.length()
+                                               - 1);
 
       lArgumentValue = lArgumentValue.substring(0,
-                                                lArgumentValue.length() - 1);
+                                                lArgumentValue.length()
+                                                   - 1);
 
       switch (lArgumentType)
       {
@@ -435,7 +477,8 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 
   public ConcurrentHashMap<String, Integer> getKernelIndexMap(String pKernelName)
   {
-    ConcurrentHashMap<String, Integer> lNameToIndexMap = new ConcurrentHashMap<String, Integer>();
+    ConcurrentHashMap<String, Integer> lNameToIndexMap =
+                                                       new ConcurrentHashMap<String, Integer>();
 
     String[] lKernelSignature = getKernelSignature(pKernelName);
 
@@ -460,17 +503,22 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
       int lBeginOfKernelSignature = lSourceCode.indexOf(pKernelName);
       if (lBeginOfKernelSignature >= 0)
       {
-        int lEndOfKernelSignature = lSourceCode.indexOf('{',
-                                                        lBeginOfKernelSignature);
-        String lSubStringKernel = lSourceCode.substring(lBeginOfKernelSignature,
-                                                        lEndOfKernelSignature);
+        int lEndOfKernelSignature =
+                                  lSourceCode.indexOf('{',
+                                                      lBeginOfKernelSignature);
+        String lSubStringKernel =
+                                lSourceCode.substring(lBeginOfKernelSignature,
+                                                      lEndOfKernelSignature);
 
-        String lSubStringSignature = lSubStringKernel.substring(lSubStringKernel.indexOf('(') + 1,
-                                                                lSubStringKernel.indexOf(')'));
+        String lSubStringSignature =
+                                   lSubStringKernel.substring(lSubStringKernel.indexOf('(')
+                                                              + 1,
+                                                              lSubStringKernel.indexOf(')'));
 
         // System.out.println("[[[" + lSubStringSignature + "]]]");
 
-        String[] lKernelSignature = lSubStringSignature.split(",", -1);
+        String[] lKernelSignature =
+                                  lSubStringSignature.split(",", -1);
 
         for (int i = 0; i < lKernelSignature.length; i++)
           lKernelSignature[i] = lKernelSignature[i].trim();
@@ -511,4 +559,5 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
     getBackend().releaseKernel(getPeerPointer());
     setPeerPointer(null);
   }
+
 }

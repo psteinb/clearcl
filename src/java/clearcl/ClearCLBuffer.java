@@ -85,9 +85,9 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pPattern
    *          pattern as a sequence of bytes
    * @param pOffsetInBuffer
-   *          offset in buffer in bytes
+   *          offset in buffer in elements
    * @param pLengthInBuffer
-   *          length in buffer in bytes
+   *          length in buffer in elements
    * @param pBlockingFill
    *          true -> blocking call, false -> asynchronous call
    */
@@ -133,11 +133,11 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pDstBuffer
    *          destination buffer
    * @param pOffsetInSrcBuffer
-   *          source buffer offset
+   *          source buffer offset in elements
    * @param pOffsetInDstBuffer
-   *          destination buffer offset
+   *          destination buffer offset in elements
    * @param pLengthInElements
-   *          copy length
+   *          copy length in elements
    * @param pBlockingCopy
    *          true -> blocking call, false -> asynchronous call
    */
@@ -221,7 +221,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pDstImage
    *          destination image
    * @param pOffsetInSrcBuffer
-   *          source buffer offset
+   *          source buffer offset in elements
    * @param pDstOrigin
    *          destination origin
    * @param pDstRegion
@@ -298,9 +298,9 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pContiguousMemory
    *          destination CoreMem buffer
    * @param pOffsetInBuffer
-   *          offset in destination buffer in bytes
+   *          offset in destination buffer in elements
    * @param pLengthInBuffer
-   *          length to write in bytes
+   *          length to write in elements
    * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
    */
@@ -353,9 +353,9 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pBuffer
    *          destination NIO buffer
    * @param pOffsetInBuffer
-   *          offset in destination buffer in bytes
+   *          offset in destination buffer in elements
    * @param pLengthInBuffer
-   *          length to write in bytes
+   *          length to write in elements
    * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
    */
@@ -405,11 +405,11 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * Reads from a linear region of a CoreMem buffer into this OpenCl buffer.
    * 
    * @param pContiguousMemory
-   *          source NIO buffer
+   *          source CoreMem buffer
    * @param pOffsetInBuffer
-   *          offset in source buffer in bytes
+   *          offset in source buffer in elements
    * @param pLengthInBuffer
-   *          length to read in bytes
+   *          length to read in elements
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
    */
@@ -462,9 +462,9 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pBuffer
    *          source NIO buffer
    * @param pOffsetInBuffer
-   *          offset in source buffer in bytes
+   *          offset in source buffer in elements
    * @param pLengthInBuffer
-   *          length to read in bytes
+   *          length to read in elements
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
    */

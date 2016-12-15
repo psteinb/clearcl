@@ -210,7 +210,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    * @param pRegionInSrcImage
    *          region dimensions in source image
    * @param pOffsetInDstBuffer
-   *          offset in destination buffer
+   *          offset in destination buffer in elements
    * @param pBlockingCopy
    *          true -> blocking call, false -> asynchronous call
    */
@@ -228,7 +228,7 @@ public class ClearCLImage extends ClearCLMemBase implements
                                           pBlockingCopy,
                                           Region3.origin(pOriginInSrcImage),
                                           Region3.region(pRegionInSrcImage),
-                                          pOffsetInDstBuffer);
+                                          pOffsetInDstBuffer*pDstBuffer.getNativeType().getSizeInBytes());
     pDstBuffer.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
   }
 

@@ -11,6 +11,11 @@ import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
 import coremem.util.Size;
 
+/**
+ * ClearCLHostImageBuffer is the ClearCL abstraction for CPU RAM images.
+ *
+ * @author royer
+ */
 public class ClearCLHostImageBuffer extends ClearCLMemBase implements
                                     ClearCLMemInterface,
                                     ClearCLImageInterface
@@ -21,6 +26,12 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
   private final long[] mDimensions;
   private long mNumberOfChannels;
 
+  /**
+   * Allocates a host image buffer of same dimensions than a given image.
+   * 
+   * @param pClearCLImage
+   * @return
+   */
   public static ClearCLHostImageBuffer allocateSameAs(ClearCLImageInterface pClearCLImage)
   {
     ClearCLHostImageBuffer lClearCLHostImage =
@@ -32,6 +43,27 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
     return lClearCLHostImage;
   }
 
+  /**
+   * Internal method to allocate offheap memory.
+   * 
+   * @param pSizeInBytes
+   * @return
+   */
+  private static OffHeapMemory allocate(long pSizeInBytes)
+  {
+    return OffHeapMemory.allocatePageAlignedBytes("ClearCLHostImageBuffer",
+                                                  pSizeInBytes);
+  }
+
+  /**
+   * Creates a host image buffer from a context, native type, number of
+   * channels, and dimensions.
+   * 
+   * @param pClearCLContext
+   * @param pNativeType
+   * @param pNumberOfChannels
+   * @param pDimensions
+   */
   public ClearCLHostImageBuffer(ClearCLContext pClearCLContext,
                                 NativeTypeEnum pNativeType,
                                 long pNumberOfChannels,
@@ -46,12 +78,16 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
 
   }
 
-  private static OffHeapMemory allocate(long pSizeInBytes)
-  {
-    return OffHeapMemory.allocatePageAlignedBytes("ClearCLHostImageBuffer",
-                                                  pSizeInBytes);
-  }
-
+  /**
+   * Creates a host image buffer from a context, an existing contiguous memory
+   * object, native type, number of channels, and dimensions.
+   * 
+   * @param pClearCLContext
+   * @param pContiguousMemoryInterface
+   * @param pNativeType
+   * @param pNumberOfChannels
+   * @param pDimensions
+   */
   public ClearCLHostImageBuffer(ClearCLContext pClearCLContext,
                                 ContiguousMemoryInterface pContiguousMemoryInterface,
                                 NativeTypeEnum pNativeType,
@@ -73,6 +109,10 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
     return null;
   }
 
+  /**
+   * Returns the contiguous memory object used to store the data.
+   * @return
+   */
   public ContiguousMemoryInterface getContiguousMemory()
   {
     return mContiguousMemory;
@@ -108,11 +148,6 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
     return mNumberOfChannels;
   }
 
-  public void writeTo(byte[] pArray)
-  {
-    mContiguousMemory.copyTo(pArray);
-  }
-
   private static final long getVolume(long[] pDimensions)
   {
     long lVolume = 1;
@@ -121,9 +156,7 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
     return lVolume;
   }
 
-  /* (non-Javadoc)
-   * @see coremem.interfaces.SizedInBytes#getSizeInBytes()
-   */
+
   @Override
   public long getSizeInBytes()
   {
@@ -146,7 +179,7 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
   public void close()
   {
     mContiguousMemory.free();
-    mContiguousMemory=null;
+    mContiguousMemory = null;
   }
 
 }

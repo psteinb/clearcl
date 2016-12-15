@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.bridj.Pointer;
 import org.bridj.Pointer.StringType;
+import org.jocl.CL;
 import org.bridj.SizeT;
 
 import com.nativelibs4java.opencl.CLPlatform.ContextProperties;
@@ -18,6 +19,7 @@ import com.nativelibs4java.opencl.library.cl_image_format;
 
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLImage;
+import clearcl.ClearCLLocalMemory;
 import clearcl.ClearCLPeerPointer;
 import clearcl.backend.BackendUtils;
 import clearcl.backend.ClearCLBackendBase;
@@ -758,6 +760,14 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase
                                                                     pIndex,
                                                                     SizeOf.cl_mem,
                                                                     Pointer.pointerToPointer(lCLmem)));
+      }
+      else if (pObject instanceof ClearCLLocalMemory)
+      {
+        ClearCLLocalMemory lClearCLLocalMemory = (ClearCLLocalMemory) pObject;
+        BackendUtils.checkOpenCLError(mOpenCLLibrary.clSetKernelArg(lKernelPointer,
+                                                                    pIndex,
+                                                                    lClearCLLocalMemory.getSizeInBytes(),
+                                                                    Pointer.NULL));
       }
 
     });

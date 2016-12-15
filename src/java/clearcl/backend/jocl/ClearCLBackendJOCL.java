@@ -35,6 +35,7 @@ import org.jocl.cl_program;
 
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLImage;
+import clearcl.ClearCLLocalMemory;
 import clearcl.ClearCLPeerPointer;
 import clearcl.backend.BackendUtils;
 import clearcl.backend.ClearCLBackendInterface;
@@ -724,6 +725,14 @@ public class ClearCLBackendJOCL implements ClearCLBackendInterface
                                                         SizeOf.cl_mem,
                                                         Pointer.to(((cl_mem) lClearCLImage.getPeerPointer()
                                                                                           .getPointer()))));
+      }
+      else if (pObject instanceof ClearCLLocalMemory)
+      {
+        ClearCLLocalMemory lClearCLLocalMemory = (ClearCLLocalMemory) pObject;
+        BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
+                                                        pIndex,
+                                                        lClearCLLocalMemory.getSizeInBytes(),
+                                                        null));
       }
     });
 
