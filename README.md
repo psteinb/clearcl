@@ -9,7 +9,7 @@ OpenCL libraries come and go in Java, some are great but then one day the lead d
 ClearVolume 2.0 GPU code will be built on top of ClearCL to offer flexibility and robsutness against OpenCL library idiosyncrasies and eventual deprecation.
 
 ## Features:
-1. implemented backends: JOCL (www.jocl.org/) and JavaCL (github.com/nativelibs4java/JavaCL).
+1. Implemented backends: JOCL (www.jocl.org/) and JavaCL (github.com/nativelibs4java/JavaCL).
 2. Full support of OpenCL 1.2
 3. Support for offheap memory (> 2G) via CoreMem (http://github.com/ClearControl/CoreMem)
 4. Automatic backend selection (different backends works better on some platforms).
