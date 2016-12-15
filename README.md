@@ -9,7 +9,7 @@ OpenCL libraries come and go in Java, some are great but then one day the lead d
 ClearVolume 2.0 GPU code will be built on top of ClearCL to offer flexibility and robsutness against OpenCL library idiosyncrasies and eventual deprecation.
 
 ## Features:
-1. Support all for JOCL and JavaCL OpenCL bindings.
+1. implemented backnds: JOCL (www.jocl.org/) and JavaCL (github.com/nativelibs4java/JavaCL).
 2. Full support of OpenCL 1.2
 3. Support for offheap memory (> 2G) via CoreMem (http://github.com/ClearControl/CoreMem)
 4. Automatic backend selection (different backends works better on some platforms).
@@ -25,6 +25,7 @@ ClearVolume 2.0 GPU code will be built on top of ClearCL to offer flexibility an
 2. Scatter-gather for processing images and buffers that don't fit in GPU mem.
 3. Upload-and-scaledown functionality to load and scale down images into GPU memory
 4. Live-coding infrastructire to be able to edit kernel code and immediately see the result.
+5. Integration with imglib2 and FiJi.
 
 ## How to add ClearCL as a dependency to your project:
 
