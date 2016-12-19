@@ -1,4 +1,4 @@
-// Copyright 2009-2015 Intel Corporation.
+   // Copyright 2009-2015 Intel Corporation.
 //
 // The source code, information and material ("Material") contained herein is 
 // owned by Intel Corporation or its suppliers or licensors, and title to such 
@@ -217,6 +217,16 @@ Noise_2d( float x, float y )
 
   float wx = WEIGHT(vxy.x);
   float wy = WEIGHT(vxy.y);
+
+
+  if(x==3.4f && y==2.5f)
+  {
+    float a =  (float)default_perm[ 2 ];
+    float b =  (float)((px + uy)  & 0x0FF);
+    float c =  (float)(default_perm[(px + uy) & 0x0FF]);
+    
+    printf(" %f %f %f\n",  (float)(a), (float)(b), (float)(c));
+  }
   
   return  interp( wy, interp( wx, gxy, gXy ), interp( wx, gxY, gXY ));
 }
@@ -335,105 +345,96 @@ float cloud( float fx, float fy, float fz, float size )
 
 
 
-kernel void
-cloud3d(__global float* output,
-    float       wx, 
-    float       wy, 
-    float       wz  
-        )
+//default cloud3d sx=1f
+//default cloud3d sy=1f
+//default cloud3d sz=1f
+__kernel void cloud3d(__global float* output,
+                               float  sx, 
+                               float  sy, 
+                               float  sz  
+                     )
 {
-    int i = get_global_id(0);
-  int j = get_global_id(1);
-  int k = get_global_id(2);
+  int x = get_global_id(0);
+  int y = get_global_id(1);
+  int z = get_global_id(2);
 
-  int Nx = get_global_size(0);
-  int Ny = get_global_size(0);
-  int Nz = get_global_size(0);
+  int width  = get_global_size(0);
+  int height = get_global_size(1);
+  int depth  = get_global_size(1);
   
-  float fx = (float)i/Nx * wx;  
-  float fy = (float)j/Ny * wy;  
-  float fz = (float)k/Nz * wz;  
+  float fx = x * sx;  
+  float fy = y * sy;  
+  float fz = z * sz;  
 
-  // int  x = get_global_id(0);
-  // int y = get_global_id(1);
-  // uint offset = x + y *  iImageWidth;
+  float value = cloud( fx, fy, fz, width );
 
-  // float  fx = 2.0f * (float)x * invWidth;
-  // float  fy = 2.0f * (float)y * invHeight;
-  // float  fz = slice;
-
-  // float  size = (float)iImageWidth;
-  // float  value = 0.0f;
-
-  float value = cloud( fx, fy, fz, Nx );
-
-
-  value *= (float)wx;
-
-  output[i+j*Nx+k*Nx*Ny] = value;
-
+  output[x+y*width+z*width*height] = value;
 }
 
 
 
-
-kernel void
-perlin2d(__global float*  output,
-      float       dx,
-    float       dy,
-    float       wx,   // 1/width
-    float       wy,   // 1/height
-    float       off_x,
-    float       off_y
-        )
+//default perlin2d sx=1f
+//default perlin2d sy=1f
+//default perlin2d ox=0f
+//default perlin2d oy=0f
+__kernel void perlin2d(__global float*  output,
+                                float   sx,
+                                float   sy,  
+                                float   ox,
+                                float   oy
+                      )
 {
-  int i = get_global_id(0);
-  int j = get_global_id(1);
+  int x = get_global_id(0);
+  int y = get_global_id(1);
 
-  int Nx = get_global_size(0);
+  int width  = get_global_size(0);
+  int height = get_global_size(1);
 
-  float fx = off_x+(float)i*dx/wx;
-  float fy = off_y+(float)j*dy/wy;
+  float fx = ox+x*sx;
+  float fy = oy+y*sy;
 
-  float value;
+  float value =  Noise_2d(fx, fy); 
+  
+  if(x==64 && y==64)
+    printf("ox=%f, oy=%f, sx=%f, sy=%f, w=%d, h=%d, x=%d, y=%d, fx=%f, fy=%f, v=%f, noise= %f \n", ox, oy, sx, sy, width, height, x, y, fx, fy, value, Noise_2d(3.4f,2.5f));
 
 
-  value =  Noise_2d(fx, fy); 
-
-  output[i+j*Nx] = value;
+  output[x+y*width] = value;
 }
 
-kernel void
-perlin3d(__global float*  output,
-     int offz,
-    float       dx,
-    float       dy,
-    float       dz,
-    float       wx,   // 1/width
-    float       wy,   // 1/height
-    float       wz,
-    float       ox,
-    float       oy,
-    float       oz
 
-
-        )
+//default perlin3d sx=1f
+//default perlin3d sy=1f
+//default perlin3d sz=1f
+//default perlin3d ox=0f
+//default perlin3d oy=0f
+//default perlin3d oz=0f
+__kernel void perlin3d(__global float*  output,
+                                int     offz,
+                                float   sx,  
+                                float   sy,  
+                                float   sz,
+                                float   ox,
+                                float   oy,
+                                float   oz
+                      )
 {
-  int i = get_global_id(0);
-  int j = get_global_id(1);
-  int k = get_global_id(2);
+  int x = get_global_id(0);
+  int y = get_global_id(1);
+  int z = get_global_id(2);
 
-  int Nx = get_global_size(0);
-  int Ny = get_global_size(1);
+  int width = get_global_size(0);
+  int height = get_global_size(1);
   
-  float fx = (float)i*dx /wx+ox;
-  float fy = (float)j*dy /wy+oy;
-  float fz = (float)(offz+k)*dz/wz+oz;
+  float fx = x*sx+ox;
+  float fy = y*sy+oy;
+  float fz = z*sz+oz;
 
-  float value;
+  float value =  Noise_3d(fx, fy, fz); 
 
-  
-  value =  Noise_3d(fx, fy, fz); 
+  if(x==64 && y==64 && z==64)
+    printf("x=%d, y=%d, z=%d \n", x, y, z);
 
-  output[i+j*Nx+k*Nx*Ny] = value;
+
+  output[x+y*width+z*width*height] = value;
 }

@@ -107,7 +107,7 @@ public class ClearCLContext extends ClearCLBase
   public ClearCLBuffer createBuffer(NativeTypeEnum pNativeType,
                                     long pBufferLengthInElements)
   {
-    return createBuffer(MemAllocMode.AllocateHostPointer,
+    return createBuffer(MemAllocMode.Best,
                         HostAccessType.ReadWrite,
                         KernelAccessType.ReadWrite,
                         pNativeType,
@@ -132,7 +132,7 @@ public class ClearCLContext extends ClearCLBase
                                     NativeTypeEnum pNativeType,
                                     long pBufferLengthInElements)
   {
-    return createBuffer(MemAllocMode.AllocateHostPointer,
+    return createBuffer(MemAllocMode.Best,
                         pHostAccessType,
                         pKernelAccessType,
                         pNativeType,
@@ -268,7 +268,7 @@ public class ClearCLContext extends ClearCLBase
   public ClearCLImage createSingleChannelImage(ImageChannelDataType pImageChannelType,
                                                long... pDimensions)
   {
-    return createImage(MemAllocMode.AllocateHostPointer,
+    return createImage(MemAllocMode.Best,
                        HostAccessType.ReadWrite,
                        KernelAccessType.ReadWrite,
                        mDevice.getType()
@@ -299,7 +299,7 @@ public class ClearCLContext extends ClearCLBase
                                   ImageChannelDataType pImageChannelType,
                                   long... pDimensions)
   {
-    return createImage(MemAllocMode.AllocateHostPointer,
+    return createImage(MemAllocMode.Best,
                        HostAccessType.ReadWrite,
                        KernelAccessType.ReadWrite,
                        pImageChannelOrder,
@@ -330,7 +330,7 @@ public class ClearCLContext extends ClearCLBase
                                                ImageChannelDataType pImageChannelType,
                                                long... pDimensions)
   {
-    return createImage(MemAllocMode.AllocateHostPointer,
+    return createImage(MemAllocMode.Best,
                        pHostAccessType,
                        pKernelAccessType,
                        mDevice.getType()
@@ -367,7 +367,7 @@ public class ClearCLContext extends ClearCLBase
                                   ImageChannelDataType pImageChannelType,
                                   long... pDimensions)
   {
-    return createImage(MemAllocMode.AllocateHostPointer,
+    return createImage(MemAllocMode.Best,
                        pHostAccessType,
                        pKernelAccessType,
                        pImageChannelOrder,

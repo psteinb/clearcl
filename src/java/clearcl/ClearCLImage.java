@@ -1,6 +1,7 @@
 package clearcl;
 
 import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import clearcl.abs.ClearCLMemBase;
@@ -17,6 +18,8 @@ import clearcl.util.Region3;
 import coremem.ContiguousMemoryInterface;
 import coremem.enums.NativeTypeEnum;
 import coremem.fragmented.FragmentedMemoryInterface;
+import coremem.offheap.OffHeapMemory;
+import coremem.util.Size;
 
 /**
  * ClearCLImage is the ClearCL abstraction for OpenCL images.
@@ -348,6 +351,10 @@ public class ClearCLImage extends ClearCLMemBase implements
                                       Region3.region(pRegion),
                                       lHostMemPointer);
   }
+  
+  
+ 
+  
 
   /**
    * Reads from a CoreMem buffer into a nD region of this image.
@@ -496,6 +503,177 @@ public class ClearCLImage extends ClearCLMemBase implements
              Region3.region(getDimensions()),
              pBlockingRead);
   }
+ 
+  
+  
+  /**
+   * Reads from a Java byte array into this image.
+   * 
+   * @param Java byte array 
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   * @return 
+   */
+  public OffHeapMemory readFrom(byte[] pByteArray,
+                       boolean pBlockingRead)
+  {
+    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateBytes(pByteArray.length);
+    
+    lOffHeapMemory.copyFrom(pByteArray);
+    
+    readFrom(lOffHeapMemory,
+             Region3.originZero(),
+             Region3.region(getDimensions()),
+             pBlockingRead);
+    
+    return lOffHeapMemory;
+  }
+  
+  /**
+   * Reads from a Java char array into this image.
+   * 
+   * @param Java char array 
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   * @return 
+   */
+  public OffHeapMemory readFrom(char[] pCharArray,
+                       boolean pBlockingRead)
+  {
+    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateChars(pCharArray.length);
+    
+    lOffHeapMemory.copyFrom(pCharArray);
+    
+    readFrom(lOffHeapMemory,
+             Region3.originZero(),
+             Region3.region(getDimensions()),
+             pBlockingRead);
+    
+    return lOffHeapMemory;
+  }
+  
+  
+  /**
+   * Reads from a Java short array into this image.
+   * 
+   * @param Java short array 
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   * @return 
+   */
+  public OffHeapMemory readFrom(short[] pShortsArray,
+                       boolean pBlockingRead)
+  {
+    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateShorts(pShortsArray.length);
+    
+    lOffHeapMemory.copyFrom(pShortsArray);
+    
+    readFrom(lOffHeapMemory,
+             Region3.originZero(),
+             Region3.region(getDimensions()),
+             pBlockingRead);
+    
+    return lOffHeapMemory;
+  }
+  
+  
+  /**
+   * Reads from a Java int array into this image.
+   * 
+   * @param Java int array 
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   * @return 
+   */
+  public OffHeapMemory readFrom(int[] pIntArray,
+                       boolean pBlockingRead)
+  {
+    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateInts(pIntArray.length);
+    
+    lOffHeapMemory.copyFrom(pIntArray);
+    
+    readFrom(lOffHeapMemory,
+             Region3.originZero(),
+             Region3.region(getDimensions()),
+             pBlockingRead);
+    
+    return lOffHeapMemory;
+  }
+  
+  
+  /**
+   * Reads from a Java long array into this image.
+   * 
+   * @param Java long array 
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   * @return 
+   */
+  public OffHeapMemory readFrom(long[] pLongArray,
+                       boolean pBlockingRead)
+  {
+    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateLongs(pLongArray.length);
+    
+    lOffHeapMemory.copyFrom(pLongArray);
+    
+    readFrom(lOffHeapMemory,
+             Region3.originZero(),
+             Region3.region(getDimensions()),
+             pBlockingRead);
+    
+    return lOffHeapMemory;
+  }
+  
+  
+  
+  /**
+   * Reads from a Java float array into this image.
+   * 
+   * @param Java float array 
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   * @return 
+   */
+  public OffHeapMemory readFrom(float[] pFloatArray,
+                       boolean pBlockingRead)
+  {
+    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateFloats(pFloatArray.length);
+    
+    lOffHeapMemory.copyFrom(pFloatArray);
+    
+    readFrom(lOffHeapMemory,
+             Region3.originZero(),
+             Region3.region(getDimensions()),
+             pBlockingRead);
+    
+    return lOffHeapMemory;
+  }
+  
+  /**
+   * Reads from a Java double array into this image.
+   * 
+   * @param Java double array 
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   * @return 
+   */
+  public OffHeapMemory readFrom(double[] pDoubleArray,
+                       boolean pBlockingRead)
+  {
+    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateDoubles(pDoubleArray.length);
+    
+    lOffHeapMemory.copyFrom(pDoubleArray);
+    
+    readFrom(lOffHeapMemory,
+             Region3.originZero(),
+             Region3.region(getDimensions()),
+             pBlockingRead);
+    
+    return lOffHeapMemory;
+  }
+  
+  
+  
 
   /**
    * Returns the context for this image.

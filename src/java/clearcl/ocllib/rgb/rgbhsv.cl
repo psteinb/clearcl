@@ -60,23 +60,23 @@ inline float4 hsv2rgb(const float4 HSV)
   switch (i)
   {
     case 0:
-      RGB = (float4)(v, t, p, w);
+      RGB = (float4){v, t, p, w};
       break;
     case 1:
-      RGB = (float4)(q, v, p, w);
+      RGB = (float4){q, v, p, w};
       break;
     case 2:
-      RGB = (float4)(p, v, t, w);
+      RGB = (float4){p, v, t, w};
       break;
     case 3:
-      RGB = (float4)(p, q, v, w);
+      RGB = (float4){p, q, v, w};
       break;
     case 4:
-      RGB = (float4)(t, p, v, w);
+      RGB = (float4){t, p, v, w};
       break;
     case 5:
     default:
-      RGB = (float4)(v, p, q, w);
+      RGB = (float4){v, p, q, w};
       break;
   }
   return RGB;
@@ -98,23 +98,23 @@ inline float4 hv2rgb(const float4 HSV)
   switch (i)
   {
     case 0:
-      RGB = (float4)(v, t, p, w);
+      RGB = (float4){v, t, p, w};
       break;
     case 1:
-      RGB = (float4)(q, v, p, w);
+      RGB = (float4){q, v, p, w};
       break;
     case 2:
-      RGB = (float4)(p, v, t, w);
+      RGB = (float4){p, v, t, w};
       break;
     case 3:
-      RGB = (float4)(p, q, v, w);
+      RGB = (float4){p, q, v, w};
       break;
     case 4:
-      RGB = (float4)(t, p, v, w);
+      RGB = (float4){t, p, v, w};
       break;
     case 5:
     default:
-      RGB = (float4)(v, p, q, w);
+      RGB = (float4){v, p, q, w};
       break;
   }
   return RGB;

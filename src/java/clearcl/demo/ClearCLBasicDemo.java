@@ -20,6 +20,7 @@ import clearcl.ClearCLKernel;
 import clearcl.ClearCLPlatform;
 import clearcl.ClearCLProgram;
 import clearcl.backend.ClearCLBackendInterface;
+import clearcl.backend.ClearCLBackends;
 import clearcl.backend.javacl.ClearCLBackendJavaCL;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.enums.BuildStatus;
@@ -38,65 +39,34 @@ public class ClearCLBasicDemo
   private static final int cFloatArrayLength = 1024 * 1024;
 
   @Test
-  public void demoBackendJOCL() throws Exception
+  public void demoClearCL() throws Exception
   {
-    ClearCLBackendJOCL lClearCLJOCLBackend = new ClearCLBackendJOCL();
 
-    demoWithBackend(lClearCLJOCLBackend);
+    ClearCLBackendInterface lClearCLBackend =
+                                            ClearCLBackends.getBestBackend();
 
-  }
-
-  @Test
-  public void demoBackendJavaCL() throws Exception
-  {
-    ClearCLBackendJavaCL lClearCLBackendJavaCL =
-                                               new ClearCLBackendJavaCL();
-
-    demoWithBackend(lClearCLBackendJavaCL);
-
-  }
-
-  private void demoWithBackend(ClearCLBackendInterface pClearCLBackendInterface) throws Exception
-  {
-    try (ClearCL lClearCL = new ClearCL(pClearCLBackendInterface))
+    try (ClearCL lClearCL = new ClearCL(lClearCLBackend))
     {
 
-      int lNumberOfPlatforms = lClearCL.getNumberOfPlatforms();
+      ClearCLDevice lBestGPUDevice = lClearCL.getBestGPUDevice();
 
-      System.out.println("lNumberOfPlatforms=" + lNumberOfPlatforms);
+      System.out.println(lBestGPUDevice.getInfoString());
 
-      for (int p = 0; p < lNumberOfPlatforms; p++)
-      {
-        ClearCLPlatform lPlatform = lClearCL.getPlatform(p);
+      ClearCLContext lContext = lBestGPUDevice.createContext();
 
-        System.out.println(lPlatform.getInfoString());
+      ClearCLProgram lProgram =
+                              lContext.createProgram(ClearCLBasicTests.class,
+                                                     "test.cl");
+      lProgram.addDefine("CONSTANT", "1");
 
-        for (int d = 0; d < lPlatform.getNumberOfDevices(); d++)
-        {
-          ClearCLDevice lClearClDevice = lPlatform.getDevice(d);
+      BuildStatus lBuildStatus = lProgram.buildAndLog();
 
-          System.out.println("\t" + d
-                             + " -> \n"
-                             + lClearClDevice.getInfoString());
+      assertEquals(lBuildStatus, BuildStatus.Success);
 
-          ClearCLContext lContext = lClearClDevice.createContext();
+      demoBuffers(lContext, lProgram);
 
-          ClearCLProgram lProgram =
-                                  lContext.createProgram(ClearCLBasicTests.class,
-                                                         "test.cl");
-          lProgram.addDefine("CONSTANT", "1");
+      demoImages(lContext, lProgram);
 
-          BuildStatus lBuildStatus = lProgram.buildAndLog();
-          
-          assertEquals(lBuildStatus, BuildStatus.Success);
-
-          demoBuffers(lContext, lProgram);
-
-          demoImages(lContext, lProgram);
-
-        }
-
-      }
     }
   }
 
@@ -140,8 +110,7 @@ public class ClearCLBasicDemo
     { 0, 0, 0 }, new long[]
     { 10, 10, 10 }, true);
 
-    // for(int i=0; i<lBuffer.getSizeInBytes()/4; i++)
-    // System.out.println(lBuffer.getFloatAligned(i));
+
 
     assertEquals((10 + 1) ^ (20 + 2 + 1)
                  ^ (30 + 3 + 2),
@@ -154,22 +123,7 @@ public class ClearCLBasicDemo
                            ClearCLProgram pProgram) throws IOException
   {
 
-    try
-    {
-      @SuppressWarnings("unused")
-      ClearCLBuffer lBufferTooBig =
-                                  lCreateContext.createBuffer(HostAccessType.WriteOnly,
-                                                              KernelAccessType.ReadOnly,
-                                                              NativeTypeEnum.Float,
-                                                              Long.MAX_VALUE);
-      fail();
-    }
-    catch (OpenCLException e)
-    {
-      System.out.println("ERROR:" + e.getMessage());
-      assertTrue(e.getErrorCode() == -61 || e.getErrorCode() == -6);
-    }
-
+   
     float[] lArrayA = new float[cFloatArrayLength];
     float[] lArrayB = new float[cFloatArrayLength];
 

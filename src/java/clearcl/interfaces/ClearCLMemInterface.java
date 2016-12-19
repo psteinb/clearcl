@@ -7,11 +7,19 @@ import coremem.interfaces.SizedInBytes;
 
 public interface ClearCLMemInterface extends SizedInBytes
 {
+
+  /**
+   * Adds listener to this mem object.
+   * 
+   * @param pListener listener
+   */
+  public void addListener(ClearCLMemChangeListener pListener);
+
   /**
    * Calling this method notifies listeners that the contents of this OpenCL
    * object might have changed.
    * 
-   * @param pQueue
+   * @param pQueue 
    */
   void notifyListenersOfChange(ClearCLQueue pQueue);
 
@@ -21,7 +29,7 @@ public interface ClearCLMemInterface extends SizedInBytes
    * @return
    */
   public ClearCLContext getContext();
-  
+
   /**
    * Returns host access type
    * 

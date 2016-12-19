@@ -33,7 +33,10 @@ public class ElapsedTime
                              Runnable pRunnable)
   {
     if (!pActive)
+    {
       pRunnable.run();
+      return;
+    }
 
     long lNanosStart = System.nanoTime();
     pRunnable.run();

@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import clearcl.abs.ClearCLMemBase;
 import clearcl.enums.HostAccessType;
+import clearcl.enums.ImageType;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.interfaces.ClearCLMemInterface;
 import coremem.ContiguousMemoryInterface;
@@ -111,6 +112,7 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
 
   /**
    * Returns the contiguous memory object used to store the data.
+   * 
    * @return
    */
   public ContiguousMemoryInterface getContiguousMemory()
@@ -155,7 +157,6 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
       lVolume *= pDimensions[i];
     return lVolume;
   }
-
 
   @Override
   public long getSizeInBytes()

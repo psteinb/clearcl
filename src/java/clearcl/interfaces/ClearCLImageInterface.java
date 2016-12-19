@@ -7,7 +7,7 @@ public interface ClearCLImageInterface extends ClearCLMemInterface
 {
 
   public ClearCLBackendInterface getBackend();
-
+  
   public NativeTypeEnum getNativeType();
 
   public default long getPixelSizeInBytes()
@@ -77,5 +77,8 @@ public interface ClearCLImageInterface extends ClearCLMemInterface
   {
     return getWidth() * getHeight() * getDepth();
   }
+
+
+
 
 }

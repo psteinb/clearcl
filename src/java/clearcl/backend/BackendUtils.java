@@ -176,6 +176,9 @@ public class BackendUtils
     case UseHostPointer:
       lMemFlags |= CL_MEM_USE_HOST_PTR;
       break;
+    case Best:
+      lMemFlags |= CL_MEM_ALLOC_HOST_PTR;
+      break;
     case None:
       break;
     default:

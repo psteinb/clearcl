@@ -19,8 +19,9 @@ import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.ClearCLUnsupportedException;
+import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.ocllib.OCLlib;
-import clearcl.ops.Reductions;
+import clearcl.ops.MinMax;
 import clearcl.util.Region2;
 import clearcl.util.ElapsedTime;
 import coremem.ContiguousMemoryInterface;
@@ -58,13 +59,13 @@ public class ClearCLImagePanel extends StackPane
 
   private Canvas mCanvas;
   private GraphicsContext mGraphicsContext2D;
-  private ClearCLImage mClearCLImage;
+  private ClearCLImageInterface mClearCLImage;
   private ClearCLBuffer mRenderRGBBuffer;
   private ClearCLHostImageBuffer mClearCLHostImage;
   private byte[] mPixelArray;
   private ClearCLProgram mProgram;
   private ClearCLKernel mRenderKernel;
-  private Reductions mReductions;
+  private MinMax mMinMax;
 
   private ReentrantLock mLock = new ReentrantLock();
 
@@ -87,14 +88,14 @@ public class ClearCLImagePanel extends StackPane
    * 
    * @param pClearCLImage
    */
-  public ClearCLImagePanel(ClearCLImage pClearCLImage)
+  public ClearCLImagePanel(ClearCLImageInterface pClearCLImage)
   {
     super();
     mClearCLImage = pClearCLImage;
 
     ClearCLContext lContext = pClearCLImage.getContext();
 
-    if (pClearCLImage.getImageType() == ImageType.IMAGE1D)
+    if (pClearCLImage.getDimension() == 1)
     {
       throw new ClearCLUnsupportedException("1D image visualizationnot supported");
     }
@@ -116,12 +117,12 @@ public class ClearCLImagePanel extends StackPane
 
       BuildStatus lBuildStatus = mProgram.buildAndLog();
 
-      if (pClearCLImage.getImageType() == ImageType.IMAGE1D)
+      if (pClearCLImage.getDimension() == 1)
       {
         throw new ClearCLUnsupportedException("1D image visualizationnot supported");
       }
 
-      mReductions = new Reductions(lContext.getDefaultQueue());
+      mMinMax = new MinMax(lContext.getDefaultQueue());
 
     }
     catch (IOException e)
@@ -198,18 +199,18 @@ public class ClearCLImagePanel extends StackPane
     {
       try
       {
-        //System.out.println("Update View");
+        // System.out.println("Update View");
         float lMin = 0;
         float lMax = 1;
 
         if (mAuto.get() || mTrueMin == null)
         {
-          float[] lMinMax = mReductions.minmax(mClearCLImage, 32);
+          float[] lMinMax = mMinMax.minmax(mClearCLImage, 32);
           mTrueMin = lMinMax[0];
           mTrueMax = lMinMax[1];
 
-          //if(mTrueMin!=0 || mTrueMax!=0)
-            //System.out.format("min=%f, max=%f \n", mTrueMin, mTrueMax);
+          // if(mTrueMin!=0 || mTrueMax!=0)
+          // System.out.format("min=%f, max=%f \n", mTrueMin, mTrueMax);
 
           lMin = mTrueMin;
           lMax = mTrueMax;
@@ -220,30 +221,50 @@ public class ClearCLImagePanel extends StackPane
           lMax = mTrueMin + (mTrueMax - mTrueMin) * mMax.get();
         }
 
-        if (mClearCLImage.getImageType() == ImageType.IMAGE2D)
+        if (mClearCLImage.getDimension() == 2)
         {
-          mRenderKernel = mProgram.getKernel("image_render_2df");
+          if (mClearCLImage instanceof ClearCLImage)
+            mRenderKernel = mProgram.getKernel("image_render_2df");
+          else if (mClearCLImage instanceof ClearCLBuffer)
+            mRenderKernel = mProgram.getKernel("buffer_render_2df");
+
         }
-        else if (mClearCLImage.getImageType() == ImageType.IMAGE3D)
+        else if (mClearCLImage.getDimension() == 3)
         {
           switch (getRenderModeProperty().get())
           {
           case AvgProjection:
-            mRenderKernel =
-                          mProgram.getKernel("image_render_avgproj_3df");
+            if (mClearCLImage instanceof ClearCLImage)
+              mRenderKernel =
+                            mProgram.getKernel("image_render_avgproj_3df");
+            else if (mClearCLImage instanceof ClearCLBuffer)
+              mRenderKernel =
+                            mProgram.getKernel("buffer_render_avgproj_3df");
             break;
           case ColorProjection:
-            mRenderKernel =
-                          mProgram.getKernel("image_render_colorproj_3df");
+            if (mClearCLImage instanceof ClearCLImage)
+              mRenderKernel =
+                            mProgram.getKernel("image_render_colorproj_3df");
+            else if (mClearCLImage instanceof ClearCLBuffer)
+              mRenderKernel =
+                            mProgram.getKernel("buffer_render_colorproj_3df");
             break;
           case MaxProjection:
-            mRenderKernel =
-                          mProgram.getKernel("image_render_maxproj_3df");
+            if (mClearCLImage instanceof ClearCLImage)
+              mRenderKernel =
+                            mProgram.getKernel("image_render_maxproj_3df");
+            else if (mClearCLImage instanceof ClearCLBuffer)
+              mRenderKernel =
+                            mProgram.getKernel("buffer_render_maxproj_3df");
             break;
           default:
           case Slice:
-            mRenderKernel =
-                          mProgram.getKernel("image_render_slice_3df");
+            if (mClearCLImage instanceof ClearCLImage)
+              mRenderKernel =
+                            mProgram.getKernel("image_render_slice_3df");
+            else if (mClearCLImage instanceof ClearCLBuffer)
+              mRenderKernel =
+                            mProgram.getKernel("buffer_render_slice_3df");
             break;
           }
 

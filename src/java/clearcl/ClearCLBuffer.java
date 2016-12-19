@@ -4,6 +4,7 @@ import java.nio.Buffer;
 
 import clearcl.abs.ClearCLMemBase;
 import clearcl.enums.HostAccessType;
+import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
 import clearcl.exceptions.ClearCLException;
 import clearcl.exceptions.ClearCLHostAccessException;
@@ -652,7 +653,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   {
     return mClearCLContext;
   }
-
+  
   /**
    * Returns host access type of this buffer.
    * 
@@ -743,5 +744,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
     getBackend().releaseBuffer(getPeerPointer());
     setPeerPointer(null);
   }
+
+
 
 }

@@ -17,11 +17,11 @@ import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.KernelAccessType;
-import clearcl.ops.Reductions;
+import clearcl.ops.MinMax;
 import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
 
-public class ReductionsTests
+public class MinMaxTests
 {
 
   @Test
@@ -57,7 +57,7 @@ public class ReductionsTests
 
       lCLBuffer.readFrom(lBuffer, true);
 
-      Reductions lReductions = new Reductions(lCreateContext.getDefaultQueue());
+      MinMax lReductions = new MinMax(lCreateContext.getDefaultQueue());
 
       float[] lOpenCLMinMax = lReductions.minmax(lCLBuffer, 3712);
 
@@ -75,7 +75,7 @@ public class ReductionsTests
   }
 
   private void benchmark(ClearCLBuffer lCLBuffer,
-                         Reductions lReductions,
+                         MinMax lReductions,
                          int lRed)
   {
     lReductions.minmax(lCLBuffer, lRed);
@@ -185,7 +185,7 @@ public class ReductionsTests
 
     lClearCLImage.readFrom(lBuffer, true);
 
-    Reductions lReductions = new Reductions(lCreateContext.getDefaultQueue());
+    MinMax lReductions = new MinMax(lCreateContext.getDefaultQueue());
 
     //System.out.println("before minmax");
     float[] lOpenCLMinMax = lReductions.minmax(lClearCLImage, 32);

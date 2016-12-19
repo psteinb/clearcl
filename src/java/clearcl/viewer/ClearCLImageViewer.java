@@ -4,8 +4,10 @@ import java.util.concurrent.CountDownLatch;
 
 import com.sun.javafx.application.PlatformImpl;
 
+import clearcl.ClearCLBuffer;
 import clearcl.ClearCLImage;
 import clearcl.enums.ImageType;
+import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.viewer.jfx.PanZoomScene;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -44,7 +46,7 @@ public class ClearCLImageViewer
    * @param pImage
    * @return
    */
-  public static ClearCLImageViewer view(ClearCLImage pImage)
+  public static ClearCLImageViewer view(ClearCLImageInterface pImage)
   {
     ClearCLImageViewer lViewImage = new ClearCLImageViewer(pImage,
                                                            "Image");
@@ -59,7 +61,7 @@ public class ClearCLImageViewer
    * @param pWindowTitle
    *          window title
    */
-  public ClearCLImageViewer(ClearCLImage pClearCLImage,
+  public ClearCLImageViewer(ClearCLImageInterface pClearCLImage,
                             String pWindowTitle)
   {
     this(pClearCLImage,
@@ -81,7 +83,7 @@ public class ClearCLImageViewer
    *          window height
    */
   @SuppressWarnings("restriction")
-  public ClearCLImageViewer(ClearCLImage pClearCLImage,
+  public ClearCLImageViewer(ClearCLImageInterface pClearCLImage,
                             String pWindowTitle,
                             int pWindowWidth,
                             int pWindowHeight)
@@ -157,7 +159,7 @@ public class ClearCLImageViewer
                                                          CornerRadii.EMPTY,
                                                          Insets.EMPTY)));/**/
 
-      if (pClearCLImage.getImageType() == ImageType.IMAGE3D)
+      if (pClearCLImage.getDimension() == 3)
       {
         ComboBox<RenderMode> lRenderModeComboBox = new ComboBox<>();
         lRenderModeComboBox.getItems().setAll(RenderMode.values());
@@ -212,7 +214,7 @@ public class ClearCLImageViewer
       GridPane.setVgrow(lGamma, Priority.ALWAYS);
       mControlPane.add(lGamma, 3, 2);
 
-      if (pClearCLImage.getImageType() == ImageType.IMAGE3D)
+      if (pClearCLImage.getDimension() == 3)
       {
         final Slider lZ = new Slider(0,
                                      pClearCLImage.getDepth() - 1,
@@ -303,5 +305,6 @@ public class ClearCLImageViewer
   {
     return mStage.isShowing();
   }
+
 
 }
