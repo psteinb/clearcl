@@ -204,12 +204,12 @@ public class ClearCLImageViewer
       final Slider lGamma = new Slider(-1, 1, 0);
       lGamma.setMaxHeight(Double.MAX_VALUE);
       lGamma.setOrientation(Orientation.VERTICAL);
-      lAutomaticMinMaxToggleButton.selectedProperty()
-                                  .bindBidirectional(lGamma.disableProperty());
+      /*lAutomaticMinMaxToggleButton.selectedProperty()
+                                  .bindBidirectional(lGamma.disableProperty());/**/
       lGamma.valueProperty().addListener((v) -> {
         mImagePanel.getGammaProperty()
                    .set((float) (Math.pow(2,
-                                          2 * (lGamma.getValue()))));
+                                          2 * (-lGamma.getValue()))));
       });
       GridPane.setVgrow(lGamma, Priority.ALWAYS);
       mControlPane.add(lGamma, 3, 2);

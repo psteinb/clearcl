@@ -117,6 +117,25 @@ public class ClearCLProgram extends ClearCLBase
     mDefinesMap.put(pKey, pValue);
     mModified = true;
   }
+  
+  /**
+   * Adds a numerical define (e.g. #define 'key' 'value' with 'value' a number) to the program source code. You
+   * must rebuild after this call for changes to take effect.
+   * 
+   * @param pKey
+   *          key
+   * @param pValue
+   *          value
+   */
+  public void addDefine(String pKey, Number pValue)
+  {
+    if(pValue instanceof Byte || pValue instanceof Short || pValue instanceof Integer || pValue instanceof Long)
+      mDefinesMap.put(pKey, ""+pValue.longValue());
+    else if(pValue instanceof Float || pValue instanceof Double)
+      mDefinesMap.put(pKey, ""+pValue.doubleValue());
+    
+    mModified = true;
+  }
 
   /**
    * Adds a define (e.g. #define 'symbol') to the program source code. You must
@@ -251,11 +270,12 @@ public class ClearCLProgram extends ClearCLBase
     {
 
       if (lDefinesEntry.getValue().length() == 0)
-        lStringBuilder.append("#define " + lDefinesEntry.getKey());
+        lStringBuilder.append("#define " + lDefinesEntry.getKey() + "\n");
       else
         lStringBuilder.append("#define " + lDefinesEntry.getKey()
                               + " \t"
-                              + lDefinesEntry.getValue());
+                              + lDefinesEntry.getValue()
+                              + "\n");
     }
     lStringBuilder.append(pSourceCode);
 

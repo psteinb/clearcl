@@ -9,6 +9,7 @@ import clearcl.ClearCLQueue;
 import clearcl.enums.BuildStatus;
 import clearcl.ocllib.OCLlib;
 
+//TODO: NOT WORKING YET!!!
 public class Noise extends OpsBase
 {
 
