@@ -79,7 +79,7 @@ public class ClearCLImagePanel extends StackPane
                                                new SimpleIntegerProperty(128);
 
   private final ObjectProperty<RenderMode> mRenderMode =
-                                                       new SimpleObjectProperty<>(RenderMode.ColorProjection);
+                                                       new SimpleObjectProperty<>(RenderMode.Slice);
 
   private Float mTrueMin = 0f, mTrueMax = 1f;
 

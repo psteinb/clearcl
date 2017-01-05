@@ -66,8 +66,8 @@ public class ClearCLImageViewer
   {
     this(pClearCLImage,
          pWindowTitle,
-         (int) (Math.max(pClearCLImage.getWidth(), 512)),
-         (int) (Math.max(pClearCLImage.getHeight(), 512)));
+         (int) (Math.max(pClearCLImage.getWidth(), 896)),
+         (int) (Math.max(pClearCLImage.getHeight(), 896)));
   }
 
   /**
@@ -224,6 +224,9 @@ public class ClearCLImageViewer
 
         lZ.valueProperty()
           .bindBidirectional(mImagePanel.getZProperty());
+        
+        lZ.setValue((pClearCLImage.getDepth() - 1.0)/2);
+        
         GridPane.setVgrow(lZ, Priority.ALWAYS);
         // GridPane.setColumnSpan(lZ, 4);
         // GridPane.setFillWidth(lZ, true);
