@@ -131,8 +131,10 @@ public class ClearCLProgram extends ClearCLBase
   {
     if(pValue instanceof Byte || pValue instanceof Short || pValue instanceof Integer || pValue instanceof Long)
       mDefinesMap.put(pKey, ""+pValue.longValue());
-    else if(pValue instanceof Float || pValue instanceof Double)
-      mDefinesMap.put(pKey, ""+pValue.doubleValue());
+    else if(pValue instanceof Float )
+      mDefinesMap.put(pKey, String.format("%ef", pValue.floatValue()));
+    else if(pValue instanceof Double)
+      mDefinesMap.put(pKey, String.format("%ef", pValue.doubleValue()));
     
     mModified = true;
   }
