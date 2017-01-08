@@ -23,13 +23,17 @@ public class ClearCLProgram extends ClearCLBase
   private final ClearCLDevice mDevice;
   private final ClearCLContext mContext;
   private final ArrayList<String> mSourceCode;
-  private final ConcurrentHashMap<String, String> mDefinesMap = new ConcurrentHashMap<>();
-  private final ArrayList<String> mBuildOptionsList = new ArrayList<>();
-  private final ArrayList<String> mIncludesSearchPackages = new ArrayList<>();
+  private final ConcurrentHashMap<String, String> mDefinesMap =
+                                                              new ConcurrentHashMap<>();
+  private final ArrayList<String> mBuildOptionsList =
+                                                    new ArrayList<>();
+  private final ArrayList<String> mIncludesSearchPackages =
+                                                          new ArrayList<>();
 
   private volatile boolean mModified = true;
   private volatile String mLastBuiltSourceCode;
-  private ConcurrentHashMap<String, ClearCLKernel> mKernelCache = new ConcurrentHashMap<String, ClearCLKernel>();
+  private ConcurrentHashMap<String, ClearCLKernel> mKernelCache =
+                                                                new ConcurrentHashMap<String, ClearCLKernel>();
 
   /**
    * This constructor is called internally from an OpenCl context.
@@ -46,7 +50,32 @@ public class ClearCLProgram extends ClearCLBase
     mDevice = pDevice;
     mContext = pClearCLContext;
     mSourceCode = new ArrayList<String>();
-    mIncludesSearchPackages.add("clearcl.ocllib");
+    addIncludesSearchPackage("clearcl.ocllib");
+  }
+
+  /**
+   * Adds a package to the list of Java packages to search for reference classes
+   * when loading includes in cl files.
+   * 
+   * @param pPackagePath
+   *          full package path and package name.
+   */
+  public void addIncludesSearchPackage(String pPackagePath)
+  {
+    mIncludesSearchPackages.add(pPackagePath);
+  }
+
+  /**
+   * Adds a reference class used to locate resources (*.cl files) for includes
+   * in cl files. This method is preferred because it is more resiliant to
+   * refactoring.
+   * 
+   * @param pReferenceClass
+   */
+  public void addIncludesReferenceClass(Class<?> pReferenceClass)
+  {
+    String lPackageName = pReferenceClass.getPackage().getName();
+    mIncludesSearchPackages.add(lPackageName);
   }
 
   /**
@@ -85,8 +114,10 @@ public class ClearCLProgram extends ClearCLBase
                           + pClassForRessource.getSimpleName()
                           + "\n");
 
-    InputStream lResourceAsStream = pClassForRessource.getResourceAsStream(pIncludeRessourceName);
-    String lSourceCode = StringUtils.streamToString(lResourceAsStream, "UTF-8");
+    InputStream lResourceAsStream =
+                                  pClassForRessource.getResourceAsStream(pIncludeRessourceName);
+    String lSourceCode = StringUtils.streamToString(lResourceAsStream,
+                                                    "UTF-8");
     lStringBuilder.append(lSourceCode);
     lStringBuilder.append("\n\n");
 
@@ -117,10 +148,11 @@ public class ClearCLProgram extends ClearCLBase
     mDefinesMap.put(pKey, pValue);
     mModified = true;
   }
-  
+
   /**
-   * Adds a numerical define (e.g. #define 'key' 'value' with 'value' a number) to the program source code. You
-   * must rebuild after this call for changes to take effect.
+   * Adds a numerical define (e.g. #define 'key' 'value' with 'value' a number)
+   * to the program source code. You must rebuild after this call for changes to
+   * take effect.
    * 
    * @param pKey
    *          key
@@ -129,13 +161,17 @@ public class ClearCLProgram extends ClearCLBase
    */
   public void addDefine(String pKey, Number pValue)
   {
-    if(pValue instanceof Byte || pValue instanceof Short || pValue instanceof Integer || pValue instanceof Long)
-      mDefinesMap.put(pKey, ""+pValue.longValue());
-    else if(pValue instanceof Float )
-      mDefinesMap.put(pKey, String.format("%ef", pValue.floatValue()));
-    else if(pValue instanceof Double)
-      mDefinesMap.put(pKey, String.format("%ef", pValue.doubleValue()));
-    
+    if (pValue instanceof Byte || pValue instanceof Short
+        || pValue instanceof Integer
+        || pValue instanceof Long)
+      mDefinesMap.put(pKey, "" + pValue.longValue());
+    else if (pValue instanceof Float)
+      mDefinesMap.put(pKey,
+                      String.format("%ef", pValue.floatValue()));
+    else if (pValue instanceof Double)
+      mDefinesMap.put(pKey,
+                      String.format("%ef", pValue.doubleValue()));
+
     mModified = true;
   }
 
@@ -225,10 +261,19 @@ public class ClearCLProgram extends ClearCLBase
    */
   public BuildStatus build() throws IOException
   {
-    mLastBuiltSourceCode = getSourceCode();
+    try
+    {
+      mLastBuiltSourceCode = getSourceCode();
+    }
+    catch (Throwable e)
+    {
+      e.printStackTrace();
+      return BuildStatus.Error;
+    }
 
-    ClearCLPeerPointer lProgramPeerPointer = getBackend().getProgramPeerPointer(mContext.getPeerPointer(),
-                                                                                mLastBuiltSourceCode);
+    ClearCLPeerPointer lProgramPeerPointer =
+                                           getBackend().getProgramPeerPointer(mContext.getPeerPointer(),
+                                                                              mLastBuiltSourceCode);
 
     ClearCLPeerPointer lCurrentProgramPeerPointer = getPeerPointer();
     if (lCurrentProgramPeerPointer != null)
@@ -256,8 +301,10 @@ public class ClearCLProgram extends ClearCLBase
   public String getSourceCode() throws IOException
   {
     String lConcatenatedSourceCode = concatenateSourceCode();
-    String lSourceCodeWithDefines = insertDefines(lConcatenatedSourceCode);
-    String lSourceCodeWithDefinesAndIncludes = insertIncludes(lSourceCodeWithDefines);
+    String lSourceCodeWithDefines =
+                                  insertDefines(lConcatenatedSourceCode);
+    String lSourceCodeWithDefinesAndIncludes =
+                                             insertIncludes(lSourceCodeWithDefines);
     return lSourceCodeWithDefinesAndIncludes;
   }
 
@@ -272,7 +319,8 @@ public class ClearCLProgram extends ClearCLBase
     {
 
       if (lDefinesEntry.getValue().length() == 0)
-        lStringBuilder.append("#define " + lDefinesEntry.getKey() + "\n");
+        lStringBuilder.append("#define " + lDefinesEntry.getKey()
+                              + "\n");
       else
         lStringBuilder.append("#define " + lDefinesEntry.getKey()
                               + " \t"
@@ -306,15 +354,19 @@ public class ClearCLProgram extends ClearCLBase
       int lClassNameEnd = lIncludeLine.indexOf(']',
                                                lClassNameBegin + 1);
       String lClassName = lClassNameBegin == -1 ? ""
-                                               : lIncludeLine.substring(lClassNameBegin + 1,
-                                                                        lClassNameEnd)
-                                                             .trim();
+                                                : lIncludeLine.substring(lClassNameBegin
+                                                                         + 1,
+                                                                         lClassNameEnd)
+                                                              .trim();
 
       int lIncludeNameBegin = lIncludeLine.indexOf('"');
-      int lIncludeNameEnd = lIncludeLine.indexOf('"',
-                                                 lIncludeNameBegin + 1);
+      int lIncludeNameEnd =
+                          lIncludeLine.indexOf('"',
+                                               lIncludeNameBegin + 1);
 
-      String lIncludeName = lIncludeLine.substring(lIncludeNameBegin + 1,
+      String lIncludeName = lIncludeLine
+                                        .substring(lIncludeNameBegin
+                                                   + 1,
                                                    lIncludeNameEnd)
                                         .trim();
 
@@ -324,21 +376,26 @@ public class ClearCLProgram extends ClearCLBase
       else
         lReferenceClass = findClassByName(lClassName);
 
-      InputStream lResourceAsStream = lReferenceClass.getResourceAsStream(lIncludeName);
+      if(lReferenceClass==null)
+        System.err.println("reference class unknown: "+lClassName+" in line: '"+lIncludeLine+"'" );
+      
+      InputStream lResourceAsStream =
+                                    lReferenceClass.getResourceAsStream(lIncludeName);
 
       if (lResourceAsStream != null)
       {
 
-        String lSourceCode = StringUtils.streamToString(lResourceAsStream,
-                                              "UTF-8");
+        String lSourceCode =
+                           StringUtils.streamToString(lResourceAsStream,
+                                                      "UTF-8");
 
         lSourceCodeWithIncludes.append("\n\n");
         lSourceCodeWithIncludes.append(" //___________________________________________________________________________\n");
-        lSourceCodeWithIncludes.append("// Begin Include: '" + lIncludeName
-                                       + "'\n");
+        lSourceCodeWithIncludes.append("// Begin Include: '"
+                                       + lIncludeName + "'\n");
         lSourceCodeWithIncludes.append(lSourceCode);
-        lSourceCodeWithIncludes.append("// End Include: '" + lIncludeName
-                                       + "'\n");
+        lSourceCodeWithIncludes.append("// End Include: '"
+                                       + lIncludeName + "'\n");
         lSourceCodeWithIncludes.append(" //___________________________________________________________________________\n");
         lSourceCodeWithIncludes.append("\n\n");
 
@@ -403,8 +460,9 @@ public class ClearCLProgram extends ClearCLBase
    */
   public BuildStatus getBuildStatus()
   {
-    BuildStatus lBuildStatus = getBackend().getBuildStatus(getDevice().getPeerPointer(),
-                                                           getPeerPointer());
+    BuildStatus lBuildStatus =
+                             getBackend().getBuildStatus(getDevice().getPeerPointer(),
+                                                         getPeerPointer());
     return lBuildStatus;
   }
 
@@ -415,7 +473,8 @@ public class ClearCLProgram extends ClearCLBase
    */
   public String getBuildLog()
   {
-    String lBuildLog = getBackend().getBuildLog(getDevice().getPeerPointer(),
+    String lBuildLog = getBackend()
+                                   .getBuildLog(getDevice().getPeerPointer(),
                                                 getPeerPointer())
                                    .trim();
     return lBuildLog;
@@ -453,14 +512,16 @@ public class ClearCLProgram extends ClearCLBase
     if (mModified)
       throw new ClearCLProgramNotBuiltException();
 
-    ClearCLPeerPointer lKernelPointer = getBackend().getKernelPeerPointer(this.getPeerPointer(),
-                                                                          pKernelName);
+    ClearCLPeerPointer lKernelPointer =
+                                      getBackend().getKernelPeerPointer(this.getPeerPointer(),
+                                                                        pKernelName);
 
-    ClearCLKernel lClearCLKernel = new ClearCLKernel(getContext(),
-                                                     this,
-                                                     lKernelPointer,
-                                                     pKernelName,
-                                                     mLastBuiltSourceCode);
+    ClearCLKernel lClearCLKernel =
+                                 new ClearCLKernel(getContext(),
+                                                   this,
+                                                   lKernelPointer,
+                                                   pKernelName,
+                                                   mLastBuiltSourceCode);
     return lClearCLKernel;
   }
 
@@ -479,8 +540,6 @@ public class ClearCLProgram extends ClearCLBase
     }
     return lCounter;
   }
-
-
 
   /* (non-Javadoc)
    * @see java.lang.Object#toString()
@@ -581,7 +640,8 @@ public class ClearCLProgram extends ClearCLBase
    * may violate the OpenCL numerical compliance requirements as defined in
    * section 7.4 for single-precision floating-point, section 9.3.9 for
    * double-precision floating-point, and edge case behavior in section 7.5.
-   * This option includes the -cl-no-signed-zeros and -cl-mad-enable options.<br>
+   * This option includes the -cl-no-signed-zeros and -cl-mad-enable
+   * options.<br>
    * Also see : <a href=
    * "http://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/clBuildProgram.html"
    * >Khronos' documentation for clBuildProgram</a>.
@@ -630,7 +690,8 @@ public class ClearCLProgram extends ClearCLBase
   /**
    * Add the <a href=
    * "http://www.cs.cmu.edu/afs/cs/academic/class/15668-s11/www/cuda-doc/OpenCL_Extensions/cl_nv_compiler_options.txt"
-   * >-cl-nv-opt-level</a> compilation option (<b><i>NVIDIA GPUs only</i></b>)<br>
+   * >-cl-nv-opt-level</a> compilation option (<b><i>NVIDIA GPUs
+   * only</i></b>)<br>
    * Specify optimization level (default value: 3)
    * 
    * @param N

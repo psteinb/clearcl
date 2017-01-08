@@ -430,9 +430,11 @@ public class ClearCLContext extends ClearCLBase
     return lClearCLImage;
   }
 
+  
   /**
-   * Creates a blank program, source code must be added to it.
+   * Creates a program, with optional source code
    * 
+   * @param pSourceCode optional varargs of source code strings.
    * @return program
    */
   public ClearCLProgram createProgram(String... pSourceCode)
