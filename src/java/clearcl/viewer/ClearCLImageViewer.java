@@ -39,6 +39,7 @@ public class ClearCLImageViewer
   private Stage mStage = null;
   private ClearCLImagePanel mImagePanel;
   private GridPane mControlPane;
+  private Slider mZSlider;
 
   /**
    * Opens a window showing the image content. View can be panned and zoomed.
@@ -216,28 +217,28 @@ public class ClearCLImageViewer
 
       if (pClearCLImage.getDimension() == 3)
       {
-        final Slider lZ = new Slider(0,
+        mZSlider = new Slider(0,
                                      pClearCLImage.getDepth() - 1,
                                      0);
-        lZ.setMaxHeight(Double.MAX_VALUE);
-        lZ.setOrientation(Orientation.VERTICAL);
+        getZSlider().setMaxHeight(Double.MAX_VALUE);
+        getZSlider().setOrientation(Orientation.VERTICAL);
 
-        lZ.valueProperty()
+        getZSlider().valueProperty()
           .bindBidirectional(mImagePanel.getZProperty());
         
-        lZ.setValue((pClearCLImage.getDepth() - 1.0)/2);
+        getZSlider().setValue((pClearCLImage.getDepth() - 1.0)/2);
         
-        GridPane.setVgrow(lZ, Priority.ALWAYS);
+        GridPane.setVgrow(getZSlider(), Priority.ALWAYS);
         // GridPane.setColumnSpan(lZ, 4);
         // GridPane.setFillWidth(lZ, true);
-        mControlPane.add(lZ, 5, 2);
+        mControlPane.add(getZSlider(), 5, 2);
 
         mImagePanel.getRenderModeProperty().addListener((e) -> {
           RenderMode lRenderMode = mImagePanel.getRenderModeProperty()
                                               .get();
-          lZ.setDisable(lRenderMode != RenderMode.Slice);
+          getZSlider().setDisable(lRenderMode != RenderMode.Slice);
         });
-        lZ.setDisable(mImagePanel.getRenderModeProperty()
+        getZSlider().setDisable(mImagePanel.getRenderModeProperty()
                                  .get() != RenderMode.Slice);
 
       }
@@ -309,5 +310,9 @@ public class ClearCLImageViewer
     return mStage.isShowing();
   }
 
+  public Slider getZSlider()
+  {
+    return mZSlider;
+  }
 
 }
