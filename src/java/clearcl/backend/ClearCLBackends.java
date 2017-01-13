@@ -39,7 +39,7 @@ public class ClearCLBackends
     {
       lList.add(new ClearCLBackendJavaCL());
     }
-    catch (Exception e)
+    catch (Throwable e)
     {
       System.err.println("Failed to instanciate JavaCL backend during backend enumeration (not critical)");
     }
