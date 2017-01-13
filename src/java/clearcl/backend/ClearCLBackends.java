@@ -27,8 +27,23 @@ public class ClearCLBackends
   public static final ArrayList<ClearCLBackendInterface> getBackendList()
   {
     ArrayList<ClearCLBackendInterface> lList = new ArrayList<>();
-    lList.add(new ClearCLBackendJOCL());
-    lList.add(new ClearCLBackendJavaCL());
+    try
+    {
+      lList.add(new ClearCLBackendJOCL());
+    }
+    catch (Throwable e)
+    {
+      System.err.println("Failed to instanciate JOCL backend during backend enumeration (not critical)");
+    }
+    try
+    {
+      lList.add(new ClearCLBackendJavaCL());
+    }
+    catch (Exception e)
+    {
+      System.err.println("Failed to instanciate JavaCL backend during backend enumeration (not critical)");
+    }
+    
     return lList;
   }
 
