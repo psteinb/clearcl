@@ -7,9 +7,10 @@ package clearcl.enums;
  */
 public enum DeviceInfo
 {
-  MaxGlobalMemory,
-  LocalMemSize,
-  MaxClockFreq,
-  ComputeUnits,
-  MaxMemoryAllocationSize
+ MaxGlobalMemory,
+ LocalMemSize,
+ MaxClockFreq,
+ ComputeUnits,
+ MaxMemoryAllocationSize,
+ MaxWorkGroupSize
 }

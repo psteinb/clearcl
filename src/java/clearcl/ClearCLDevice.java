@@ -56,9 +56,10 @@ public class ClearCLDevice extends ClearCLBase
    */
   public double getVersion()
   {
-    String lStringVersion = getBackend().getDeviceVersion(mDevicePointer)
-                                        .replace("OpenCL C", "")
-                                        .trim();
+    String lStringVersion =
+                          getBackend().getDeviceVersion(mDevicePointer)
+                                      .replace("OpenCL C", "")
+                                      .trim();
     Double lDoubleVersion = Double.parseDouble(lStringVersion);
     return lDoubleVersion;
   }
@@ -129,6 +130,18 @@ public class ClearCLDevice extends ClearCLBase
   }
 
   /**
+   * Returns the max work group size. This means that the product of the local
+   * sizes cannot be bigger that this value.
+   * 
+   * @return
+   */
+  public long getMaxWorkGroupSize()
+  {
+    return getBackend().getDeviceInfo(mDevicePointer,
+                                      DeviceInfo.MaxWorkGroupSize);
+  }
+
+  /**
    * Returns device info string.
    * 
    * @return device info string
@@ -157,8 +170,9 @@ public class ClearCLDevice extends ClearCLBase
    */
   public ClearCLContext createContext()
   {
-    ClearCLPeerPointer lContextPointer = getBackend().getContextPeerPointer(mClearCLPlatform.getPeerPointer(),
-                                                                            mDevicePointer);
+    ClearCLPeerPointer lContextPointer =
+                                       getBackend().getContextPeerPointer(mClearCLPlatform.getPeerPointer(),
+                                                                          mDevicePointer);
     return new ClearCLContext(this, lContextPointer);
   }
 

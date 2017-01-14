@@ -107,7 +107,6 @@ public abstract class ClearCLBackendBase implements
     case LocalMemSize:
       return getDeviceInfoLong(pDevicePointer,
                                BackendUtils.CL_DEVICE_LOCAL_MEM_SIZE);
-
     case MaxClockFreq:
       return getDeviceInfoInt(pDevicePointer,
                               BackendUtils.CL_DEVICE_MAX_CLOCK_FREQUENCY);
@@ -117,6 +116,9 @@ public abstract class ClearCLBackendBase implements
     case MaxMemoryAllocationSize:
       return getDeviceInfoLong(pDevicePointer,
                                BackendUtils.CL_DEVICE_MAX_MEM_ALLOC_SIZE);
+    case MaxWorkGroupSize:
+      return getDeviceInfoLong(pDevicePointer,
+                               BackendUtils.CL_DEVICE_MAX_WORK_GROUP_SIZE);
     default:
       return -1;
     }
