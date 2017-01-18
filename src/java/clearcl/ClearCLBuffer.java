@@ -66,6 +66,18 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   }
 
   /**
+   * Fills the buffer with a given byte.
+   * @param pByte byte to fill buffer with
+   * @param pBlockingFill true -> blocking call, false -> asynchronous call
+   */
+  public void fill(byte pByte, boolean pBlockingFill)
+  {
+    byte[] lPattern =
+    { pByte };
+    fill(lPattern, pBlockingFill);
+  }
+
+  /**
    * Fills the buffer with a given byte pattern.
    * 
    * @param pPattern
@@ -75,7 +87,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    */
   public void fill(byte[] pPattern, boolean pBlockingFill)
   {
-    fill(pPattern, 0, getSizeInBytes(), pBlockingFill);
+    fill(pPattern, 0, getVolume(), pBlockingFill);
   }
 
   /**
@@ -97,7 +109,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
                    long pLengthInBuffer,
                    boolean pBlockingFill)
   {
-    if (pOffsetInBuffer + pLengthInBuffer <= getSizeInBytes())
+    if (!(pOffsetInBuffer + pLengthInBuffer <= getVolume()))
       throw new ClearCLException("Incompatible length");
 
     getBackend().enqueueFillBuffer(mClearCLContext.getDefaultQueue()
@@ -653,7 +665,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   {
     return mClearCLContext;
   }
-  
+
   /**
    * Returns host access type of this buffer.
    * 
@@ -744,7 +756,5 @@ public class ClearCLBuffer extends ClearCLMemBase implements
     getBackend().releaseBuffer(getPeerPointer());
     setPeerPointer(null);
   }
-
-
 
 }
