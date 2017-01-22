@@ -24,13 +24,15 @@ public enum ImageChannelDataType
 
   NativeTypeEnum mNativeType;
   boolean mIsNormalized;
+  boolean mIsSigned;
 
-  private ImageChannelDataType(NativeTypeEnum pDataType,
+  private ImageChannelDataType(NativeTypeEnum pNativeDataType,
                                boolean pIsNormalized,
                                boolean pIsSigned)
   {
-    mNativeType = pDataType;
+    mNativeType = pNativeDataType;
     mIsNormalized = pIsNormalized;
+    mIsSigned = pIsSigned;
   }
 
   /**
@@ -80,6 +82,6 @@ public enum ImageChannelDataType
    */
   public boolean isSigned()
   {
-    return !isFloat();
+    return mIsSigned;
   }
 }
