@@ -264,11 +264,13 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 		{
 			final String lArgumentName = lEntry.getKey();
 			final Integer lArgumentIndex = lEntry.getValue();
-
+			
 			try
 			{
 
 				Argument lArgument = mIndexToArgumentMap.get(lArgumentIndex);
+				
+				//System.out.format("index: %d, arg name: %s, arg: '%s'  \n",lArgumentIndex, lArgumentName, lArgument.argument);
 
 				if (lArgument == null)
 				{

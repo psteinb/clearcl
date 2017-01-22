@@ -12,10 +12,12 @@ import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
 import clearcl.exceptions.ClearCLException;
 import clearcl.exceptions.ClearCLHostAccessException;
+import clearcl.exceptions.ClearCLIllegalArgumentException;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.interfaces.ClearCLMemInterface;
 import clearcl.util.Region3;
 import coremem.ContiguousMemoryInterface;
+import coremem.buffers.ContiguousBuffer;
 import coremem.enums.NativeTypeEnum;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.offheap.OffHeapMemory;
@@ -84,36 +86,53 @@ public class ClearCLImage extends ClearCLMemBase implements
   /**
    * Fills this image with zeros.
    * 
-   * @param pBlocking
-   *          true -> blocking call, false -> asynchronous call
-   */
-  public void fillZero(boolean pBlocking)
-  {
-    fill(new byte[]
-    { 0 }, pBlocking);
-  }
-
-  /**
-   * Fills this image with a byte pattern.
-   * 
-   * @param pPattern
-   *          byte pattern
    * @param pBlockingFill
    *          true -> blocking call, false -> asynchronous call
    */
-  public void fill(byte[] pPattern, boolean pBlockingFill)
+
+  public void fillZero(boolean pBlockingFill)
   {
-    fill(pPattern,
+    fill(0.0f, pBlockingFill);
+  }
+
+  /**
+   * Fills this image with a single channel 'color'.
+   * 
+   * @param pColor
+   *          single channel float color
+   * @param pBlockingFill
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void fill(float pColor, boolean pBlockingFill)
+  {
+    fill(new float[]
+    { pColor, pColor, pColor, pColor },
          Region3.originZero(),
          Region3.region(getDimensions()),
          pBlockingFill);
   }
 
   /**
-   * Fills a nD region of this image with a byte pattern.
+   * Fills this image with a RGBA 'color'.
    * 
-   * @param pPattern
-   *          byte pattern
+   * @param pRGBA
+   *          four float color
+   * @param pBlockingFill
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void fill(float[] pRGBA, boolean pBlockingFill)
+  {
+    fill(pRGBA,
+         Region3.originZero(),
+         Region3.region(getDimensions()),
+         pBlockingFill);
+  }
+
+  /**
+   * Fills a nD region of this image with a RGBA 'color'.
+   * 
+   * @param pRGBA
+   *          four float color
    * @param pOrigin
    *          region origin
    * @param pRegion
@@ -121,18 +140,35 @@ public class ClearCLImage extends ClearCLMemBase implements
    * @param pBlockingFill
    *          true -> blocking call, false -> asynchronous call
    */
-  public void fill(byte[] pPattern,
+  public void fill(float[] pRGBA,
                    long[] pOrigin,
                    long[] pRegion,
                    boolean pBlockingFill)
   {
+    if (!(isNormalized() || isFloat()))
+      throw new ClearCLIllegalArgumentException("Image data type must not be normalized integer or float");
+    if (pRGBA.length > 4)
+      throw new ClearCLIllegalArgumentException("Float array must have length 4");
+
+    int lLength = 4 * 4;
+    ContiguousBuffer lContiguousBuffer =
+                                       ContiguousBuffer.allocate(lLength);
+    for (float lFloat : pRGBA)
+      lContiguousBuffer.writeFloat(lFloat);
+    lContiguousBuffer.rewind();
+
+    byte[] lPattern = new byte[lLength];
+
+    for (int i = 0; i < lLength; i++)
+      lPattern[i] = lContiguousBuffer.readByte();
+
     getBackend().enqueueFillImage(mClearCLContext.getDefaultQueue()
                                                  .getPeerPointer(),
                                   getPeerPointer(),
                                   pBlockingFill,
                                   Region3.origin(pOrigin),
                                   Region3.region(pRegion),
-                                  pPattern);
+                                  lPattern);
     notifyListenersOfChange(mClearCLContext.getDefaultQueue());
   }
 
@@ -231,7 +267,8 @@ public class ClearCLImage extends ClearCLMemBase implements
                                           pBlockingCopy,
                                           Region3.origin(pOriginInSrcImage),
                                           Region3.region(pRegionInSrcImage),
-                                          pOffsetInDstBuffer*pDstBuffer.getNativeType().getSizeInBytes());
+                                          pOffsetInDstBuffer * pDstBuffer.getNativeType()
+                                                                         .getSizeInBytes());
     pDstBuffer.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
   }
 
@@ -263,7 +300,7 @@ public class ClearCLImage extends ClearCLMemBase implements
     pClearCLHostImage.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
 
   }
-  
+
   /**
    * Writes a nD region of this image to a NIO buffer.
    * 
@@ -272,8 +309,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
    */
-  public void writeTo(Buffer pBuffer,
-                      boolean pBlockingRead)
+  public void writeTo(Buffer pBuffer, boolean pBlockingRead)
   {
     if (!getHostAccessType().isReadableFromHost())
       throw new ClearCLHostAccessException("Image not readable from host");
@@ -351,10 +387,6 @@ public class ClearCLImage extends ClearCLMemBase implements
                                       Region3.region(pRegion),
                                       lHostMemPointer);
   }
-  
-  
- 
-  
 
   /**
    * Reads from a CoreMem buffer into a nD region of this image.
@@ -503,177 +535,181 @@ public class ClearCLImage extends ClearCLMemBase implements
              Region3.region(getDimensions()),
              pBlockingRead);
   }
- 
-  
-  
+
   /**
    * Reads from a Java byte array into this image.
    * 
-   * @param Java byte array 
+   * @param Java
+   *          byte array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return 
+   * @return
    */
   public OffHeapMemory readFrom(byte[] pByteArray,
-                       boolean pBlockingRead)
+                                boolean pBlockingRead)
   {
-    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateBytes(pByteArray.length);
-    
+    OffHeapMemory lOffHeapMemory =
+                                 OffHeapMemory.allocateBytes(pByteArray.length);
+
     lOffHeapMemory.copyFrom(pByteArray);
-    
+
     readFrom(lOffHeapMemory,
              Region3.originZero(),
              Region3.region(getDimensions()),
              pBlockingRead);
-    
+
     return lOffHeapMemory;
   }
-  
+
   /**
    * Reads from a Java char array into this image.
    * 
-   * @param Java char array 
+   * @param Java
+   *          char array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return 
+   * @return
    */
   public OffHeapMemory readFrom(char[] pCharArray,
-                       boolean pBlockingRead)
+                                boolean pBlockingRead)
   {
-    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateChars(pCharArray.length);
-    
+    OffHeapMemory lOffHeapMemory =
+                                 OffHeapMemory.allocateChars(pCharArray.length);
+
     lOffHeapMemory.copyFrom(pCharArray);
-    
+
     readFrom(lOffHeapMemory,
              Region3.originZero(),
              Region3.region(getDimensions()),
              pBlockingRead);
-    
+
     return lOffHeapMemory;
   }
-  
-  
+
   /**
    * Reads from a Java short array into this image.
    * 
-   * @param Java short array 
+   * @param Java
+   *          short array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return 
+   * @return
    */
   public OffHeapMemory readFrom(short[] pShortsArray,
-                       boolean pBlockingRead)
+                                boolean pBlockingRead)
   {
-    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateShorts(pShortsArray.length);
-    
+    OffHeapMemory lOffHeapMemory =
+                                 OffHeapMemory.allocateShorts(pShortsArray.length);
+
     lOffHeapMemory.copyFrom(pShortsArray);
-    
+
     readFrom(lOffHeapMemory,
              Region3.originZero(),
              Region3.region(getDimensions()),
              pBlockingRead);
-    
+
     return lOffHeapMemory;
   }
-  
-  
+
   /**
    * Reads from a Java int array into this image.
    * 
-   * @param Java int array 
+   * @param Java
+   *          int array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return 
+   * @return
    */
   public OffHeapMemory readFrom(int[] pIntArray,
-                       boolean pBlockingRead)
+                                boolean pBlockingRead)
   {
-    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateInts(pIntArray.length);
-    
+    OffHeapMemory lOffHeapMemory =
+                                 OffHeapMemory.allocateInts(pIntArray.length);
+
     lOffHeapMemory.copyFrom(pIntArray);
-    
+
     readFrom(lOffHeapMemory,
              Region3.originZero(),
              Region3.region(getDimensions()),
              pBlockingRead);
-    
+
     return lOffHeapMemory;
   }
-  
-  
+
   /**
    * Reads from a Java long array into this image.
    * 
-   * @param Java long array 
+   * @param Java
+   *          long array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return 
+   * @return
    */
   public OffHeapMemory readFrom(long[] pLongArray,
-                       boolean pBlockingRead)
+                                boolean pBlockingRead)
   {
-    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateLongs(pLongArray.length);
-    
+    OffHeapMemory lOffHeapMemory =
+                                 OffHeapMemory.allocateLongs(pLongArray.length);
+
     lOffHeapMemory.copyFrom(pLongArray);
-    
+
     readFrom(lOffHeapMemory,
              Region3.originZero(),
              Region3.region(getDimensions()),
              pBlockingRead);
-    
+
     return lOffHeapMemory;
   }
-  
-  
-  
+
   /**
    * Reads from a Java float array into this image.
    * 
-   * @param Java float array 
+   * @param Java
+   *          float array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return 
+   * @return
    */
   public OffHeapMemory readFrom(float[] pFloatArray,
-                       boolean pBlockingRead)
+                                boolean pBlockingRead)
   {
-    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateFloats(pFloatArray.length);
-    
+    OffHeapMemory lOffHeapMemory =
+                                 OffHeapMemory.allocateFloats(pFloatArray.length);
+
     lOffHeapMemory.copyFrom(pFloatArray);
-    
+
     readFrom(lOffHeapMemory,
              Region3.originZero(),
              Region3.region(getDimensions()),
              pBlockingRead);
-    
+
     return lOffHeapMemory;
   }
-  
+
   /**
    * Reads from a Java double array into this image.
    * 
-   * @param Java double array 
+   * @param Java
+   *          double array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return 
+   * @return
    */
   public OffHeapMemory readFrom(double[] pDoubleArray,
-                       boolean pBlockingRead)
+                                boolean pBlockingRead)
   {
-    OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateDoubles(pDoubleArray.length);
-    
+    OffHeapMemory lOffHeapMemory =
+                                 OffHeapMemory.allocateDoubles(pDoubleArray.length);
+
     lOffHeapMemory.copyFrom(pDoubleArray);
-    
+
     readFrom(lOffHeapMemory,
              Region3.originZero(),
              Region3.region(getDimensions()),
              pBlockingRead);
-    
+
     return lOffHeapMemory;
   }
-  
-  
-  
 
   /**
    * Returns the context for this image.
@@ -745,6 +781,36 @@ public class ClearCLImage extends ClearCLMemBase implements
   public boolean isNormalized()
   {
     return mImageChannelDataType.isNormalized();
+  }
+  
+  /**
+   * Returns whether this image data type has a sign
+   * 
+   * @return true if signed, false otherwise
+   */
+  public boolean isSigned()
+  {
+    return mImageChannelDataType.isSigned();
+  }
+  
+  /**
+   * Returns whether this image data type is integer
+   * 
+   * @return true if integer, false otherwise
+   */
+  public boolean isInteger()
+  {
+    return mImageChannelDataType.isInteger();
+  }
+  
+  /**
+   * Returns whether this image data type is float
+   * 
+   * @return true if float, false otherwise
+   */
+  public boolean isFloat()
+  {
+    return mImageChannelDataType.isFloat();
   }
 
   @Override
