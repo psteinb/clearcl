@@ -67,7 +67,7 @@ public class ClearCLDevice extends ClearCLBase
   /**
    * Returns device OpenL extensions string.
    * 
-   * @return
+   * @return extensions string
    */
   public String getExtensions()
   {
@@ -133,7 +133,7 @@ public class ClearCLDevice extends ClearCLBase
    * Returns the max work group size. This means that the product of the local
    * sizes cannot be bigger that this value.
    * 
-   * @return
+   * @return max work group size
    */
   public long getMaxWorkGroupSize()
   {

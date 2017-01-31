@@ -1,10 +1,10 @@
 package clearcl;
 
+import java.nio.Buffer;
 import java.util.Arrays;
 
 import clearcl.abs.ClearCLMemBase;
 import clearcl.enums.HostAccessType;
-import clearcl.enums.ImageType;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.interfaces.ClearCLMemInterface;
 import coremem.ContiguousMemoryInterface;
@@ -31,7 +31,8 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
    * Allocates a host image buffer of same dimensions than a given image.
    * 
    * @param pClearCLImage
-   * @return
+   *          image template
+   * @return newly allocated image.
    */
   public static ClearCLHostImageBuffer allocateSameAs(ClearCLImageInterface pClearCLImage)
   {
@@ -61,9 +62,13 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
    * channels, and dimensions.
    * 
    * @param pClearCLContext
+   *          context
    * @param pNativeType
+   *          native type
    * @param pNumberOfChannels
+   *          number of channels
    * @param pDimensions
+   *          dimensions
    */
   public ClearCLHostImageBuffer(ClearCLContext pClearCLContext,
                                 NativeTypeEnum pNativeType,
@@ -84,10 +89,15 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
    * object, native type, number of channels, and dimensions.
    * 
    * @param pClearCLContext
+   *          context
    * @param pContiguousMemoryInterface
+   *          contiguous memory
    * @param pNativeType
+   *          native type
    * @param pNumberOfChannels
+   *          number of channels
    * @param pDimensions
+   *          dimensions
    */
   public ClearCLHostImageBuffer(ClearCLContext pClearCLContext,
                                 ContiguousMemoryInterface pContiguousMemoryInterface,
@@ -97,7 +107,10 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
   {
     super(pClearCLContext.getBackend(),
           pClearCLContext.getBackend()
-                         .wrap(pContiguousMemoryInterface));
+                         .wrap(pContiguousMemoryInterface),
+          null,
+          null,
+          null);
     mContiguousMemory = pContiguousMemoryInterface;
     mNativeType = pNativeType;
     mNumberOfChannels = pNumberOfChannels;
@@ -113,7 +126,7 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
   /**
    * Returns the contiguous memory object used to store the data.
    * 
-   * @return
+   * @return contiguous memory used internally
    */
   public ContiguousMemoryInterface getContiguousMemory()
   {
@@ -165,15 +178,43 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
   }
 
   @Override
+  public void writeTo(ContiguousMemoryInterface pContiguousMemory,
+                      boolean pBlockingWrite)
+  {
+    mContiguousMemory.copyTo(pContiguousMemory);
+  }
+
+  @Override
+  public void writeTo(Buffer pBuffer, boolean pBlockingWrite)
+  {
+    mContiguousMemory.copyTo(pBuffer);
+  }
+
+  @Override
+  public void readFrom(ContiguousMemoryInterface pContiguousMemory,
+                       boolean pBlockingRead)
+  {
+    mContiguousMemory.copyFrom(pContiguousMemory);
+  }
+
+  @Override
+  public void readFrom(Buffer pBuffer, boolean pBlockingRead)
+  {
+    mContiguousMemory.copyFrom(pBuffer);
+  }
+
+  @Override
   public String toString()
   {
-    return String.format("ClearCLHostImage [mContiguousMemory=%s, getDimensions()=%s, getNativeType()=%s, getPixelSizeInBytes()=%s, getNumberOfChannels()=%s, getSizeInBytes()=%s]",
+    return String.format("ClearCLHostImageBuffer [mContiguousMemory=%s, mNativeType=%s, mDimensions=%s, mNumberOfChannels=%s, getMemAllocMode()=%s, getKernelAccessType()=%s, getBackend()=%s, getPeerPointer()=%s]",
                          mContiguousMemory,
-                         Arrays.toString(getDimensions()),
-                         getNativeType(),
-                         getPixelSizeInBytes(),
-                         getNumberOfChannels(),
-                         getSizeInBytes());
+                         mNativeType,
+                         Arrays.toString(mDimensions),
+                         mNumberOfChannels,
+                         getMemAllocMode(),
+                         getKernelAccessType(),
+                         getBackend(),
+                         getPeerPointer());
   }
 
   @Override

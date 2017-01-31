@@ -20,7 +20,9 @@ public abstract class ClearCLBase implements AutoCloseable
    * Constructs a ClearCLBase given a ClearCL backend and OpenCL peer pointer
    * 
    * @param pClearCLBackendInterface
+   *          backend
    * @param pPointer
+   *          peer pointer
    */
   public ClearCLBase(ClearCLBackendInterface pClearCLBackendInterface,
                      ClearCLPeerPointer pPointer)
@@ -32,7 +34,7 @@ public abstract class ClearCLBase implements AutoCloseable
   /**
    * Returns this object's ClearCL backend
    * 
-   * @return
+   * @return backend
    */
   public ClearCLBackendInterface getBackend()
   {
@@ -65,5 +67,13 @@ public abstract class ClearCLBase implements AutoCloseable
    */
   @Override
   public abstract void close();
+
+  @Override
+  public String toString()
+  {
+    return String.format("ClearCLBase [mClearCLBackendInterface=%s, mPeerPointer=%s]",
+                         mClearCLBackendInterface,
+                         mPeerPointer);
+  }
 
 }

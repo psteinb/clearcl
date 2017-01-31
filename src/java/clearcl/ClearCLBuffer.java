@@ -1,11 +1,12 @@
 package clearcl;
 
 import java.nio.Buffer;
+import java.util.Arrays;
 
 import clearcl.abs.ClearCLMemBase;
 import clearcl.enums.HostAccessType;
-import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
+import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.ClearCLException;
 import clearcl.exceptions.ClearCLHostAccessException;
 import clearcl.interfaces.ClearCLImageInterface;
@@ -26,11 +27,10 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 {
 
   private final ClearCLContext mClearCLContext;
-  private final HostAccessType mHostAccessType;
-  private final KernelAccessType mKernelAccessType;
   private final NativeTypeEnum mNativeType;
   private long mNumberOfChannels;
   private final long[] mDimensions;
+
 
   /**
    * This constructor is called internally from an OpenCl context.
@@ -39,6 +39,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    *          context
    * @param pBufferPointer
    *          buffer pointer
+   * @param pMemAllocMode 
    * @param pHostAccessType
    *          host access type
    * @param pKernelAccessType
@@ -50,16 +51,15 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    */
   ClearCLBuffer(ClearCLContext pClearCLContext,
                 ClearCLPeerPointer pBufferPointer,
+                MemAllocMode pMemAllocMode, 
                 HostAccessType pHostAccessType,
                 KernelAccessType pKernelAccessType,
                 long pNumberOfChannels,
                 NativeTypeEnum pNativeType,
                 long... pDimensions)
   {
-    super(pClearCLContext.getBackend(), pBufferPointer);
+    super(pClearCLContext.getBackend(), pBufferPointer, pMemAllocMode, pHostAccessType, pKernelAccessType);
     mClearCLContext = pClearCLContext;
-    mHostAccessType = pHostAccessType;
-    mKernelAccessType = pKernelAccessType;
     mNumberOfChannels = pNumberOfChannels;
     mNativeType = pNativeType;
     mDimensions = pDimensions;
@@ -517,7 +517,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    *          origin in destination buffer
    * @param pDestinationOrigin
    *          origin in source buffer
-   * @param Region
+   * @param pRegion
    *          region to write
    * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
@@ -554,7 +554,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    *          origin in source buffer
    * @param pDestinationOrigin
    *          origin in destination buffer
-   * @param Region
+   * @param pRegion
    *          region to write
    * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
@@ -665,27 +665,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   {
     return mClearCLContext;
   }
-
-  /**
-   * Returns host access type of this buffer.
-   * 
-   * @return host access type
-   */
-  @Override
-  public HostAccessType getHostAccessType()
-  {
-    return mHostAccessType;
-  }
-
-  /**
-   * Returns kernel access type of this buffer.
-   * 
-   * @return kernel access type
-   */
-  public KernelAccessType getKernelAccessType()
-  {
-    return mKernelAccessType;
-  }
+  
 
   /**
    * Returns data type.
@@ -733,18 +713,21 @@ public class ClearCLBuffer extends ClearCLMemBase implements
            * mNativeType.getSizeInBytes();
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Object#toString()
-   */
+
+
   @Override
   public String toString()
   {
-    return String.format("ClearCLBuffer [mHostAccessType=%s, mKernelAccessType=%s, mDataType=%s, getLengthInElements()=%s, getSizeInBytes()=%s]",
-                         mHostAccessType,
-                         mKernelAccessType,
+    return String.format("ClearCLBuffer [mClearCLContext=%s, mNativeType=%s, mNumberOfChannels=%s, mDimensions=%s, getMemAllocMode()=%s, getHostAccessType()=%s, getKernelAccessType()=%s, getBackend()=%s, getPeerPointer()=%s]",
+                         mClearCLContext,
                          mNativeType,
-                         getLength(),
-                         getSizeInBytes());
+                         mNumberOfChannels,
+                         Arrays.toString(mDimensions),
+                         getMemAllocMode(),
+                         getHostAccessType(),
+                         getKernelAccessType(),
+                         getBackend(),
+                         getPeerPointer());
   }
 
   /* (non-Javadoc)

@@ -1,7 +1,6 @@
 package clearcl;
 
 import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import clearcl.abs.ClearCLMemBase;
@@ -10,6 +9,7 @@ import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
+import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.ClearCLException;
 import clearcl.exceptions.ClearCLHostAccessException;
 import clearcl.exceptions.ClearCLIllegalArgumentException;
@@ -21,7 +21,6 @@ import coremem.buffers.ContiguousBuffer;
 import coremem.enums.NativeTypeEnum;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.offheap.OffHeapMemory;
-import coremem.util.Size;
 
 /**
  * ClearCLImage is the ClearCL abstraction for OpenCL images.
@@ -33,8 +32,7 @@ public class ClearCLImage extends ClearCLMemBase implements
                           ClearCLImageInterface
 {
   private final ClearCLContext mClearCLContext;
-  private final HostAccessType mHostAccessType;
-  private final KernelAccessType mKernelAccessType;
+
   private final ImageType mImageType;
   private final ImageChannelOrder mImageChannelOrder;
   private final ImageChannelDataType mImageChannelDataType;
@@ -66,6 +64,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    */
   ClearCLImage(ClearCLContext pClearCLContext,
                ClearCLPeerPointer pImage,
+               MemAllocMode pMemAllocMode,
                HostAccessType pHostAccessType,
                KernelAccessType pKernelAccessType,
                ImageType pImageType,
@@ -73,10 +72,12 @@ public class ClearCLImage extends ClearCLMemBase implements
                ImageChannelDataType pImageChannelType,
                long... pDimensions)
   {
-    super(pClearCLContext.getBackend(), pImage);
+    super(pClearCLContext.getBackend(),
+          pImage,
+          pMemAllocMode,
+          pHostAccessType,
+          pKernelAccessType);
     mClearCLContext = pClearCLContext;
-    mHostAccessType = pHostAccessType;
-    mKernelAccessType = pKernelAccessType;
     mImageType = pImageType;
     mImageChannelOrder = pImageChannelOrder;
     mImageChannelDataType = pImageChannelType;
@@ -88,11 +89,14 @@ public class ClearCLImage extends ClearCLMemBase implements
    * 
    * @param pBlockingFill
    *          true -> blocking call, false -> asynchronous call
+   * @param pNotifyListeners
+   *          true -> notify listeners, false -> do not notify
    */
 
-  public void fillZero(boolean pBlockingFill)
+  public void fillZero(boolean pBlockingFill,
+                       boolean pNotifyListeners)
   {
-    fill(0.0f, pBlockingFill);
+    fill(0.0f, pBlockingFill, pNotifyListeners);
   }
 
   /**
@@ -102,14 +106,19 @@ public class ClearCLImage extends ClearCLMemBase implements
    *          single channel float color
    * @param pBlockingFill
    *          true -> blocking call, false -> asynchronous call
+   * @param pNotifyListeners
+   *          true -> notify listeners, false -> do not notify
    */
-  public void fill(float pColor, boolean pBlockingFill)
+  public void fill(float pColor,
+                   boolean pBlockingFill,
+                   boolean pNotifyListeners)
   {
     fill(new float[]
     { pColor, pColor, pColor, pColor },
          Region3.originZero(),
          Region3.region(getDimensions()),
-         pBlockingFill);
+         pBlockingFill,
+         pNotifyListeners);
   }
 
   /**
@@ -119,13 +128,18 @@ public class ClearCLImage extends ClearCLMemBase implements
    *          four float color
    * @param pBlockingFill
    *          true -> blocking call, false -> asynchronous call
+   * @param pNotifyListeners
+   *          true -> notify listeners, false -> do not notify
    */
-  public void fill(float[] pRGBA, boolean pBlockingFill)
+  public void fill(float[] pRGBA,
+                   boolean pBlockingFill,
+                   boolean pNotifyListeners)
   {
     fill(pRGBA,
          Region3.originZero(),
          Region3.region(getDimensions()),
-         pBlockingFill);
+         pBlockingFill,
+         pNotifyListeners);
   }
 
   /**
@@ -139,11 +153,14 @@ public class ClearCLImage extends ClearCLMemBase implements
    *          region dimensions
    * @param pBlockingFill
    *          true -> blocking call, false -> asynchronous call
+   * @param pNotifyListeners
+   *          true -> notify listeners, false -> do not notify
    */
   public void fill(float[] pRGBA,
                    long[] pOrigin,
                    long[] pRegion,
-                   boolean pBlockingFill)
+                   boolean pBlockingFill,
+                   boolean pNotifyListeners)
   {
     if (!(isNormalized() || isFloat()))
       throw new ClearCLIllegalArgumentException("Image data type must not be normalized integer or float");
@@ -169,7 +186,9 @@ public class ClearCLImage extends ClearCLMemBase implements
                                   Region3.origin(pOrigin),
                                   Region3.region(pRegion),
                                   lPattern);
-    notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+
+    if (pNotifyListeners)
+      notifyListenersOfChange(mClearCLContext.getDefaultQueue());
   }
 
   /**
@@ -177,7 +196,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    * 
    * @param pDstImage
    *          destination image
-   * @param pBlocking
+   * @param pBlockingCopy
    *          true -> blocking call, false -> asynchronous call
    */
   public void copyTo(ClearCLImage pDstImage, boolean pBlockingCopy)
@@ -201,7 +220,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    *          origin in destination image
    * @param pRegion
    *          region dimensions
-   * @param pBlocking
+   * @param pBlockingCopy
    *          true -> blocking call, false -> asynchronous call
    */
   public void copyTo(ClearCLImage pDstImage,
@@ -309,20 +328,30 @@ public class ClearCLImage extends ClearCLMemBase implements
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
    */
+  @Override
   public void writeTo(Buffer pBuffer, boolean pBlockingRead)
   {
-    if (!getHostAccessType().isReadableFromHost())
-      throw new ClearCLHostAccessException("Image not readable from host");
+    writeTo(pBuffer,
+            Region3.originZero(),
+            Region3.region(getDimensions()),
+            pBlockingRead);
+  }
 
-    ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pBuffer);
-
-    getBackend().enqueueReadFromImage(mClearCLContext.getDefaultQueue()
-                                                     .getPeerPointer(),
-                                      getPeerPointer(),
-                                      pBlockingRead,
-                                      Region3.originZero(),
-                                      Region3.region(getDimensions()),
-                                      lHostMemPointer);
+  /**
+   * Writes a this image to a CoreMem buffer.
+   * 
+   * @param pContiguousMemory
+   *          CoreMem buffer
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   */
+  public void writeTo(ContiguousMemoryInterface pContiguousMemory,
+                      boolean pBlockingRead)
+  {
+    writeTo(pContiguousMemory,
+            Region3.originZero(),
+            Region3.region(getDimensions()),
+            pBlockingRead);
   }
 
   /**
@@ -429,6 +458,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
    */
+  @Override
   public void readFrom(ContiguousMemoryInterface pContiguousMemory,
                        boolean pBlockingRead)
   {
@@ -528,6 +558,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
    */
+  @Override
   public void readFrom(Buffer pBuffer, boolean pBlockingRead)
   {
     readFrom(pBuffer,
@@ -539,11 +570,11 @@ public class ClearCLImage extends ClearCLMemBase implements
   /**
    * Reads from a Java byte array into this image.
    * 
-   * @param Java
+   * @param pByteArray
    *          byte array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return
+   * @return temp offheap memory object used to transfer the data.
    */
   public OffHeapMemory readFrom(byte[] pByteArray,
                                 boolean pBlockingRead)
@@ -564,11 +595,11 @@ public class ClearCLImage extends ClearCLMemBase implements
   /**
    * Reads from a Java char array into this image.
    * 
-   * @param Java
+   * @param pCharArray
    *          char array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return
+   * @return temp offheap memory object used to transfer the data.
    */
   public OffHeapMemory readFrom(char[] pCharArray,
                                 boolean pBlockingRead)
@@ -589,11 +620,11 @@ public class ClearCLImage extends ClearCLMemBase implements
   /**
    * Reads from a Java short array into this image.
    * 
-   * @param Java
+   * @param pShortsArray
    *          short array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return
+   * @return temp offheap memory object used to transfer the data.
    */
   public OffHeapMemory readFrom(short[] pShortsArray,
                                 boolean pBlockingRead)
@@ -614,11 +645,11 @@ public class ClearCLImage extends ClearCLMemBase implements
   /**
    * Reads from a Java int array into this image.
    * 
-   * @param Java
+   * @param pIntArray
    *          int array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return
+   * @return temp offheap memory object used to transfer the data.
    */
   public OffHeapMemory readFrom(int[] pIntArray,
                                 boolean pBlockingRead)
@@ -639,11 +670,11 @@ public class ClearCLImage extends ClearCLMemBase implements
   /**
    * Reads from a Java long array into this image.
    * 
-   * @param Java
+   * @param pLongArray
    *          long array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return
+   * @return temp offheap memory object used to transfer the data.
    */
   public OffHeapMemory readFrom(long[] pLongArray,
                                 boolean pBlockingRead)
@@ -664,11 +695,11 @@ public class ClearCLImage extends ClearCLMemBase implements
   /**
    * Reads from a Java float array into this image.
    * 
-   * @param Java
+   * @param pFloatArray
    *          float array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return
+   * @return temp offheap memory object used to transfer the data.
    */
   public OffHeapMemory readFrom(float[] pFloatArray,
                                 boolean pBlockingRead)
@@ -689,11 +720,11 @@ public class ClearCLImage extends ClearCLMemBase implements
   /**
    * Reads from a Java double array into this image.
    * 
-   * @param Java
+   * @param pDoubleArray
    *          double array
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
-   * @return
+   * @return temp offheap memory object used to transfer the data.
    */
   public OffHeapMemory readFrom(double[] pDoubleArray,
                                 boolean pBlockingRead)
@@ -720,27 +751,6 @@ public class ClearCLImage extends ClearCLMemBase implements
   public ClearCLContext getContext()
   {
     return mClearCLContext;
-  }
-
-  /**
-   * Returns host access type
-   * 
-   * @return host acess type
-   */
-  @Override
-  public HostAccessType getHostAccessType()
-  {
-    return mHostAccessType;
-  }
-
-  /**
-   * Returns kernel access type
-   * 
-   * @return kernel access type
-   */
-  public KernelAccessType getKernelAccessType()
-  {
-    return mKernelAccessType;
   }
 
   /**
@@ -782,7 +792,7 @@ public class ClearCLImage extends ClearCLMemBase implements
   {
     return mImageChannelDataType.isNormalized();
   }
-  
+
   /**
    * Returns whether this image data type has a sign
    * 
@@ -792,7 +802,7 @@ public class ClearCLImage extends ClearCLMemBase implements
   {
     return mImageChannelDataType.isSigned();
   }
-  
+
   /**
    * Returns whether this image data type is integer
    * 
@@ -802,7 +812,7 @@ public class ClearCLImage extends ClearCLMemBase implements
   {
     return mImageChannelDataType.isInteger();
   }
-  
+
   /**
    * Returns whether this image data type is float
    * 
@@ -850,17 +860,17 @@ public class ClearCLImage extends ClearCLMemBase implements
   @Override
   public String toString()
   {
-    return String.format("ClearCLImage [getHostAccessType()=%s, getKernelAccessType()=%s, getImageType()=%s, getChannelOrder()=%s, getChannelDataType()=%s, isNormalized()=%s, getNativeType()=%s, getNumberOfChannels()=%s, getDimensions()=%s, getSizeInBytes()=%s]",
+    return String.format("ClearCLImage [mClearCLContext=%s, mImageType=%s, mImageChannelOrder=%s, mImageChannelDataType=%s, mDimensions=%s, getMemAllocMode()=%s, getHostAccessType()=%s, getKernelAccessType()=%s, getBackend()=%s, getPeerPointer()=%s]",
+                         mClearCLContext,
+                         mImageType,
+                         mImageChannelOrder,
+                         mImageChannelDataType,
+                         Arrays.toString(mDimensions),
+                         getMemAllocMode(),
                          getHostAccessType(),
                          getKernelAccessType(),
-                         getImageType(),
-                         getChannelOrder(),
-                         getChannelDataType(),
-                         isNormalized(),
-                         getNativeType(),
-                         getNumberOfChannels(),
-                         Arrays.toString(getDimensions()),
-                         getSizeInBytes());
+                         getBackend(),
+                         getPeerPointer());
   }
 
   /* (non-Javadoc)

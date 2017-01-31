@@ -163,6 +163,9 @@ public class ClearCLImagePanel extends StackPane
     mMax.addListener((e) -> {
       updateImage();
     });
+    mAuto.addListener((e) -> {
+      updateImage();
+    });
     mGamma.addListener((e) -> {
       updateImage();
     });
@@ -178,6 +181,8 @@ public class ClearCLImagePanel extends StackPane
 
     updateImage();
   }
+  
+  
 
   /**
    * Updates the display of this ImageView. This is called automatically through
@@ -365,5 +370,6 @@ public class ClearCLImagePanel extends StackPane
   {
     return mRenderMode;
   }
+  
 
 }

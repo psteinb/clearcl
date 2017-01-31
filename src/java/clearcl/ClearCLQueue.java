@@ -15,8 +15,8 @@ public class ClearCLQueue extends ClearCLBase
   /**
    * This constructor is called internally from an OpenCl context.
    * 
-   * @param pClearCLContext
-   * @param pQueuePointer
+   * @param pClearCLContext context
+   * @param pQueuePointer queue peer pointer
    */
   public ClearCLQueue(ClearCLContext pClearCLContext,
                       ClearCLPeerPointer pQueuePointer)

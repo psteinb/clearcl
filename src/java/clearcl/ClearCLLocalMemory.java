@@ -11,13 +11,13 @@ import coremem.util.Size;
  */
 public class ClearCLLocalMemory implements SizedInBytes
 {
-  public NativeTypeEnum mNativeTypeEnum;
-  public long mNumberOfElements;
+  private NativeTypeEnum mNativeTypeEnum;
+  private long mNumberOfElements;
 
   /**
    * Instantiates a local memory object,
-   * @param pNativeTypeEnum
-   * @param pNumberOfElements
+   * @param pNativeTypeEnum native type
+   * @param pNumberOfElements number of elements
    */
   public ClearCLLocalMemory(NativeTypeEnum pNativeTypeEnum,
                      long pNumberOfElements)

@@ -37,13 +37,16 @@ public class ClearCLPlatform extends ClearCLBase
    */
   public int getNumberOfDevices(DeviceType pDeviceType)
   {
-    try {
-		return getBackend().getNumberOfDevicesForPlatform(mPlatformPointer,
-		                                                  pDeviceType);
-	} catch (OpenCLException e) {
-		
-		return 0;
-	}
+    try
+    {
+      return getBackend().getNumberOfDevicesForPlatform(mPlatformPointer,
+                                                        pDeviceType);
+    }
+    catch (OpenCLException e)
+    {
+
+      return 0;
+    }
   }
 
   /**
@@ -65,9 +68,10 @@ public class ClearCLPlatform extends ClearCLBase
    */
   public ClearCLDevice getCPUDevice(int pDeviceIndex)
   {
-    ClearCLPeerPointer lDevicePointer = getBackend().getDevicePeerPointer(mPlatformPointer,
-                                                                          DeviceType.CPU,
-                                                                          pDeviceIndex);
+    ClearCLPeerPointer lDevicePointer =
+                                      getBackend().getDevicePeerPointer(mPlatformPointer,
+                                                                        DeviceType.CPU,
+                                                                        pDeviceIndex);
     return new ClearCLDevice(this, lDevicePointer);
   }
 
@@ -80,9 +84,10 @@ public class ClearCLPlatform extends ClearCLBase
    */
   public ClearCLDevice getGPUDevice(int pDeviceIndex)
   {
-    ClearCLPeerPointer lDevicePointer = getBackend().getDevicePeerPointer(mPlatformPointer,
-                                                                          DeviceType.GPU,
-                                                                          pDeviceIndex);
+    ClearCLPeerPointer lDevicePointer =
+                                      getBackend().getDevicePeerPointer(mPlatformPointer,
+                                                                        DeviceType.GPU,
+                                                                        pDeviceIndex);
     return new ClearCLDevice(this, lDevicePointer);
   }
 
@@ -91,12 +96,13 @@ public class ClearCLPlatform extends ClearCLBase
    * 
    * @param pDeviceIndex
    *          device index
-   * @return
+   * @return device for given index
    */
   public ClearCLDevice getDevice(int pDeviceIndex)
   {
-    ClearCLPeerPointer lDevicePointer = getBackend().getDevicePeerPointer(mPlatformPointer,
-                                                                          pDeviceIndex);
+    ClearCLPeerPointer lDevicePointer =
+                                      getBackend().getDevicePeerPointer(mPlatformPointer,
+                                                                        pDeviceIndex);
     return new ClearCLDevice(this, lDevicePointer);
   }
 

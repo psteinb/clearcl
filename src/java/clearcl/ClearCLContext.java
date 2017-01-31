@@ -20,478 +20,478 @@ import coremem.enums.NativeTypeEnum;
 public class ClearCLContext extends ClearCLBase
 {
 
-	private final ClearCLDevice mDevice;
+  private final ClearCLDevice mDevice;
 
-	private final ClearCLQueue mDefaultQueue;
+  private final ClearCLQueue mDefaultQueue;
 
-	/**
-	 * Construction of this object is done from within a ClearClDevice.
-	 * 
-	 * @param pClearCLDevice
-	 *          device
-	 * @param pContextPointer
-	 *          context peer pointer
-	 */
-	ClearCLContext(	final ClearCLDevice pClearCLDevice,
-									final ClearCLPeerPointer pContextPointer)
-	{
-		super(pClearCLDevice.getBackend(), pContextPointer);
-		mDevice = pClearCLDevice;
+  /**
+   * Construction of this object is done from within a ClearClDevice.
+   * 
+   * @param pClearCLDevice
+   *          device
+   * @param pContextPointer
+   *          context peer pointer
+   */
+  ClearCLContext(final ClearCLDevice pClearCLDevice,
+                 final ClearCLPeerPointer pContextPointer)
+  {
+    super(pClearCLDevice.getBackend(), pContextPointer);
+    mDevice = pClearCLDevice;
 
-		mDefaultQueue = createQueue();
-	}
+    mDefaultQueue = createQueue();
+  }
 
-	/**
-	 * Returns the default queue. All devices are created with a default queue.
-	 * 
-	 * @return default queue
-	 */
-	public ClearCLQueue getDefaultQueue()
-	{
-		return mDefaultQueue;
-	}
+  /**
+   * Returns the default queue. All devices are created with a default queue.
+   * 
+   * @return default queue
+   */
+  public ClearCLQueue getDefaultQueue()
+  {
+    return mDefaultQueue;
+  }
 
-	/**
-	 * Creates a queue.
-	 * 
-	 * @return queue
-	 */
-	public ClearCLQueue createQueue()
-	{
-		final ClearCLPeerPointer lQueuePointer = getBackend().getQueuePeerPointer(mDevice.getPeerPointer(),
-																																							getPeerPointer(),
-																																							true);
-		final ClearCLQueue lClearCLQueue = new ClearCLQueue(this,
-																												lQueuePointer);
-		return lClearCLQueue;
-	}
+  /**
+   * Creates a queue.
+   * 
+   * @return queue
+   */
+  public ClearCLQueue createQueue()
+  {
+    final ClearCLPeerPointer lQueuePointer =
+                                           getBackend().getQueuePeerPointer(mDevice.getPeerPointer(),
+                                                                            getPeerPointer(),
+                                                                            true);
+    final ClearCLQueue lClearCLQueue =
+                                     new ClearCLQueue(this,
+                                                      lQueuePointer);
+    return lClearCLQueue;
+  }
 
-	/**
-	 * Creates an OpenCL buffer with a given memory allocation mode, host and
-	 * kernel access and a template image to match for dimensions, data type and
-	 * number of channels.
-	 *
-	 * @param pMemAllocMode
-	 *          allocation mode
-	 * @param pHostAccessType
-	 *          host access type
-	 * @param pKernelAccessType
-	 *          kernel access type
-	 * @param pTemplate
-	 *          image to use as template
-	 * @return created buffer
-	 */
-	public ClearCLBuffer createBuffer(final MemAllocMode pMemAllocMode,
-																		final HostAccessType pHostAccessType,
-																		final KernelAccessType pKernelAccessType,
-																		final ClearCLImage pTemplate)
-	{
-		return createBuffer(pMemAllocMode,
-												pHostAccessType,
-												pKernelAccessType,
-												pTemplate.getNumberOfChannels(),
-												pTemplate.getNativeType(),
-												pTemplate.getDimension());
-	}
+  /**
+   * Creates an OpenCL buffer with a given memory allocation mode, host and
+   * kernel access and a template image to match for dimensions, data type and
+   * number of channels.
+   *
+   * @param pMemAllocMode
+   *          allocation mode
+   * @param pHostAccessType
+   *          host access type
+   * @param pKernelAccessType
+   *          kernel access type
+   * @param pTemplate
+   *          image to use as template
+   * @return created buffer
+   */
+  public ClearCLBuffer createBuffer(final MemAllocMode pMemAllocMode,
+                                    final HostAccessType pHostAccessType,
+                                    final KernelAccessType pKernelAccessType,
+                                    final ClearCLImage pTemplate)
+  {
+    return createBuffer(pMemAllocMode,
+                        pHostAccessType,
+                        pKernelAccessType,
+                        pTemplate.getNumberOfChannels(),
+                        pTemplate.getNativeType(),
+                        pTemplate.getDimension());
+  }
 
-	/**
-	 * Creates an OpenCL buffer with a given data type and length. The host and
-	 * kernel access policy is read and write access for both.
-	 * 
-	 * @param pNativeType
-	 *          native type
-	 * @param pBufferLengthInElements
-	 *          length in elements
-	 * @return
-	 */
-	public ClearCLBuffer createBuffer(final NativeTypeEnum pNativeType,
-																		final long pBufferLengthInElements)
-	{
-		return createBuffer(MemAllocMode.Best,
-												HostAccessType.ReadWrite,
-												KernelAccessType.ReadWrite,
-												pNativeType,
-												pBufferLengthInElements);
-	}
+  /**
+   * Creates an OpenCL buffer with a given data type and length. The host and
+   * kernel access policy is read and write access for both.
+   * 
+   * @param pNativeType
+   *          native type
+   * @param pBufferLengthInElements
+   *          length in elements
+   * @return created buffer
+   */
+  public ClearCLBuffer createBuffer(final NativeTypeEnum pNativeType,
+                                    final long pBufferLengthInElements)
+  {
+    return createBuffer(MemAllocMode.Best,
+                        HostAccessType.ReadWrite,
+                        KernelAccessType.ReadWrite,
+                        pNativeType,
+                        pBufferLengthInElements);
+  }
 
-	/**
-	 * Creates an OpenCL buffer with a given access policy, data type and length.
-	 * 
-	 * @param pHostAccessType
-	 *          host access type
-	 * @param pKernelAccessType
-	 *          kernel access type
-	 * @param pNativeType
-	 *          data type
-	 * @param pBufferLengthInElements
-	 *          length in elements
-	 * @return created buffer
-	 */
-	public ClearCLBuffer createBuffer(final HostAccessType pHostAccessType,
-																		final KernelAccessType pKernelAccessType,
-																		final NativeTypeEnum pNativeType,
-																		final long pBufferLengthInElements)
-	{
-		return createBuffer(MemAllocMode.Best,
-												pHostAccessType,
-												pKernelAccessType,
-												pNativeType,
-												pBufferLengthInElements);
-	}
+  /**
+   * Creates an OpenCL buffer with a given access policy, data type and length.
+   * 
+   * @param pHostAccessType
+   *          host access type
+   * @param pKernelAccessType
+   *          kernel access type
+   * @param pNativeType
+   *          data type
+   * @param pBufferLengthInElements
+   *          length in elements
+   * @return created buffer
+   */
+  public ClearCLBuffer createBuffer(final HostAccessType pHostAccessType,
+                                    final KernelAccessType pKernelAccessType,
+                                    final NativeTypeEnum pNativeType,
+                                    final long pBufferLengthInElements)
+  {
+    return createBuffer(MemAllocMode.Best,
+                        pHostAccessType,
+                        pKernelAccessType,
+                        pNativeType,
+                        pBufferLengthInElements);
+  }
 
-	/**
-	 * Creates an OpenCL buffer with a given access policy, data type, memory
-	 * allocation mode and length. The host and kernel access policy is read and
-	 * write access for both.
-	 * 
-	 * @param pMemAllocMode
-	 *          memory allocation mode
-	 * @param pNativeType
-	 *          native type
-	 * @param pBufferLengthInElements
-	 *          length in elements
-	 * @return
-	 */
-	public ClearCLBuffer createBuffer(final MemAllocMode pMemAllocMode,
-																		final NativeTypeEnum pNativeType,
-																		final long pBufferLengthInElements)
-	{
-		return createBuffer(pMemAllocMode,
-												HostAccessType.ReadWrite,
-												KernelAccessType.ReadWrite,
-												pNativeType,
-												pBufferLengthInElements);
-	}
+  /**
+   * Creates an OpenCL buffer with a given access policy, data type, memory
+   * allocation mode and length. The host and kernel access policy is read and
+   * write access for both.
+   * 
+   * @param pMemAllocMode
+   *          memory allocation mode
+   * @param pNativeType
+   *          native type
+   * @param pBufferLengthInElements
+   *          length in elements
+   * @return created buffer
+   */
+  public ClearCLBuffer createBuffer(final MemAllocMode pMemAllocMode,
+                                    final NativeTypeEnum pNativeType,
+                                    final long pBufferLengthInElements)
+  {
+    return createBuffer(pMemAllocMode,
+                        HostAccessType.ReadWrite,
+                        KernelAccessType.ReadWrite,
+                        pNativeType,
+                        pBufferLengthInElements);
+  }
 
-	/**
-	 * Creates an OpenCL buffer with a given data type, access policy, memory
-	 * allocation mode, native type, and length.
-	 * 
-	 * @param pMemAllocMode
-	 *          memory allocation mode
-	 * @param pHostAccessType
-	 *          host access type
-	 * @param pKernelAccessType
-	 *          kernel access type
-	 * @param pDataType
-	 *          data type
-	 * @param pBufferLengthInElements
-	 *          length in elements
-	 * @return
-	 */
-	public ClearCLBuffer createBuffer(final MemAllocMode pMemAllocMode,
-																		final HostAccessType pHostAccessType,
-																		final KernelAccessType pKernelAccessType,
-																		final NativeTypeEnum pNativeType,
-																		final long pBufferLengthInElements)
-	{
-		return createBuffer(pMemAllocMode,
-												pHostAccessType,
-												pKernelAccessType,
-												1,
-												pNativeType,
-												pBufferLengthInElements);
-	}
+  /**
+   * Creates an OpenCL buffer with a given data type, access policy, memory
+   * allocation mode, native type, and length.
+   * 
+   * @param pMemAllocMode
+   *          memory allocation mode
+   * @param pHostAccessType
+   *          host access type
+   * @param pKernelAccessType
+   *          kernel access type
+   * @param pNativeType
+   *          native data type
+   * @param pBufferLengthInElements
+   *          length in elements
+   * @return created buffer
+   */
+  public ClearCLBuffer createBuffer(final MemAllocMode pMemAllocMode,
+                                    final HostAccessType pHostAccessType,
+                                    final KernelAccessType pKernelAccessType,
+                                    final NativeTypeEnum pNativeType,
+                                    final long pBufferLengthInElements)
+  {
+    return createBuffer(pMemAllocMode,
+                        pHostAccessType,
+                        pKernelAccessType,
+                        1,
+                        pNativeType,
+                        pBufferLengthInElements);
+  }
 
-	/**
-	 * Creates an OpenCL buffer with a given data type, memory allocation mode and
-	 * access policy, memory allocation mode, native type, and dimensions. In this
-	 * case the buffer can be interpreted as an image.
-	 * 
-	 * @param pMemAllocMode
-	 *          memory allocation mode
-	 * @param pHostAccessType
-	 *          host access type
-	 * @param pKernelAccessType
-	 *          kernel access type
-	 * @param pDataType
-	 *          data type
-	 * @param pMemAllocMode
-	 *          memory allocation mode
-	 * @param pNumberOfChannels
-	 *          number of channels per
-	 * @param pNativeType
-	 *          native type per channel per pixel/voxel
-	 * @param pDimensions
-	 *          image buffer dimensions
-	 * @return
-	 */
-	public ClearCLBuffer createBuffer(final MemAllocMode pMemAllocMode,
-																		final HostAccessType pHostAccessType,
-																		final KernelAccessType pKernelAccessType,
-																		final long pNumberOfChannels,
-																		final NativeTypeEnum pNativeType,
-																		final long... pDimensions)
-	{
+  /**
+   * Creates an OpenCL buffer with a given data type, memory allocation mode and
+   * access policy, memory allocation mode, native type, and dimensions. In this
+   * case the buffer can be interpreted as an image.
+   * 
+   * @param pMemAllocMode
+   *          memory allocation mode
+   * @param pHostAccessType
+   *          host access type
+   * @param pKernelAccessType
+   *          kernel access type
+   * @param pNumberOfChannels
+   *          number of channels per
+   * @param pNativeType
+   *          native type per channel per pixel/voxel
+   * @param pDimensions
+   *          image buffer dimensions
+   * @return created buffer
+   */
+  public ClearCLBuffer createBuffer(final MemAllocMode pMemAllocMode,
+                                    final HostAccessType pHostAccessType,
+                                    final KernelAccessType pKernelAccessType,
+                                    final long pNumberOfChannels,
+                                    final NativeTypeEnum pNativeType,
+                                    final long... pDimensions)
+  {
 
-		long lVolume = 1;
-		for (int i = 0; i < pDimensions.length; i++)
-			lVolume *= pDimensions[i];
+    long lVolume = 1;
+    for (int i = 0; i < pDimensions.length; i++)
+      lVolume *= pDimensions[i];
 
-		final long lBufferSizeInBytes = lVolume	* pNumberOfChannels
-																		* pNativeType.getSizeInBytes();
+    final long lBufferSizeInBytes = lVolume * pNumberOfChannels
+                                    * pNativeType.getSizeInBytes();
 
-		if (lBufferSizeInBytes < 0)
-			throw new OpenCLException(-61);
+    if (lBufferSizeInBytes < 0)
+      throw new OpenCLException(-61);
 
-		final ClearCLPeerPointer lBufferPointer =
-																						getBackend().getBufferPeerPointer(mDevice.getPeerPointer(),
-																																							getPeerPointer(),
-																																							pMemAllocMode,
-																																							pHostAccessType,
-																																							pKernelAccessType,
-																																							lBufferSizeInBytes);
+    final ClearCLPeerPointer lBufferPointer =
+                                            getBackend().getBufferPeerPointer(mDevice.getPeerPointer(),
+                                                                              getPeerPointer(),
+                                                                              pMemAllocMode,
+                                                                              pHostAccessType,
+                                                                              pKernelAccessType,
+                                                                              lBufferSizeInBytes);
 
-		final ClearCLBuffer lClearCLBuffer = new ClearCLBuffer(	this,
-																														lBufferPointer,
-																														pHostAccessType,
-																														pKernelAccessType,
-																														pNumberOfChannels,
-																														pNativeType,
-																														pDimensions);
-		return lClearCLBuffer;
-	}
+    final ClearCLBuffer lClearCLBuffer =
+                                       new ClearCLBuffer(this,
+                                                         lBufferPointer,
+                                                         pMemAllocMode,
+                                                         pHostAccessType,
+                                                         pKernelAccessType,
+                                                         pNumberOfChannels,
+                                                         pNativeType,
+                                                         pDimensions);
+    return lClearCLBuffer;
+  }
 
-	/**
-	 * Creates 1D, 2D, or 3D single channel images with a given channel data type,
-	 * and dimensions. The host and kernel access policy is read and write access
-	 * for both.
-	 * 
-	 * 
-	 * @param pImageChannelType
-	 *          channel data type
-	 * @param pWidth
-	 *          width
-	 * @param pHeight
-	 *          height
-	 * @param pDepth
-	 *          depth
-	 * @return 1D,2D, or 3D image
-	 */
-	public ClearCLImage createSingleChannelImage(	final ImageChannelDataType pImageChannelType,
-																								final long... pDimensions)
-	{
-		return createImage(	MemAllocMode.Best,
-												HostAccessType.ReadWrite,
-												KernelAccessType.ReadWrite,
-												mDevice	.getType()
-																.isCPU()	? ImageChannelOrder.Intensity
-																					: ImageChannelOrder.R,
-												pImageChannelType,
-												pDimensions);
-	}
+  /**
+   * Creates an image with same parameters as the given image,
+   * 
+   * @param pImage
+   *          template image to use
+   * @return created image
+   */
+  public ClearCLImage createImage(ClearCLImage pImage)
+  {
+    return createImage(pImage.getMemAllocMode(),
+                       pImage.getHostAccessType(),
+                       pImage.getKernelAccessType(),
+                       pImage.getChannelOrder(),
+                       pImage.getChannelDataType(),
+                       pImage.getDimensions());
+  }
 
-	/**
-	 * Creates 1D, 2D, or 3D image with a given channel order, channel data type,
-	 * and dimensions. The host and kernel access policy is read and write access
-	 * for both.
-	 * 
-	 * @param pImageChannelOrder
-	 *          channel order
-	 * @param pImageChannelType
-	 *          channel data type
-	 * @param pWidth
-	 *          width
-	 * @param pHeight
-	 *          height
-	 * @param pDepth
-	 *          depth
-	 * @return 1D,2D, or 3D image
-	 */
-	public ClearCLImage createImage(final ImageChannelOrder pImageChannelOrder,
-																	final ImageChannelDataType pImageChannelType,
-																	final long... pDimensions)
-	{
-		return createImage(	MemAllocMode.Best,
-												HostAccessType.ReadWrite,
-												KernelAccessType.ReadWrite,
-												pImageChannelOrder,
-												pImageChannelType,
-												pDimensions);
-	}
+  /**
+   * Creates 1D, 2D, or 3D single channel images with a given channel data type,
+   * and dimensions. The host and kernel access policy is read and write access
+   * for both.
+   * 
+   * 
+   * @param pImageChannelType
+   *          channel data type
+   * @param pDimensions
+   *          dimensions
+   * 
+   * @return 1D,2D, or 3D image
+   */
+  public ClearCLImage createSingleChannelImage(final ImageChannelDataType pImageChannelType,
+                                               final long... pDimensions)
+  {
+    return createImage(MemAllocMode.Best,
+                       HostAccessType.ReadWrite,
+                       KernelAccessType.ReadWrite,
+                       mDevice.getType()
+                              .isCPU() ? ImageChannelOrder.Intensity
+                                       : ImageChannelOrder.R,
+                       pImageChannelType,
+                       pDimensions);
+  }
 
-	/**
-	 * Creates 1D, 2D, or 3D single channel image with a given memory allocation
-	 * and access policy, channel data type, and dimensions.
-	 * 
-	 * @param pHostAccessType
-	 *          host access type
-	 * @param pKernelAccessType
-	 *          kernel access type
-	 * @param pImageChannelType
-	 *          channel data type
-	 * @param pWidth
-	 *          width
-	 * @param pHeight
-	 *          height
-	 * @param pDepth
-	 *          depth
-	 * @return 1D,2D, or 3D image
-	 */
-	public ClearCLImage createSingleChannelImage(	final HostAccessType pHostAccessType,
-																								final KernelAccessType pKernelAccessType,
-																								final ImageChannelDataType pImageChannelType,
-																								final long... pDimensions)
-	{
-		return createImage(	MemAllocMode.Best,
-												pHostAccessType,
-												pKernelAccessType,
-												mDevice	.getType()
-																.isCPU()	? ImageChannelOrder.Intensity
-																					: ImageChannelOrder.R,
-												pImageChannelType,
-												pDimensions);
-	}
+  /**
+   * Creates 1D, 2D, or 3D image with a given channel order, channel data type,
+   * and dimensions. The host and kernel access policy is read and write access
+   * for both.
+   * 
+   * @param pImageChannelOrder
+   *          channel order
+   * @param pImageChannelType
+   *          channel data type
+   * @param pDimensions
+   *          dimensions
+   * @return 1D,2D, or 3D image
+   */
+  public ClearCLImage createImage(final ImageChannelOrder pImageChannelOrder,
+                                  final ImageChannelDataType pImageChannelType,
+                                  final long... pDimensions)
+  {
+    return createImage(MemAllocMode.Best,
+                       HostAccessType.ReadWrite,
+                       KernelAccessType.ReadWrite,
+                       pImageChannelOrder,
+                       pImageChannelType,
+                       pDimensions);
+  }
 
-	/**
-	 * Creates 1D, 2D, or 3D image with a given memory allocation and access
-	 * policy, channel order, channel data type, and dimensions.
-	 * 
-	 * 
-	 * @param pHostAccessType
-	 *          host access type
-	 * @param pKernelAccessType
-	 *          kernel access type
-	 * @param pImageChannelOrder
-	 *          channel order
-	 * @param pImageChannelType
-	 *          channel data type
-	 * @param pWidth
-	 *          width
-	 * @param pHeight
-	 *          height
-	 * @param pDepth
-	 *          depth
-	 * @return 1D,2D, or 3D image
-	 */
-	public ClearCLImage createImage(final HostAccessType pHostAccessType,
-																	final KernelAccessType pKernelAccessType,
-																	final ImageChannelOrder pImageChannelOrder,
-																	final ImageChannelDataType pImageChannelType,
-																	final long... pDimensions)
-	{
-		return createImage(	MemAllocMode.Best,
-												pHostAccessType,
-												pKernelAccessType,
-												pImageChannelOrder,
-												pImageChannelType,
-												pDimensions);
-	}
+  /**
+   * Creates 1D, 2D, or 3D single channel image with a given memory allocation
+   * and access policy, channel data type, and dimensions.
+   * 
+   * @param pHostAccessType
+   *          host access type
+   * @param pKernelAccessType
+   *          kernel access type
+   * @param pImageChannelType
+   *          channel data type
+   * @param pDimensions
+   *          dimensions
+   * @return 1D,2D, or 3D image
+   */
+  public ClearCLImage createSingleChannelImage(final HostAccessType pHostAccessType,
+                                               final KernelAccessType pKernelAccessType,
+                                               final ImageChannelDataType pImageChannelType,
+                                               final long... pDimensions)
+  {
+    return createImage(MemAllocMode.Best,
+                       pHostAccessType,
+                       pKernelAccessType,
+                       mDevice.getType()
+                              .isCPU() ? ImageChannelOrder.Intensity
+                                       : ImageChannelOrder.R,
+                       pImageChannelType,
+                       pDimensions);
+  }
 
-	/**
-	 * Creates 1D, 2D, or 3D image with a given memory allocation and access
-	 * policy, channel order, channel data type, and dimensions.
-	 * 
-	 * 
-	 * @param pMemAllocMode
-	 *          memory allocation mode
-	 * @param pHostAccessType
-	 *          host access type
-	 * @param pKernelAccessType
-	 *          kernel access type
-	 * @param pImageChannelOrder
-	 *          channel order
-	 * @param pImageChannelType
-	 *          channel data type
-	 * @param pWidth
-	 *          width
-	 * @param pHeight
-	 *          height
-	 * @param pDepth
-	 *          depth
-	 * @return 1D,2D, or 3D image
-	 */
-	public ClearCLImage createImage(final MemAllocMode pMemAllocMode,
-																	final HostAccessType pHostAccessType,
-																	final KernelAccessType pKernelAccessType,
-																	final ImageChannelOrder pImageChannelOrder,
-																	final ImageChannelDataType pImageChannelType,
-																	final long... pDimensions)
-	{
-		final ImageType lImageType = ImageType.fromDimensions(pDimensions);
+  /**
+   * Creates 1D, 2D, or 3D image with a given memory allocation and access
+   * policy, channel order, channel data type, and dimensions.
+   * 
+   * 
+   * @param pHostAccessType
+   *          host access type
+   * @param pKernelAccessType
+   *          kernel access type
+   * @param pImageChannelOrder
+   *          channel order
+   * @param pImageChannelType
+   *          channel data type
+   * @param pDimensions
+   *          dimensions
+   * @return 1D,2D, or 3D image
+   */
+  public ClearCLImage createImage(final HostAccessType pHostAccessType,
+                                  final KernelAccessType pKernelAccessType,
+                                  final ImageChannelOrder pImageChannelOrder,
+                                  final ImageChannelDataType pImageChannelType,
+                                  final long... pDimensions)
+  {
+    return createImage(MemAllocMode.Best,
+                       pHostAccessType,
+                       pKernelAccessType,
+                       pImageChannelOrder,
+                       pImageChannelType,
+                       pDimensions);
+  }
 
-		final ClearCLPeerPointer lImage =
-																		getBackend().getImagePeerPointer(	mDevice.getPeerPointer(),
-																																			getPeerPointer(),
-																																			pMemAllocMode,
-																																			pHostAccessType,
-																																			pKernelAccessType,
-																																			lImageType,
-																																			pImageChannelOrder,
-																																			pImageChannelType,
-																																			pDimensions);
+  /**
+   * Creates 1D, 2D, or 3D image with a given memory allocation and access
+   * policy, channel order, channel data type, and dimensions.
+   * 
+   * 
+   * @param pMemAllocMode
+   *          memory allocation mode
+   * @param pHostAccessType
+   *          host access type
+   * @param pKernelAccessType
+   *          kernel access type
+   * @param pImageChannelOrder
+   *          channel order
+   * @param pImageChannelType
+   *          channel data type
+   * @param pDimensions
+   *          dimensions
+   * @return 1D,2D, or 3D image
+   */
+  public ClearCLImage createImage(final MemAllocMode pMemAllocMode,
+                                  final HostAccessType pHostAccessType,
+                                  final KernelAccessType pKernelAccessType,
+                                  final ImageChannelOrder pImageChannelOrder,
+                                  final ImageChannelDataType pImageChannelType,
+                                  final long... pDimensions)
+  {
+    final ImageType lImageType =
+                               ImageType.fromDimensions(pDimensions);
 
-		final ClearCLImage lClearCLImage = new ClearCLImage(this,
-																												lImage,
-																												pHostAccessType,
-																												pKernelAccessType,
-																												lImageType,
-																												pImageChannelOrder,
-																												pImageChannelType,
-																												pDimensions);
+    final ClearCLPeerPointer lImage =
+                                    getBackend().getImagePeerPointer(mDevice.getPeerPointer(),
+                                                                     getPeerPointer(),
+                                                                     pMemAllocMode,
+                                                                     pHostAccessType,
+                                                                     pKernelAccessType,
+                                                                     lImageType,
+                                                                     pImageChannelOrder,
+                                                                     pImageChannelType,
+                                                                     pDimensions);
 
-		return lClearCLImage;
-	}
+    final ClearCLImage lClearCLImage = new ClearCLImage(this,
+                                                        lImage,
+                                                        pMemAllocMode,
+                                                        pHostAccessType,
+                                                        pKernelAccessType,
+                                                        lImageType,
+                                                        pImageChannelOrder,
+                                                        pImageChannelType,
+                                                        pDimensions);
 
-	/**
-	 * Creates a program, with optional source code
-	 * 
-	 * @param pSourceCode
-	 *          optional varargs of source code strings.
-	 * @return program
-	 */
-	public ClearCLProgram createProgram(final String... pSourceCode)
-	{
-		final ClearCLProgram lClearCLProgram = new ClearCLProgram(mDevice,
-																															this,
-																															null);
-		for (final String lSourceCode : pSourceCode)
-			lClearCLProgram.addSource(lSourceCode);
+    return lClearCLImage;
+  }
 
-		return lClearCLProgram;
-	}
+  /**
+   * Creates a program, with optional source code
+   * 
+   * @param pSourceCode
+   *          optional varargs of source code strings.
+   * @return program
+   */
+  public ClearCLProgram createProgram(final String... pSourceCode)
+  {
+    final ClearCLProgram lClearCLProgram = new ClearCLProgram(mDevice,
+                                                              this,
+                                                              null);
+    for (final String lSourceCode : pSourceCode)
+      lClearCLProgram.addSource(lSourceCode);
 
-	/**
-	 * Creates a program given a list of resources locate relative to a reference
-	 * class.
-	 * 
-	 * @param pClassForRessource
-	 *          reference class to locate resources
-	 * @param pRessourceNames
-	 *          Resource file names (relative to reference class)
-	 * @return program
-	 * @throws IOException
-	 *           if IO problem while accessing resources
-	 */
-	public ClearCLProgram createProgram(final Class<?> pClassForRessource,
-																			final String... pRessourceNames) throws IOException
-	{
-		final ClearCLProgram lClearCLProgram = createProgram();
+    return lClearCLProgram;
+  }
 
-		for (final String lRessourceName : pRessourceNames)
-			lClearCLProgram.addSource(pClassForRessource, lRessourceName);
+  /**
+   * Creates a program given a list of resources locate relative to a reference
+   * class.
+   * 
+   * @param pClassForRessource
+   *          reference class to locate resources
+   * @param pRessourceNames
+   *          Resource file names (relative to reference class)
+   * @return program
+   * @throws IOException
+   *           if IO problem while accessing resources
+   */
+  public ClearCLProgram createProgram(final Class<?> pClassForRessource,
+                                      final String... pRessourceNames) throws IOException
+  {
+    final ClearCLProgram lClearCLProgram = createProgram();
 
-		return lClearCLProgram;
-	}
+    for (final String lRessourceName : pRessourceNames)
+      lClearCLProgram.addSource(pClassForRessource, lRessourceName);
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString()
-	{
-		return String.format(	"ClearCLContext [device=%s]",
-													mDevice.toString());
-	}
+    return lClearCLProgram;
+  }
 
-	/* (non-Javadoc)
-	 * @see clearcl.ClearCLBase#close()
-	 */
-	@Override
-	public void close()
-	{
-		getBackend().releaseContext(getPeerPointer());
-		setPeerPointer(null);
-	}
+  /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString()
+  {
+    return String.format("ClearCLContext [device=%s]",
+                         mDevice.toString());
+  }
+
+  /* (non-Javadoc)
+   * @see clearcl.ClearCLBase#close()
+   */
+  @Override
+  public void close()
+  {
+    getBackend().releaseContext(getPeerPointer());
+    setPeerPointer(null);
+  }
 
 }

@@ -1,20 +1,90 @@
 package clearcl.interfaces;
 
+import java.nio.Buffer;
+
 import clearcl.backend.ClearCLBackendInterface;
+import coremem.ContiguousMemoryInterface;
 import coremem.enums.NativeTypeEnum;
 
+/**
+ *
+ *
+ * @author royer
+ */
 public interface ClearCLImageInterface extends ClearCLMemInterface
 {
 
+  /**
+   * Copies image into CoreMem contiguous memory
+   * 
+   * @param pContiguousMemory
+   *          contiguous memory
+   * @param pBlockingWrite
+   *          true -> blocking call, false -> asynchronous call
+   */
+  void writeTo(ContiguousMemoryInterface pContiguousMemory,
+               boolean pBlockingWrite);
+
+  /**
+   * Copies image into NIO buffer
+   * 
+   * @param pBuffer
+   *          NIO buffer
+   * @param pBlockingWrite
+   *          true -> blocking call, false -> asynchronous call
+   */
+  void writeTo(Buffer pBuffer, boolean pBlockingWrite);
+
+  /**
+   * Copies image from CoreMem contiguous memory
+   * 
+   * @param pContiguousMemory
+   *          contiguous memory
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   */
+  void readFrom(ContiguousMemoryInterface pContiguousMemory,
+                boolean pBlockingRead);
+
+  /**
+   * Copies image into NIO buffer
+   * 
+   * @param pBuffer
+   *          NIO buffer
+   * @param pBlockingRead
+   *          true -> blocking call, false -> asynchronous call
+   */
+  void readFrom(Buffer pBuffer, boolean pBlockingRead);
+
+  /**
+   * Returns backend
+   * 
+   * @return backend
+   */
   public ClearCLBackendInterface getBackend();
-  
+
+  /**
+   * Returns native type
+   * 
+   * @return native type
+   */
   public NativeTypeEnum getNativeType();
 
+  /**
+   * Returns pixel/voxel size in bytes
+   * 
+   * @return pixel/voxel size in bytes
+   */
   public default long getPixelSizeInBytes()
   {
     return getNativeType().getSizeInBytes() * getNumberOfChannels();
   }
 
+  /**
+   * Returns the number of channels in this image
+   * 
+   * @return number of channels
+   */
   public long getNumberOfChannels();
 
   /**
@@ -77,8 +147,5 @@ public interface ClearCLImageInterface extends ClearCLMemInterface
   {
     return getWidth() * getHeight() * getDepth();
   }
-
-
-
 
 }

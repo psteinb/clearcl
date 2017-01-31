@@ -13,7 +13,7 @@ public class ClearCLPeerPointer
   /**
    * Creates a peer pointer from a backend internal pointer-wrapping object.
    * 
-   * @param pPointer
+   * @param pPointer pointer object
    */
   public ClearCLPeerPointer(Object pPointer)
   {

@@ -79,3 +79,75 @@ inline float rngfloat3(unsigned int x,  unsigned int y,  unsigned int z)
 }
 
 
+inline float normal1(unsigned int x)
+{
+  const float u1 = FLT_MIN+rngfloat1(x);
+  const float u2 = rngfloat1(~x);
+ 
+  float normal = native_sqrt(-2.0f * native_log(u1)) * native_sin(2.0f*M_PI * u2);
+  return normal;
+}
+
+inline float normal2(unsigned int x,  unsigned int y)
+{
+  const float u1 = FLT_MIN+rngfloat2(x,y);
+  const float u2 = rngfloat2(~y,~x);
+   
+  float normal = native_sqrt(-2.0f * native_log(u1)) * native_sin(2.0f*M_PI * u2);
+  return normal;
+}
+
+inline float normal3(unsigned int x,  unsigned int y, unsigned int z)
+{
+  const float u1 = FLT_MIN+rngfloat3(x,y,z);
+  const float u2 = rngfloat3(~z,~x,~y);
+
+  float normal = native_sqrt(-2.0f * native_log(u1)) * native_sin(2.0f*M_PI * u2);
+  return normal;
+}
+
+
+inline float anscomb_transform(const float x)
+{
+  return 2.0f*native_sqrt(x+0.375f);
+}
+
+inline float inverse_anscomb_transform(const float x)
+{
+  return 0.25f*(x*x)-0.375f;
+}
+
+inline float poisson1(float m, unsigned int x)
+{
+  const float mean = 2.0f*native_sqrt(m+3.0f/8)-native_recip(4*native_sqrt(m));
+  
+  const float normalvalue = mean + normal1(x);
+  
+  const float poissonvalue = inverse_anscomb_transform(normalvalue);
+  
+  return poissonvalue;
+}
+
+inline float poisson2(float m, unsigned int x, unsigned int y)
+{
+  const float mean = 2.0f*native_sqrt(m+3.0f/8)-native_recip(4*native_sqrt(m));
+  
+  const float normalvalue = mean + normal2(x,y);
+  
+  const float poissonvalue = inverse_anscomb_transform(normalvalue);
+  
+  return poissonvalue;
+}
+
+inline float poisson3(float m, unsigned int x, unsigned int y, unsigned int z)
+{
+  const float mean = 2.0f*native_sqrt(m+3.0f/8)-native_recip(4*native_sqrt(m));
+  
+  const float normalvalue = mean + normal3(x,y,z);
+  
+  const float poissonvalue = inverse_anscomb_transform(normalvalue);
+  
+  return poissonvalue;
+}
+
+

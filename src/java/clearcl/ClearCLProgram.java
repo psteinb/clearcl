@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.nativelibs4java.util.IOUtils;
-
 import clearcl.abs.ClearCLBase;
 import clearcl.enums.BuildStatus;
 import clearcl.exceptions.ClearCLProgramNotBuiltException;
@@ -70,7 +68,7 @@ public class ClearCLProgram extends ClearCLBase
    * in cl files. This method is preferred because it is more resiliant to
    * refactoring.
    * 
-   * @param pReferenceClass
+   * @param pReferenceClass reference class
    */
   public void addIncludesReferenceClass(Class<?> pReferenceClass)
   {
@@ -202,7 +200,7 @@ public class ClearCLProgram extends ClearCLBase
    * Adds an building option for this program. You must rebuild after this call
    * for changes to take effect.
    * 
-   * @param pOption
+   * @param pOption option string
    */
   public void addBuildOption(String pOption)
   {
@@ -223,7 +221,7 @@ public class ClearCLProgram extends ClearCLBase
   /**
    * Returns the device for this program.
    * 
-   * @return
+   * @return device
    */
   public ClearCLDevice getDevice()
   {
@@ -233,13 +231,18 @@ public class ClearCLProgram extends ClearCLBase
   /**
    * Returns the context for this program.
    * 
-   * @return
+   * @return context
    */
   public ClearCLContext getContext()
   {
     return mContext;
   }
 
+  /**
+   * Builds program and logs any errors on the stdout
+   * @return build status
+   * @throws IOException thrown if source code includes cannot be resolved
+   */
   public BuildStatus buildAndLog() throws IOException
   {
     BuildStatus lBuildStatus = build();
@@ -257,7 +260,7 @@ public class ClearCLProgram extends ClearCLBase
    * 
    * @return build status
    * @throws IOException
-   *           if source code includes cannot be resolved
+   *           thrown if source code includes cannot be resolved
    */
   public BuildStatus build() throws IOException
   {
@@ -557,8 +560,6 @@ public class ClearCLProgram extends ClearCLBase
    * Adds all math optimizations option available. Note: this might lead to
    * 'unsafe' floating point behavior, although in practice it is rarely a
    * problem.F You must rebuild after this call for changes to take effect.
-   * 
-   * @param pOption
    */
   public void addBuildOptionAllMathOpt()
   {
