@@ -7,9 +7,29 @@ package clearcl.enums;
  */
 public enum ImageType
 {
-  IMAGE1D, IMAGE2D, IMAGE3D;
+ /**
+  * 1D image type
+  */
+ IMAGE1D,
 
-  public static ImageType fromDimensions(long[] pDimensions)
+ /**
+  * 2D image type
+  */
+ IMAGE2D,
+
+ /**
+  * 3D image type
+  */
+ IMAGE3D;
+
+  /**
+   * Returns the image type from dimensions
+   * 
+   * @param pDimensions
+   *          vararg dimensions
+   * @return image type
+   */
+  public static ImageType fromDimensions(long... pDimensions)
   {
     int lDimension = pDimensions.length;
     if (lDimension == 1)

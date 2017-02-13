@@ -4,13 +4,9 @@ import java.util.concurrent.CountDownLatch;
 
 import com.sun.javafx.application.PlatformImpl;
 
-import clearcl.ClearCLBuffer;
-import clearcl.ClearCLImage;
-import clearcl.enums.ImageType;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.viewer.jfx.PanZoomScene;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -33,6 +29,7 @@ import javafx.stage.Stage;
  *
  * @author royer
  */
+@SuppressWarnings("restriction")
 public class ClearCLImageViewer
 {
 
@@ -44,8 +41,8 @@ public class ClearCLImageViewer
   /**
    * Opens a window showing the image content. View can be panned and zoomed.
    * 
-   * @param pImage
-   * @return
+   * @param pImage imag to view
+   * @return image viewer
    */
   public static ClearCLImageViewer view(ClearCLImageInterface pImage)
   {
@@ -83,7 +80,6 @@ public class ClearCLImageViewer
    * @param pWindowHeight
    *          window height
    */
-  @SuppressWarnings("restriction")
   public ClearCLImageViewer(ClearCLImageInterface pClearCLImage,
                             String pWindowTitle,
                             int pWindowWidth,
@@ -272,9 +268,8 @@ public class ClearCLImageViewer
   }
 
   /**
-   * Returns the render mode property.
-   * 
-   * @return
+   * Sets the render mode property.
+   * @param pRenderMode render mode
    */
   public void setRenderMode(RenderMode pRenderMode)
   {
@@ -310,6 +305,10 @@ public class ClearCLImageViewer
     return mStage.isShowing();
   }
 
+  /**
+   * Returns this  viewer's z slider
+   * @return z slider
+   */
   public Slider getZSlider()
   {
     return mZSlider;

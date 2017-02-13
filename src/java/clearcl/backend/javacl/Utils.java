@@ -33,6 +33,11 @@ import clearcl.backend.BackendUtils;
 import clearcl.backend.SizeOf;
 import clearcl.exceptions.ClearCLUnsupportedException;
 
+/**
+ * Utility class for JavaCL backend
+ *
+ * @author royer
+ */
 public class Utils
 {
 
@@ -42,7 +47,7 @@ public class Utils
    * 
    * @param pDebug
    *          to enable debugging.
-   * @return
+   * @return OpenCL library
    */
   public static OpenCLLibrary initCL(boolean pDebug)
   {
@@ -50,7 +55,8 @@ public class Utils
     {
       String amdAppBase = "/opt/AMDAPP/lib";
       BridJ.addLibraryPath(amdAppBase + "/"
-                           + (Platform.is64Bits() ? "x86_64" : "x86"));
+                           + (Platform.is64Bits() ? "x86_64"
+                                                  : "x86"));
       BridJ.addLibraryPath(amdAppBase);
     }
     boolean needsAdditionalSynchronization = false;
@@ -74,7 +80,10 @@ public class Utils
           BridJ.unregister(OpenCLProbeLibrary.class);
           // BridJ.setNativeLibraryActualName("OpenCLProbe", "OpenCL");
           String alt;
-          if (Platform.is64Bits() && (BridJ.getNativeLibraryFile(alt = "atiocl64") != null || BridJ.getNativeLibraryFile(alt = "amdocl64") != null)
+          if (Platform.is64Bits()
+              && (BridJ.getNativeLibraryFile(alt = "atiocl64") != null
+                  || BridJ.getNativeLibraryFile(alt =
+                                                    "amdocl64") != null)
               || BridJ.getNativeLibraryFile(alt = "atiocl32") != null
               || BridJ.getNativeLibraryFile(alt = "atiocl") != null
               || BridJ.getNativeLibraryFile(alt = "amdocl32") != null
@@ -106,9 +115,11 @@ public class Utils
     if (pDebug)
     {
       List<String> DEBUG_COMPILER_FLAGS;
-      String JAVACL_DEBUG_COMPILER_FLAGS_PROP = "JAVACL_DEBUG_COMPILER_FLAGS";
+      String JAVACL_DEBUG_COMPILER_FLAGS_PROP =
+                                              "JAVACL_DEBUG_COMPILER_FLAGS";
 
-      String debugArgs = System.getenv(JAVACL_DEBUG_COMPILER_FLAGS_PROP);
+      String debugArgs =
+                       System.getenv(JAVACL_DEBUG_COMPILER_FLAGS_PROP);
       if (debugArgs != null)
         DEBUG_COMPILER_FLAGS = Arrays.asList(debugArgs.split(" "));
       else if (Platform.isMacOSX())
@@ -118,18 +129,19 @@ public class Utils
 
       int pid = ProcessUtils.getCurrentProcessId();
       log(Level.INFO,
-          "Debug mode enabled with compiler flags \"" + StringUtils.implode(DEBUG_COMPILER_FLAGS,
-                                                                            " ")
-              + "\" (can be overridden with env. var. JAVACL_DEBUG_COMPILER_FLAGS_PROP)");
+          "Debug mode enabled with compiler flags \""
+                      + StringUtils.implode(DEBUG_COMPILER_FLAGS, " ")
+                      + "\" (can be overridden with env. var. JAVACL_DEBUG_COMPILER_FLAGS_PROP)");
       log(Level.INFO,
-          "You can debug your kernels with GDB using one of the following commands :\n" + "\tsudo gdb --tui --pid="
-              + pid
-              + "\n"
-              + "\tsudo ddd --debugger \"gdb --pid="
-              + pid
-              + "\"\n"
-              + "More info here :\n"
-              + "\thttp://code.google.com/p/javacl/wiki/DebuggingKernels");
+          "You can debug your kernels with GDB using one of the following commands :\n"
+                      + "\tsudo gdb --tui --pid="
+                      + pid
+                      + "\n"
+                      + "\tsudo ddd --debugger \"gdb --pid="
+                      + pid
+                      + "\"\n"
+                      + "More info here :\n"
+                      + "\thttp://code.google.com/p/javacl/wiki/DebuggingKernels");
 
     }
     Class<? extends OpenCLLibrary> libraryClass = OpenCLLibrary.class;
@@ -137,12 +149,13 @@ public class Utils
     {
       try
       {
-        libraryClass = BridJ.subclassWithSynchronizedNativeMethods(libraryClass);
+        libraryClass =
+                     BridJ.subclassWithSynchronizedNativeMethods(libraryClass);
       }
       catch (Throwable ex)
       {
-        throw new RuntimeException("Failed to create a synchronized version of the OpenCL API bindings: " + ex,
-                                   ex);
+        throw new RuntimeException("Failed to create a synchronized version of the OpenCL API bindings: "
+                                   + ex, ex);
       }
     }
     BridJ.register(libraryClass);
@@ -153,9 +166,10 @@ public class Utils
     }
     catch (Throwable ex)
     {
-      throw new RuntimeException("Failed to instantiate library " + libraryClass.getName()
-                                     + ": "
-                                     + ex,
+      throw new RuntimeException("Failed to instantiate library "
+                                 + libraryClass.getName()
+                                 + ": "
+                                 + ex,
                                  ex);
     }
   }
@@ -172,6 +186,9 @@ public class Utils
 
   /**
    * Returns the value of the device info parameter with the given name
+   * 
+   * @param pOpenCLLibrary
+   *          OpenCL library access
    *
    * @param device
    *          The device
@@ -188,7 +205,9 @@ public class Utils
 
   /**
    * Returns the values of the device info parameter with the given name
-   *
+   * 
+   * @param pOpenCLLibrary
+   *          OpenCL library access
    * @param device
    *          The device
    * @param paramName
@@ -205,7 +224,8 @@ public class Utils
     Pointer<Integer> lValues = Pointer.allocateInts(numValues);
     BackendUtils.checkOpenCLError(pOpenCLLibrary.clGetDeviceInfo(device,
                                                                  paramName,
-                                                                 SizeOf.cl_int * numValues,
+                                                                 SizeOf.cl_int
+                                                                            * numValues,
                                                                  lValues,
                                                                  null));
     return lValues.toArray();
@@ -213,7 +233,9 @@ public class Utils
 
   /**
    * Returns the value of the device info parameter with the given name
-   *
+   * 
+   * @param pOpenCLLibrary
+   *          OpenCL library access
    * @param device
    *          The device
    * @param paramName
@@ -229,7 +251,9 @@ public class Utils
 
   /**
    * Returns the values of the device info parameter with the given name
-   *
+   * 
+   * @param pOpenCLLibrary
+   *          OpenCL library access
    * @param device
    *          The device
    * @param paramName
@@ -246,7 +270,8 @@ public class Utils
     Pointer<Long> lValues = Pointer.allocateLongs(numValues);
     BackendUtils.checkOpenCLError(pOpenCLLibrary.clGetDeviceInfo(device,
                                                                  paramName,
-                                                                 SizeOf.cl_long * numValues,
+                                                                 SizeOf.cl_long
+                                                                            * numValues,
                                                                  lValues,
                                                                  null));
     return lValues.toArray();
@@ -254,7 +279,9 @@ public class Utils
 
   /**
    * Returns the value of the device info parameter with the given name
-   *
+   * 
+   * @param pOpenCLLibrary
+   *          OpenCL library access
    * @param pDevice
    *          The device
    * @param pParamName
@@ -288,7 +315,9 @@ public class Utils
 
   /**
    * Returns the value of the platform info parameter with the given name
-   *
+   * 
+   * @param pOpenCLLibrary
+   *          OpenCL library access
    * @param platform
    *          The platform
    * @param paramName
@@ -322,7 +351,9 @@ public class Utils
 
   /**
    * Returns the value of the device info parameter with the given name
-   *
+   * 
+   * @param pOpenCLLibrary
+   *          OpenCL library access
    * @param device
    *          The device
    * @param paramName
@@ -338,7 +369,9 @@ public class Utils
 
   /**
    * Returns the values of the device info parameter with the given name
-   *
+   * 
+   * @param pOpenCLLibrary
+   *          OpenCL library access
    * @param device
    *          The device
    * @param paramName
@@ -355,10 +388,12 @@ public class Utils
   {
     // The size of the returned data has to depend on
     // the size of a size_t, which is handled here
-    Pointer<Byte> lBuffer = Pointer.allocateBytes(numValues * SizeOf.size_t);
+    Pointer<Byte> lBuffer = Pointer.allocateBytes(numValues
+                                                  * SizeOf.size_t);
     BackendUtils.checkOpenCLError(pOpenCLLibrary.clGetDeviceInfo(device,
                                                                  paramName,
-                                                                 SizeOf.size_t * numValues,
+                                                                 SizeOf.size_t
+                                                                            * numValues,
                                                                  lBuffer,
                                                                  null));
     long values[] = new long[numValues];
@@ -379,6 +414,17 @@ public class Utils
     return values;
   }
 
+  /**
+   * Returns boolean property for device
+   * 
+   * @param pOpenCLLibrary
+   *          OpenCL library access
+   * @param pPointer
+   *          device pointer
+   * @param pParam
+   *          parameter
+   * @return boolean
+   */
   public static boolean getBoolean(OpenCLLibrary pOpenCLLibrary,
                                    OpenCLLibrary.cl_device_id pPointer,
                                    int pParam)
@@ -386,10 +432,18 @@ public class Utils
     return getInt(pOpenCLLibrary, pPointer, pParam) > 0;
   }
 
+  /**
+   * Converts device pointers from peer pointers to backend specific pointers,
+   * 
+   * @param pDevicePointers
+   *          device pointers
+   * @return array of backend specific device pointers
+   */
   public static Pointer<OpenCLLibrary.cl_device_id> convertDevicePointers(ClearCLPeerPointer... pDevicePointers)
   {
-    Pointer<OpenCLLibrary.cl_device_id> lDevicesArrayPointer = Pointer.allocateArray(OpenCLLibrary.cl_device_id.class,
-                                                                                     pDevicePointers.length);
+    Pointer<OpenCLLibrary.cl_device_id> lDevicesArrayPointer =
+                                                             Pointer.allocateArray(OpenCLLibrary.cl_device_id.class,
+                                                                                   pDevicePointers.length);
 
     for (int i = 0; i < pDevicePointers.length; i++)
       lDevicesArrayPointer.set(i,
@@ -399,19 +453,28 @@ public class Utils
 
   }
 
+  /**
+   * 
+   * @param pOpenCLLibrary  OpenCL library access
+   * @param pPlatform platform
+   * @param pContextPropertiesMap context properties map
+   * @return context properties
+   */
   public static long[] getContextProps(OpenCLLibrary pOpenCLLibrary,
                                        cl_platform_id pPlatform,
-                                       Map<ContextProperties, Object> contextProperties)
+                                       Map<ContextProperties, Object> pContextPropertiesMap)
   {
-    int nContextProperties = contextProperties == null ? 0
-                                                      : contextProperties.size();
-    final long[] properties = new long[(nContextProperties + 1) * 2 + 1];
+    int nContextProperties =
+                           pContextPropertiesMap == null ? 0
+                                                     : pContextPropertiesMap.size();
+    final long[] properties = new long[(nContextProperties + 1) * 2
+                                       + 1];
     properties[0] = CL_CONTEXT_PLATFORM;
     properties[1] = pPlatform.getPeer();
     int iProp = 2;
     if (nContextProperties != 0)
     {
-      for (Map.Entry<ContextProperties, Object> e : contextProperties.entrySet())
+      for (Map.Entry<ContextProperties, Object> e : pContextPropertiesMap.entrySet())
       {
         // if (!(v instanceof Number)) throw new
         // IllegalArgumentException("Invalid context property value for '" +
@@ -421,9 +484,10 @@ public class Utils
         if (v instanceof Number)
           properties[iProp++] = ((Number) v).longValue();
         else if (v instanceof Pointer)
-          properties[iProp++] = ((Pointer) v).getPeer();
+          properties[iProp++] = ((Pointer<?>) v).getPeer();
         else
-          throw new IllegalArgumentException("Cannot convert value " + v
+          throw new IllegalArgumentException("Cannot convert value "
+                                             + v
                                              + " to a context property value !");
       }
     }
@@ -431,9 +495,15 @@ public class Utils
     return properties;
   }
 
-  public static void checkDirectNIOBuffer(ClearCLPeerPointer pHostMemPointer)
+  /**
+   * Checks if a NIO buffer is direct - which is a requirement for this backend.
+   * 
+   * @param pPeerPointer
+   *          pointer to check
+   */
+  public static void checkDirectNIOBuffer(ClearCLPeerPointer pPeerPointer)
   {
-    Object lPointer = pHostMemPointer.getPointer();
+    Object lPointer = pPeerPointer.getPointer();
     if (!(lPointer instanceof Buffer))
       return;
 

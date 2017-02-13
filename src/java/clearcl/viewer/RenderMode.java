@@ -7,5 +7,23 @@ package clearcl.viewer;
  */
 public enum RenderMode
 {
-  Slice, MaxProjection, AvgProjection, ColorProjection
+  /**
+   * Slice rendering (single plane)
+   */
+  Slice, 
+  
+  /**
+   * Max projection rendering
+   */
+  MaxProjection, 
+  
+  /**
+   * Average projection rendering
+   */
+  AvgProjection, 
+  
+  /**
+   * Colorprojection rendering
+   */
+  ColorProjection
 }

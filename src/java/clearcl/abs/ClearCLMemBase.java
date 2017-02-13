@@ -59,6 +59,7 @@ public abstract class ClearCLMemBase extends ClearCLBase
    * @param pListener
    *          listener
    */
+  @Override
   public void addListener(ClearCLMemChangeListener pListener)
   {
     mListener.add(pListener);
@@ -87,6 +88,7 @@ public abstract class ClearCLMemBase extends ClearCLBase
     }
   }
 
+  @Override
   public MemAllocMode getMemAllocMode()
   {
     return mMemAllocMode;
@@ -108,6 +110,7 @@ public abstract class ClearCLMemBase extends ClearCLBase
    * 
    * @return kernel access type
    */
+  @Override
   public KernelAccessType getKernelAccessType()
   {
     return mKernelAccessType;

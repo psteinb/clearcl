@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.bridj.Pointer;
 import org.bridj.Pointer.StringType;
-import org.jocl.CL;
 import org.bridj.SizeT;
 
 import com.nativelibs4java.opencl.CLPlatform.ContextProperties;
@@ -39,6 +38,11 @@ import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.util.Size;
 
+/**
+ * CLearCL JOCL backend. Uses the JavaCL library to access OpenCL functions. 
+ *
+ * @author royer
+ */
 public class ClearCLBackendJavaCL extends ClearCLBackendBase
                                   implements ClearCLBackendInterface
 {
@@ -48,11 +52,18 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase
   private ThreadLocal<Pointer<?>> mTempPointerThreadLocal =
                                                           new ThreadLocal<>();
 
+  /**
+   * Instanciates a JavaCL backend with no debug functionality 
+   */
   public ClearCLBackendJavaCL()
   {
     this(false);
   }
 
+  /**
+   * Instanciates a JavaCL backend with debug functionality 
+   * @param pDebug true -> debug theoretically possible using GDB on certain platforms
+   */
   public ClearCLBackendJavaCL(boolean pDebug)
   {
     super();
@@ -309,7 +320,6 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase
                                                 boolean pInOrder)
   {
     return BackendUtils.checkExceptions(() -> {
-      @SuppressWarnings("deprecation")
       Pointer<Integer> lErrorCode = Pointer.allocateInt();
 
       OpenCLLibrary.cl_command_queue commandQueue =
@@ -646,6 +656,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase
     });
   }
 
+  @SuppressWarnings({ "deprecation", "unchecked" })
   @Override
   public void setKernelArgument(ClearCLPeerPointer pKernelPeerPointer,
                                 int pIndex,
@@ -657,6 +668,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase
 
       if (lTempPointer == null)
       {
+        
         lTempPointer = Pointer.allocateBytes(1024)
                               .withoutValidityInformation();
         mTempPointerThreadLocal.set(lTempPointer);
@@ -774,12 +786,6 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase
 
   }
 
-  /**
-   * @param pQueuePointer
-   * @param pKernelPointer
-   * @param pNumberOfDimension
-   * @param pOffsets
-   */
   @Override
   public void enqueueKernelExecution(ClearCLPeerPointer pQueuePointer,
                                      ClearCLPeerPointer pKernelPointer,
@@ -903,7 +909,7 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase
                                                                             0,
                                                                             0,
                                                                             0,
-                                                                            (Pointer) pHostMemPointer.getPointer(),
+                                                                            (Pointer<?>) pHostMemPointer.getPointer(),
                                                                             0,
                                                                             null,
                                                                             null));

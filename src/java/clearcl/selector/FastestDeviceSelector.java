@@ -18,8 +18,16 @@ import clearcl.util.StringUtils;
 public class FastestDeviceSelector implements DeviceSelector
 {
 
+  /**
+   * Device selector that uses a image centric benchmark to determine the
+   * fastest device
+   */
   public static FastestDeviceSelector FastestForImages =
                                                        new FastestDeviceSelector(BenchmarkTest.Image);
+  /**
+   * Device selector that uses a buffer centric benchmark to determine the
+   * fastest device
+   */
   public static FastestDeviceSelector FastestForBuffers =
                                                         new FastestDeviceSelector(BenchmarkTest.Buffer);
 

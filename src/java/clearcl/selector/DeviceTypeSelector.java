@@ -13,9 +13,23 @@ import clearcl.enums.DeviceType;
 public class DeviceTypeSelector implements DeviceSelector
 {
 
-  public static DeviceTypeSelector GPU = new DeviceTypeSelector(DeviceType.GPU);
-  public static DeviceTypeSelector CPU = new DeviceTypeSelector(DeviceType.CPU);
-  public static DeviceTypeSelector OTHER = new DeviceTypeSelector(DeviceType.OTHER);
+  /**
+   * GPU only device selector
+   */
+  public static DeviceTypeSelector GPU =
+                                       new DeviceTypeSelector(DeviceType.GPU);
+
+  /**
+   * CPU only device selector
+   */
+  public static DeviceTypeSelector CPU =
+                                       new DeviceTypeSelector(DeviceType.CPU);
+
+  /**
+   * Non-CPU and non-GPU device selector
+   */
+  public static DeviceTypeSelector OTHER =
+                                         new DeviceTypeSelector(DeviceType.OTHER);
 
   DeviceType mDeviceType;
 

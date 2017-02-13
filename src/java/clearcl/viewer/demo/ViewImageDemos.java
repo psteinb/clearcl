@@ -11,16 +11,28 @@ import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
 import clearcl.backend.ClearCLBackendInterface;
 import clearcl.backend.ClearCLBackends;
-import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.ocllib.OCLlib;
 import clearcl.test.ClearCLBasicTests;
 import clearcl.viewer.ClearCLImageViewer;
 
+/**
+ * View image demos
+ *
+ * @author royer
+ */
 public class ViewImageDemos
 {
 
+  /**
+   * Demos 2D image viewing.
+   * 
+   * @throws InterruptedException
+   *           NA
+   * @throws IOException
+   *           NA
+   */
   @Test
   public void demoViewImage2D() throws InterruptedException,
                                 IOException
@@ -74,6 +86,14 @@ public class ViewImageDemos
 
   }
 
+  /**
+   * Demos 3D image viewing.
+   * 
+   * @throws InterruptedException
+   *           NA
+   * @throws IOException
+   *           NA
+   */
   @Test
   public void demoViewImage3D() throws InterruptedException,
                                 IOException

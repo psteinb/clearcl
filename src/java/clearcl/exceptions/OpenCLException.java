@@ -1,7 +1,7 @@
 package clearcl.exceptions;
 
 /**
- * Standard ClearCL exception. Wraps internal backend exception.
+ * Exceptions for OpenCL error codes.
  *
  * @author royer
  */
@@ -14,8 +14,8 @@ public class OpenCLException extends ClearCLException
   /**
    * Constructs a ClearCL exception from a message and a cause.
    * 
-   * @param pMessage
-   * @param pCause
+   * @param pOpenCLErrorCode
+   *          OpenCL error code.
    */
   public OpenCLException(int pOpenCLErrorCode)
   {
@@ -25,6 +25,13 @@ public class OpenCLException extends ClearCLException
     mOpenCLErrorCode = pOpenCLErrorCode;
   }
 
+  /**
+   * Returns OpenCL error string for OpenCL error code.
+   * 
+   * @param pOpenCLErrorCode
+   *          OpenCL error code
+   * @return error string
+   */
   public static String getErrorString(int pOpenCLErrorCode)
   {
     switch (pOpenCLErrorCode)
@@ -129,12 +136,20 @@ public class OpenCLException extends ClearCLException
     }
   }
 
+  /**
+   * Throw exception if the error code corresponds to an error
+   */
   public void throwIfError()
   {
     if (mOpenCLErrorCode != 0)
       throw this;
   }
 
+  /**
+   * Returns OpenCL error code
+   * 
+   * @return error code
+   */
   public int getErrorCode()
   {
     return mOpenCLErrorCode;

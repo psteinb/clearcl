@@ -5,8 +5,8 @@ package clearcl.enums;
  *
  * @author royer
  */
+@SuppressWarnings("javadoc")
 public enum BuildStatus
 {
   None, Error, Success, InProgress;
-
 }

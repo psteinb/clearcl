@@ -14,9 +14,20 @@ import clearcl.selector.DeviceTypeSelector;
 import clearcl.selector.FastestDeviceSelector;
 import clearcl.selector.GlobalMemorySelector;
 
+/**
+ * Test 'best device' functionality
+ *
+ * @author royer
+ */
 public class ClearCLBestDeviceTests
 {
 
+  /**
+   * Test with JOCL backend
+   * 
+   * @throws Exception
+   *           NA
+   */
   @Test
   public void testBackendJOCL() throws Exception
   {
@@ -26,10 +37,17 @@ public class ClearCLBestDeviceTests
 
   }
 
+  /**
+   * Test with JavaCL backend
+   * 
+   * @throws Exception
+   *           NA
+   */
   @Test
   public void testBackenJavaCL() throws Exception
   {
-    ClearCLBackendJavaCL lClearCLBackendJavaCL = new ClearCLBackendJavaCL();
+    ClearCLBackendJavaCL lClearCLBackendJavaCL =
+                                               new ClearCLBackendJavaCL();
 
     testWithBackend(lClearCLBackendJavaCL);
 
@@ -41,36 +59,40 @@ public class ClearCLBestDeviceTests
     {
 
       {
-        ClearCLDevice lClearClDevice = lClearCL.getBestDevice(DeviceTypeSelector.GPU,
-                                                              BadDeviceSelector.NotIntegratedIntel,
-                                                              GlobalMemorySelector.MAX);
+        ClearCLDevice lClearClDevice =
+                                     lClearCL.getBestDevice(DeviceTypeSelector.GPU,
+                                                            BadDeviceSelector.NotIntegratedIntel,
+                                                            GlobalMemorySelector.MAX);
 
-        //System.out.println(lClearClDevice);
+        // System.out.println(lClearClDevice);
         assertTrue(lClearClDevice != null);
       }
 
       {
-        ClearCLDevice lClearClDevice = lClearCL.getBestDevice(DeviceTypeSelector.GPU,
-                                                              BadDeviceSelector.NotIntegratedIntel,
-                                                              FastestDeviceSelector.FastestForImages);
+        ClearCLDevice lClearClDevice =
+                                     lClearCL.getBestDevice(DeviceTypeSelector.GPU,
+                                                            BadDeviceSelector.NotIntegratedIntel,
+                                                            FastestDeviceSelector.FastestForImages);
 
-        //System.out.println(lClearClDevice);
+        // System.out.println(lClearClDevice);
         assertTrue(lClearClDevice != null);
       }
-      
-      {
-        ClearCLDevice lClearClDevice = lClearCL.getBestDevice(DeviceTypeSelector.GPU,
-                                                              FastestDeviceSelector.FastestForImages);
 
-        //System.out.println(lClearClDevice);
+      {
+        ClearCLDevice lClearClDevice =
+                                     lClearCL.getBestDevice(DeviceTypeSelector.GPU,
+                                                            FastestDeviceSelector.FastestForImages);
+
+        // System.out.println(lClearClDevice);
         assertTrue(lClearClDevice != null);
       }
-      
-      {
-        ClearCLDevice lClearClDevice = lClearCL.getBestDevice(DeviceTypeSelector.GPU,
-                                                              FastestDeviceSelector.FastestForBuffers);
 
-        //System.out.println(lClearClDevice);
+      {
+        ClearCLDevice lClearClDevice =
+                                     lClearCL.getBestDevice(DeviceTypeSelector.GPU,
+                                                            FastestDeviceSelector.FastestForBuffers);
+
+        // System.out.println(lClearClDevice);
         assertTrue(lClearClDevice != null);
       }
     }

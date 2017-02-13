@@ -9,6 +9,14 @@ package clearcl.exceptions;
 public class ClearCLHostAccessException extends ClearCLException
 {
 
+  private static final long serialVersionUID = 1L;
+
+  /**
+   * Instanciates an exception given a m,essage
+   * 
+   * @param pMessage
+   *          message
+   */
   public ClearCLHostAccessException(String pMessage)
   {
     super(pMessage);

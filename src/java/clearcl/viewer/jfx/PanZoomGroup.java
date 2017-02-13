@@ -16,26 +16,28 @@ import javafx.scene.transform.Translate;
  */
 public class PanZoomGroup extends Group
 {
-  private Scene mScene;
   private Parent mRoot;
   private volatile double mPressedX, mPressedY;
   private Scale mScale;
   private Translate mTranslate;
   private Point2D mSceneCenterInRoot;
 
-
   /**
-   * T
+   * Instanciates a pan-zoom group.
    * 
    * @param pRoot
+   *          root node
    * @param pWidth
+   *          width
    * @param pHeight
-   * @param pFill
+   *          height
+   * @param pFillPaint
+   *          fill paint
    */
   public PanZoomGroup(Parent pRoot,
                       double pWidth,
                       double pHeight,
-                      Paint pFill)
+                      Paint pFillPaint)
   {
     super(pRoot);
     mRoot = pRoot;
@@ -45,13 +47,17 @@ public class PanZoomGroup extends Group
     mRoot.getTransforms().add(mScale);
     mRoot.getTransforms().add(mTranslate);
 
-
   }
-  
+
+  /**
+   * Initializes this scene
+   * 
+   * @param pScene
+   *          scene
+   */
   public void init(Scene pScene)
   {
-    mScene = pScene;
-    
+
     setOnMousePressed((event) -> {
 
       if (event.getButton() == MouseButton.PRIMARY)
@@ -87,11 +93,13 @@ public class PanZoomGroup extends Group
             && lMouseY >= 10
             && lMouseY <= lSceneHeight - 11)
         {
-          Point2D lRootNodePoint = mRoot.sceneToLocal(lMouseX,
-                                                      lMouseY);
+          Point2D lRootNodePoint =
+                                 mRoot.sceneToLocal(lMouseX, lMouseY);
 
-          double lDeltaX = mTranslate.getX() + (lRootNodePoint.getX() - mPressedX);
-          double lDeltaY = mTranslate.getY() + (lRootNodePoint.getY() - mPressedY);
+          double lDeltaX = mTranslate.getX()
+                           + (lRootNodePoint.getX() - mPressedX);
+          double lDeltaY = mTranslate.getY()
+                           + (lRootNodePoint.getY() - mPressedY);
 
           mTranslate.setX(lDeltaX);
           mTranslate.setY(lDeltaY);
@@ -117,14 +125,14 @@ public class PanZoomGroup extends Group
     });
 
     getScene().widthProperty().addListener((obs, o, n) -> {
-      
-      scaleScene(Math.sqrt(n.doubleValue()/o.doubleValue()));
+
+      scaleScene(Math.sqrt(n.doubleValue() / o.doubleValue()));
       resetZoomPivot();
     });
 
     getScene().heightProperty().addListener((obs, o, n) -> {
-      
-      scaleScene(Math.sqrt(n.doubleValue()/o.doubleValue()));
+
+      scaleScene(Math.sqrt(n.doubleValue() / o.doubleValue()));
       resetZoomPivot();
     });
 
@@ -149,6 +157,5 @@ public class PanZoomGroup extends Group
     mScale.setPivotX(lSceneWidth / 2);
     mScale.setPivotY(lSceneHeight / 2);/**/
   }
-
 
 }

@@ -13,17 +13,15 @@ import clearcl.ClearCLHostImageBuffer;
 import clearcl.ClearCLImage;
 import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
-import clearcl.enums.BuildStatus;
 import clearcl.enums.HostAccessType;
-import clearcl.enums.ImageType;
 import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.ClearCLUnsupportedException;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.ocllib.OCLlib;
 import clearcl.ops.MinMax;
-import clearcl.util.Region2;
 import clearcl.util.ElapsedTime;
+import clearcl.util.Region2;
 import coremem.ContiguousMemoryInterface;
 import coremem.enums.NativeTypeEnum;
 import javafx.application.Platform;
@@ -39,7 +37,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.Background;
@@ -55,7 +52,7 @@ import javafx.scene.paint.Color;
  */
 public class ClearCLImagePanel extends StackPane
 {
-  private static final float cSmoothingFactor = 0.99f;
+  private static final float cSmoothingFactor = 0.2f;
 
   private Canvas mCanvas;
   private GraphicsContext mGraphicsContext2D;
@@ -86,7 +83,7 @@ public class ClearCLImagePanel extends StackPane
   /**
    * Creates a panel for a given ClearCL image.
    * 
-   * @param pClearCLImage
+   * @param pClearCLImage image
    */
   public ClearCLImagePanel(ClearCLImageInterface pClearCLImage)
   {
@@ -114,8 +111,7 @@ public class ClearCLImagePanel extends StackPane
                                         "render/render.cl");
 
       mProgram.addBuildOptionAllMathOpt();
-
-      BuildStatus lBuildStatus = mProgram.buildAndLog();
+      mProgram.buildAndLog();
 
       if (pClearCLImage.getDimension() == 1)
       {
@@ -211,11 +207,8 @@ public class ClearCLImagePanel extends StackPane
         if (mAuto.get() || mTrueMin == null)
         {
           float[] lMinMax = mMinMax.minmax(mClearCLImage, 32);
-          mTrueMin = lMinMax[0];
-          mTrueMax = lMinMax[1];
-
-          // if(mTrueMin!=0 || mTrueMax!=0)
-          // System.out.format("min=%f, max=%f \n", mTrueMin, mTrueMax);
+          mTrueMin = (1-cSmoothingFactor)*lMinMax[0]+ cSmoothingFactor*mTrueMin;
+          mTrueMax = (1-cSmoothingFactor)*lMinMax[1]+ cSmoothingFactor*mTrueMax;
 
           lMin = mTrueMin;
           lMax = mTrueMax;
@@ -341,31 +334,55 @@ public class ClearCLImagePanel extends StackPane
     }
   }
 
+  /**
+   * Returns auto property
+   * @return auto property
+   */
   public BooleanProperty getAutoProperty()
   {
     return mAuto;
   }
 
+  /**
+   * Returns min property
+   * @return min property
+   */
   public FloatProperty getMinProperty()
   {
     return mMin;
   }
 
+  /**
+   * Returns max property
+   * @return max property
+   */
   public FloatProperty getMaxProperty()
   {
     return mMax;
   }
 
+  /**
+   * Returns gamma property
+   * @return gamma property
+   */
   public FloatProperty getGammaProperty()
   {
     return mGamma;
   }
 
+  /**
+   * Returns z property
+   * @return z property
+   */
   public IntegerProperty getZProperty()
   {
     return mZ;
   }
 
+  /**
+   * Returns render mode property
+   * @return render mode property
+   */
   public ObjectProperty<RenderMode> getRenderModeProperty()
   {
     return mRenderMode;

@@ -27,7 +27,7 @@ public interface ClearCLBackendInterface
   /**
    * Returns the number of OpenCL platforms available
    * 
-   * @return
+   * @return number of platforms
    */
   int getNumberOfPlatforms();
 
@@ -248,12 +248,8 @@ public interface ClearCLBackendInterface
    *          image channel order
    * @param pImageChannelDataType
    *          image channel data type
-   * @param pWidth
-   *          width
-   * @param pHeight
-   *          height
-   * @param pDepth
-   *          depth
+   * @param pDimensions
+   *          vararg of dimensions (width,height,depth,...)
    * @return image peer pointer
    */
   ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pDevicePointer,
@@ -274,7 +270,7 @@ public interface ClearCLBackendInterface
    *          context peer pointer
    * @param pSourceCode
    *          list of source code strings
-   * @return
+   * @return program peer pointer
    */
   ClearCLPeerPointer getProgramPeerPointer(ClearCLPeerPointer pContextPeerPointer,
                                            String... pSourceCode);
@@ -555,7 +551,7 @@ public interface ClearCLBackendInterface
   /**
    * Enqueues read from image region.
    * 
-   * @param pQueuePointer
+   * @param pQueuePeerPointer
    *          queue peer pointer
    * @param pImagePeerPointer
    *          image peer pointer

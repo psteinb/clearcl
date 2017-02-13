@@ -6,18 +6,23 @@ import org.junit.Test;
 
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 
+/**
+ *
+ *
+ * @author royer
+ */
 public class ClearCLBackendJOCLTests
 {
 
+  /**
+   * Basic test
+   */
   @Test
   public void test()
   {
     ClearCLBackendJOCL lClearCLBackendJOCL = new ClearCLBackendJOCL();
 
-    //System.out.println(lClearCLBackendJOCL.getNumberOfPlatforms());
-    assertTrue(lClearCLBackendJOCL.getNumberOfPlatforms() > 0);
-
-    
+    assertTrue(lClearCLBackendJOCL.getNumberOfPlatforms() > 0);    
   }
 
 }

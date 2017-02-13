@@ -3,13 +3,11 @@ package clearcl.ops;
 import java.io.IOException;
 
 import clearcl.ClearCLBuffer;
-import clearcl.ClearCLContext;
 import clearcl.ClearCLHostImageBuffer;
 import clearcl.ClearCLImage;
 import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
 import clearcl.ClearCLQueue;
-import clearcl.enums.BuildStatus;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.KernelAccessType;
 import clearcl.interfaces.ClearCLImageInterface;
@@ -17,6 +15,11 @@ import clearcl.ocllib.OCLlib;
 import coremem.buffers.ContiguousBuffer;
 import coremem.enums.NativeTypeEnum;
 
+/**
+ * Computes the min max values of an image of buffer.
+ *
+ * @author royer
+ */
 public class MinMax extends OpsBase
 {
 
@@ -25,13 +28,21 @@ public class MinMax extends OpsBase
   private ClearCLKernel mMinKernelBufferF, mMinKernelImage1F,
       mMinKernelImage2F, mMinKernelImage3F;
 
+  /**
+   * Instanciates a MinMax object given a queue.
+   * 
+   * @param pClearCLQueue
+   *          queue
+   * @throws IOException
+   *           thrown if kernels canot be read.
+   */
   public MinMax(ClearCLQueue pClearCLQueue) throws IOException
   {
     super(pClearCLQueue);
 
     ClearCLProgram lMinMaxProgram =
-                                      getClearCLContext().createProgram(OCLlib.class,
-                                                                        "reduction/reductions.cl");
+                                  getClearCLContext().createProgram(OCLlib.class,
+                                                                    "reduction/reductions.cl");
     lMinMaxProgram.addBuildOptionAllMathOpt();
     lMinMaxProgram.buildAndLog();
 
@@ -45,18 +56,35 @@ public class MinMax extends OpsBase
                       lMinMaxProgram.createKernel("reduce_min_image_3df");
   }
 
-  public float[] minmax(ClearCLImageInterface pClearCLImageInterface,
+  /**
+   * Computes the min max of an image or buffer using a two step reduction
+   * scheme.
+   * 
+   * @param pClearCLImage
+   *          image
+   * @param pReduction
+   *          reduction factor
+   * @return {min,max} float array
+   */
+  public float[] minmax(ClearCLImageInterface pClearCLImage,
                         int pReduction)
   {
-    if (pClearCLImageInterface instanceof ClearCLBuffer)
-      return minmax((ClearCLBuffer) pClearCLImageInterface,
-                    pReduction);
-    else if (pClearCLImageInterface instanceof ClearCLImage)
-      return minmax((ClearCLImage) pClearCLImageInterface,
-                    pReduction);
+    if (pClearCLImage instanceof ClearCLBuffer)
+      return minmax((ClearCLBuffer) pClearCLImage, pReduction);
+    else if (pClearCLImage instanceof ClearCLImage)
+      return minmax((ClearCLImage) pClearCLImage, pReduction);
     return null;
   }
 
+  /**
+   * Computes the min max of an image using a two step reduction scheme.
+   * 
+   * @param pBuffer
+   *          buffer
+   * @param lReduction
+   *          reduction factor
+   * @return {min,max} float array
+   */
   public float[] minmax(ClearCLBuffer pBuffer, int lReduction)
   {
     if (mScratchBuffer == null
@@ -101,6 +129,15 @@ public class MinMax extends OpsBase
     { lMin, lMax };
   }
 
+  /**
+   * Computes the min max of an image using a two step reduction scheme.
+   * 
+   * @param pImage
+   *          image
+   * @param lReduction
+   *          reduction factor
+   * @return {min,max} float array
+   */
   public float[] minmax(ClearCLImage pImage, int lReduction)
   {
 
@@ -162,6 +199,9 @@ public class MinMax extends OpsBase
       lMin = Math.min(lMin, lMinValue);
       float lMaxValue = lContiguousBuffer.readFloat();
       lMax = Math.max(lMax, lMaxValue);
+
+      if (Float.isInfinite(lMaxValue))
+        System.err.println("INFINITE VALUE!!!");
       // System.out.format("min=%f, max=%f \n",lMin,lMax);
     }
 

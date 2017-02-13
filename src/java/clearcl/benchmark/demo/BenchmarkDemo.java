@@ -14,9 +14,20 @@ import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.benchmark.Benchmark;
 import clearcl.enums.BenchmarkTest;
 
+/**
+ * Bencmark demo
+ *
+ * @author royer
+ */
 public class BenchmarkDemo
 {
 
+  /**
+   * Benchmark demo
+   * 
+   * @throws Exception
+   *           NA
+   */
   @Test
   public void demo() throws Exception
   {

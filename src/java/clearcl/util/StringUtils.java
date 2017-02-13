@@ -8,6 +8,11 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Scanner;
 
+/**
+ * String Utils for ClearCL
+ *
+ * @author royer
+ */
 public class StringUtils
 {
   /**
@@ -20,6 +25,7 @@ public class StringUtils
    *          file
    * @return String
    * @throws IOException
+   *           if file cannot be read.
    */
   public static final String readFileToString(File pFile) throws IOException
   {
@@ -54,8 +60,8 @@ public class StringUtils
    *          file
    * @param pString
    *          string
-   * @return
    * @throws IOException
+   *           if file cannot be writen
    */
   public static final void writeStringToFile(File pFile,
                                              String pString) throws IOException
@@ -67,6 +73,15 @@ public class StringUtils
     }
   }
 
+  /**
+   * Writes astream to a string.
+   * 
+   * @param pResourceAsStream
+   *          stream
+   * @param pCharSetName
+   *          charset
+   * @return string
+   */
   public static String streamToString(InputStream pResourceAsStream,
                                       String pCharSetName)
   {

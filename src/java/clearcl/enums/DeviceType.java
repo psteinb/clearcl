@@ -5,6 +5,7 @@ package clearcl.enums;
  *
  * @author royer
  */
+@SuppressWarnings("javadoc")
 public enum DeviceType
 {
  CPU, GPU, OTHER;

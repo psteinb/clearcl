@@ -12,13 +12,25 @@ import clearcl.ClearCLDevice;
 public class BadDeviceSelector implements DeviceSelector
 {
 
-  public static BadDeviceSelector NotIntegratedIntel = new BadDeviceSelector().addName("HD Graphics")
-                                                                              .addName("Iris Graphics")
-                                                                              .addName("Iris Pro Graphics");
+  /**
+   * Selects out all integrated Intel devices
+   */
+  public static BadDeviceSelector NotIntegratedIntel =
+                                                     new BadDeviceSelector().addName("HD Graphics")
+                                                                            .addName("Iris Graphics")
+                                                                            .addName("Iris Pro Graphics");
 
-  public static BadDeviceSelector NotSlowIntegratedIntel = new BadDeviceSelector().addName("HD Graphics");
+  /**
+   * Selects out all known slow integrated Intel devices
+   */
+  public static BadDeviceSelector NotSlowIntegratedIntel =
+                                                         new BadDeviceSelector().addName("HD Graphics");
 
-  public static BadDeviceSelector NotIntegratedIntelHD = new BadDeviceSelector().addName("HD Graphics");
+  /**
+   * Selects out all HD integrated Intel devices
+   */
+  public static BadDeviceSelector NotIntegratedIntelHD =
+                                                       new BadDeviceSelector().addName("HD Graphics");
 
   private ArrayList<String> mBadDeviceNamesList = new ArrayList<>();
 
@@ -34,6 +46,13 @@ public class BadDeviceSelector implements DeviceSelector
     super();
   }
 
+  /**
+   * Adds a name to te list of bad devices.
+   * 
+   * @param pName
+   *          device name
+   * @return this bad device selector
+   */
   public BadDeviceSelector addName(String pName)
   {
     mBadDeviceNamesList.add(pName);

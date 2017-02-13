@@ -345,6 +345,7 @@ public class ClearCLImage extends ClearCLMemBase implements
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
    */
+  @Override
   public void writeTo(ContiguousMemoryInterface pContiguousMemory,
                       boolean pBlockingRead)
   {

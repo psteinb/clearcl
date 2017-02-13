@@ -7,6 +7,7 @@ import coremem.enums.NativeTypeEnum;
  *
  * @author royer
  */
+@SuppressWarnings("javadoc")
 public enum ImageChannelDataType
 {
  SignedNormalizedInt8(NativeTypeEnum.Byte, true, true),

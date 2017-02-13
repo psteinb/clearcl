@@ -295,6 +295,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
    */
+  @Override
   public void writeTo(ContiguousMemoryInterface pContiguousMemory,
                       boolean pBlockingWrite)
   {
@@ -352,6 +353,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
    */
+  @Override
   public void writeTo(Buffer pBuffer, boolean pBlockingWrite)
   {
     writeTo(pBuffer,
@@ -405,6 +407,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
    */
+  @Override
   public void readFrom(ContiguousMemoryInterface pContiguousMemory,
                        boolean pBlockingRead)
   {
@@ -461,6 +464,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * @param pBlockingRead
    *          true -> blocking call, false -> asynchronous call
    */
+  @Override
   public void readFrom(Buffer pBuffer, boolean pBlockingRead)
   {
     readFrom(pBuffer,

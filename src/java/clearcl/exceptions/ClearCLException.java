@@ -10,16 +10,21 @@ public class ClearCLException extends RuntimeException
   private static final long serialVersionUID = 1L;
 
   /**
-   * Constructs a ClearCL exception from a message and a cause.
+   * Instanciates a ClearCL exception from a message and a cause.
    * 
-   * @param pMessage
-   * @param pCause
+   * @param pMessage message
+   * @param pCause cause
    */
   public ClearCLException(String pMessage, Throwable pCause)
   {
     super(pMessage, pCause);
   }
 
+  /**
+   * Instanciates a ClearCL exception from a message and a cause.
+   *    
+   * @param pMessage message
+   */
   public ClearCLException(String pMessage)
   {
     super(pMessage);

@@ -19,17 +19,25 @@ import clearcl.enums.BuildStatus;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.KernelAccessType;
 import clearcl.exceptions.ClearCLArgumentMissingException;
-import clearcl.exceptions.ClearCLUnknownArgumentNameException;
 import clearcl.selector.BadDeviceSelector;
 import clearcl.selector.DeviceTypeSelector;
 import clearcl.selector.GlobalMemorySelector;
 import coremem.enums.NativeTypeEnum;
 
+/**
+ * Basic Kernel tests
+ *
+ * @author royer
+ */
 public class ClearCLKernelTests
 {
 
   private static final int cFloatArrayLength = 1024 * 1024;
 
+  /**
+   * Test with JOCL backend
+   * @throws Exception NA
+   */
   @Test
   public void testBackendJOCL() throws Exception
   {
@@ -39,6 +47,10 @@ public class ClearCLKernelTests
 
   }
 
+  /**
+   * Test with JavaCL backend
+   * @throws Exception NA
+   */
   @Test
   public void testBackendJavaCL() throws Exception
   {
@@ -137,6 +149,8 @@ public class ClearCLKernelTests
         fail();
       }
 
+      boolean lFailed = false;
+      
       // what if a argument is missing?
       try
       {
@@ -145,11 +159,11 @@ public class ClearCLKernelTests
         lKernel.setArgument("a", lBufferA);
         lKernel.setArgument("b", lBufferB);
         lKernel.run();
-        fail();
+        lFailed = true;
       }
-      catch (ClearCLArgumentMissingException e)
+      catch (RuntimeException e)
       {
-        //System.out.println("Caught as expected: " + e);
+        System.out.println("Caught as expected: " + e);
       }
 
       // what if an unknown argument is added?
@@ -162,12 +176,14 @@ public class ClearCLKernelTests
         lKernel.setArgument("c", lBufferC);
         lKernel.setArgument("z", 1.3f);
         lKernel.run();
-        fail();
+        lFailed = true;
       }
-      catch (ClearCLUnknownArgumentNameException e)
+      catch (RuntimeException e)
       {
-        //System.out.println("Caught as expected: " + e);
+        System.out.println("Caught as expected: " + e);
       }
+      
+      assertTrue(!lFailed);
 
     }
   }

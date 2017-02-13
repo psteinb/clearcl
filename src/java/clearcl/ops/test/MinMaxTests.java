@@ -21,11 +21,20 @@ import clearcl.ops.MinMax;
 import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
 
+/**
+ * MinMax tests
+ *
+ * @author royer
+ */
 public class MinMaxTests
 {
 
+  /**
+   * Tests min max computation with buffer float.
+   * @throws IOException NA
+   */
   @Test
-  public void testMinMaxBufferF() throws IOException
+  public void testMinMaxBufferFloat() throws IOException
   {
     ClearCLBackendInterface lClearCLBackend = new ClearCLBackendJavaCL();
 
@@ -86,6 +95,7 @@ public class MinMaxTests
       lReductions.minmax(lCLBuffer, lRed);
     long lNanoStop = System.nanoTime();
 
+    @SuppressWarnings("unused")
     double lElapsedTime = 10e-9 * (lNanoStop - lNanoStart) / lRepeats;
 
     /*System.out.format("elpased time: %g seconds for %d reductions\n",
@@ -93,6 +103,10 @@ public class MinMaxTests
                       lRed);/**/
   }
 
+  /**
+   * Tests min max computation of 1D image 
+   * @throws IOException NA
+   */
   @Test
   public void testMinMaxImage1F() throws IOException
   {
@@ -116,6 +130,10 @@ public class MinMaxTests
     }
   }
 
+  /**
+   * Tests min max computation of 2D image 
+   * @throws IOException NA
+   */
   @Test
   public void testMinMaxImage2F() throws IOException
   {
@@ -140,6 +158,10 @@ public class MinMaxTests
     }
   }
 
+  /**
+   * Tests min max computation of 3D image 
+   * @throws IOException NA
+   */
   @Test
   public void testMinMaxImage3F() throws IOException
   {

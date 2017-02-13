@@ -11,6 +11,11 @@ import java.io.File;
 public class ClearCLFolder
 {
 
+  /**
+   * Return teh ClearCL folder.
+   * 
+   * @return ClearCL folder
+   */
   static public File get()
   {
     File lFolder = new File(System.getProperty("user.home"),

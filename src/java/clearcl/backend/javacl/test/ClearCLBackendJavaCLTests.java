@@ -6,9 +6,17 @@ import org.junit.Test;
 
 import clearcl.backend.javacl.ClearCLBackendJavaCL;
 
+/**
+ * 
+ *
+ * @author royer
+ */
 public class ClearCLBackendJavaCLTests
 {
 
+  /**
+   * 
+   */
   @Test
   public void test()
   {

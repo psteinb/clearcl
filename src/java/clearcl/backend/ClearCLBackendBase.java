@@ -15,6 +15,12 @@ import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.ClearCLUnsupportedException;
 import coremem.ContiguousMemoryInterface;
 
+/**
+ * ClearCL backend base class providing common fields and methods for al
+ * backends.
+ *
+ * @author royer
+ */
 public abstract class ClearCLBackendBase implements
                                          ClearCLBackendInterface
 {

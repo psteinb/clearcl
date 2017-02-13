@@ -12,8 +12,19 @@ import clearcl.ClearCLDevice;
 public class GlobalMemorySelector implements DeviceSelector
 {
 
-  public static GlobalMemorySelector MAX = new GlobalMemorySelector(0);
+  /**
+   * Global memory selector that returns the device with most global memory.
+   */
+  public static GlobalMemorySelector MAX =
+                                         new GlobalMemorySelector(0);
 
+  /**
+   * Global memory selector that returns the devices with at least a given
+   * amount of memory.
+   * 
+   * @param pAtLeastBytes least amount of memory in bytes
+   * @return device selector
+   */
   public static GlobalMemorySelector ATLEAST(long pAtLeastBytes)
   {
     return new GlobalMemorySelector(pAtLeastBytes);
@@ -40,13 +51,15 @@ public class GlobalMemorySelector implements DeviceSelector
     for (ClearCLDevice lDevice : pDevices)
     {
       {
-        long lGlobalMemorySizeInBytes = lDevice.getGlobalMemorySizeInBytes();
+        long lGlobalMemorySizeInBytes =
+                                      lDevice.getGlobalMemorySizeInBytes();
 
         // System.out.println(lDevice);
         // System.out.println("lGlobalMemorySizeInBytes=" +
         // lGlobalMemorySizeInBytes);
 
-        if (lGlobalMemorySizeInBytes > lMaxGlobalMemory && lGlobalMemorySizeInBytes >= mAtLeastBytes)
+        if (lGlobalMemorySizeInBytes > lMaxGlobalMemory
+            && lGlobalMemorySizeInBytes >= mAtLeastBytes)
         {
           mBestDevice = lDevice;
           lMaxGlobalMemory = lGlobalMemorySizeInBytes;

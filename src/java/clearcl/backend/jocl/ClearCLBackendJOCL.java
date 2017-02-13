@@ -42,7 +42,6 @@ import clearcl.backend.ClearCLBackendBase;
 import clearcl.backend.ClearCLBackendInterface;
 import clearcl.backend.SizeOf;
 import clearcl.enums.BuildStatus;
-import clearcl.enums.DeviceInfo;
 import clearcl.enums.DeviceType;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
@@ -55,6 +54,11 @@ import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.util.Size;
 
+/**
+ * CLearCL JOCL backend. Uses the JOCL library to access OpenCL functions. 
+ *
+ * @author royer
+ */
 public class ClearCLBackendJOCL extends ClearCLBackendBase
                                 implements ClearCLBackendInterface
 {
@@ -350,6 +354,7 @@ public class ClearCLBackendJOCL extends ClearCLBackendBase
     });
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public ClearCLPeerPointer getImagePeerPointer(final ClearCLPeerPointer pDevicePointer,
                                                 final ClearCLPeerPointer pContextPointer,
@@ -715,12 +720,6 @@ public class ClearCLBackendJOCL extends ClearCLBackendBase
 
   }
 
-  /**
-   * @param pQueuePointer
-   * @param pKernelPointer
-   * @param pNumberOfDimension
-   * @param pOffsets
-   */
   @Override
   public void enqueueKernelExecution(final ClearCLPeerPointer pQueuePointer,
                                      final ClearCLPeerPointer pKernelPointer,

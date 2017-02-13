@@ -11,6 +11,12 @@ import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.ClearCLException;
 import clearcl.exceptions.OpenCLException;
 
+/**
+ * utility class providing OpenCL constants and methods for all backends.
+ *
+ * @author royer
+ */
+@SuppressWarnings("javadoc")
 public class BackendUtils
 {
   // cl_mem_flags - bitfield
@@ -25,13 +31,16 @@ public class BackendUtils
   public static final long CL_MEM_HOST_READ_ONLY = (1 << 8);
   public static final long CL_MEM_HOST_NO_ACCESS = (1 << 9);
   // OPENCL_2_0
-  public static final long CL_MEM_SVM_FINE_GRAIN_BUFFER = (1 << 10); /* used by cl_svm_mem_flags only */
-  public static final long CL_MEM_SVM_ATOMICS = (1 << 11); /* used by cl_svm_mem_flags only */
+  public static final long CL_MEM_SVM_FINE_GRAIN_BUFFER =
+                                                        (1 << 10); /* used by cl_svm_mem_flags only */
+  public static final long CL_MEM_SVM_ATOMICS =
+                                              (1 << 11); /* used by cl_svm_mem_flags only */
 
   // OPENCL_1_2
   /* cl_mem_migration_flags - bitfield */
   public static final long CL_MIGRATE_MEM_OBJECT_HOST = (1 << 0);
-  public static final long CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED = (1 << 1);
+  public static final long CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED =
+                                                                   (1 << 1);
 
   // cl_mem_object_type
   public static final int CL_MEM_OBJECT_BUFFER = 0x10F0;
@@ -95,12 +104,18 @@ public class BackendUtils
   public static final int CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS = 0x1003;
   public static final int CL_DEVICE_MAX_WORK_GROUP_SIZE = 0x1004;
   public static final int CL_DEVICE_MAX_WORK_ITEM_SIZES = 0x1005;
-  public static final int CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR = 0x1006;
-  public static final int CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT = 0x1007;
-  public static final int CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT = 0x1008;
-  public static final int CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG = 0x1009;
-  public static final int CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT = 0x100A;
-  public static final int CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE = 0x100B;
+  public static final int CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR =
+                                                                0x1006;
+  public static final int CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT =
+                                                                 0x1007;
+  public static final int CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT =
+                                                               0x1008;
+  public static final int CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG =
+                                                                0x1009;
+  public static final int CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT =
+                                                                 0x100A;
+  public static final int CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE =
+                                                                  0x100B;
   public static final int CL_DEVICE_MAX_CLOCK_FREQUENCY = 0x100C;
   public static final int CL_DEVICE_ADDRESS_BITS = 0x100D;
   public static final int CL_DEVICE_MAX_READ_IMAGE_ARGS = 0x100E;
@@ -118,7 +133,8 @@ public class BackendUtils
   public static final int CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE = 0x101A;
   public static final int CL_DEVICE_SINGLE_FP_CONFIG = 0x101B;
   public static final int CL_DEVICE_GLOBAL_MEM_CACHE_TYPE = 0x101C;
-  public static final int CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE = 0x101D;
+  public static final int CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE =
+                                                              0x101D;
   public static final int CL_DEVICE_GLOBAL_MEM_CACHE_SIZE = 0x101E;
   public static final int CL_DEVICE_GLOBAL_MEM_SIZE = 0x101F;
   public static final int CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE = 0x1020;
@@ -126,7 +142,8 @@ public class BackendUtils
   public static final int CL_DEVICE_LOCAL_MEM_TYPE = 0x1022;
   public static final int CL_DEVICE_LOCAL_MEM_SIZE = 0x1023;
   public static final int CL_DEVICE_ERROR_CORRECTION_SUPPORT = 0x1024;
-  public static final int CL_DEVICE_PROFILING_TIMER_RESOLUTION = 0x1025;
+  public static final int CL_DEVICE_PROFILING_TIMER_RESOLUTION =
+                                                               0x1025;
   public static final int CL_DEVICE_ENDIAN_LITTLE = 0x1026;
   public static final int CL_DEVICE_AVAILABLE = 0x1027;
   public static final int CL_DEVICE_COMPILER_AVAILABLE = 0x1028;
@@ -167,7 +184,7 @@ public class BackendUtils
                                      KernelAccessType pKernelAccessType)
   {
     long lMemFlags = 0;
-    
+
     switch (pMemAllocMode)
     {
     case AllocateHostPointer:
@@ -185,7 +202,6 @@ public class BackendUtils
       break;
     }
 
-    
     switch (pHostAccessType)
     {
     case ReadOnly:
@@ -333,7 +349,8 @@ public class BackendUtils
 
   public static void checkOpenCLErrorCode(int pErrorCode)
   {
-    OpenCLException lOpenCLException = new OpenCLException(pErrorCode);
+    OpenCLException lOpenCLException =
+                                     new OpenCLException(pErrorCode);
     lOpenCLException.throwIfError();
   }
 

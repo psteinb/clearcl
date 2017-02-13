@@ -14,6 +14,11 @@ import clearcl.ClearCLPeerPointer;
 import clearcl.backend.BackendUtils;
 import clearcl.backend.SizeOf;
 
+/**
+ * Utility class for JOCL backend
+ *
+ * @author royer
+ */
 public class Utils
 {
 
@@ -49,7 +54,8 @@ public class Utils
     int values[] = new int[numValues];
     BackendUtils.checkOpenCLError(clGetDeviceInfo(device,
                                                   paramName,
-                                                  SizeOf.cl_int * numValues,
+                                                  SizeOf.cl_int
+                                                             * numValues,
                                                   Pointer.to(values),
                                                   null));
     return values;
@@ -87,7 +93,8 @@ public class Utils
     long values[] = new long[numValues];
     BackendUtils.checkOpenCLError(clGetDeviceInfo(device,
                                                   paramName,
-                                                  SizeOf.cl_long * numValues,
+                                                  SizeOf.cl_long
+                                                             * numValues,
                                                   Pointer.to(values),
                                                   null));
     return values;
@@ -191,7 +198,8 @@ public class Utils
                                   .order(ByteOrder.nativeOrder());
     BackendUtils.checkOpenCLError(clGetDeviceInfo(device,
                                                   paramName,
-                                                  SizeOf.size_t * numValues,
+                                                  SizeOf.size_t
+                                                             * numValues,
                                                   Pointer.to(buffer),
                                                   null));
     long values[] = new long[numValues];
@@ -212,18 +220,36 @@ public class Utils
     return values;
   }
 
+  /**
+   * Returns boolean property for device
+   * 
+   * @param pPointer
+   *          device pointer
+   * @param pParam
+   *          parameter
+   * @return boolean
+   */
   public static boolean getBoolean(cl_device_id pPointer, int pParam)
   {
     return getInt(pPointer, pParam) > 0;
   }
 
-  public static cl_device_id[] convertDevicePointers(ClearCLPeerPointer... pDevicePointers)
+  /**
+   * Converts device pointers from peer pointers to backend specific pointers,
+   * 
+   * @param pClearCLDevicePeerPointers
+   *          device pointers
+   * @return array of backend specific device pointers
+   */
+  public static cl_device_id[] convertDevicePointers(ClearCLPeerPointer... pClearCLDevicePeerPointers)
   {
     return BackendUtils.checkExceptions(() -> {
-      cl_device_id[] lJOCLDevicePointers = new cl_device_id[pDevicePointers.length];
+      cl_device_id[] lJOCLDevicePointers =
+                                         new cl_device_id[pClearCLDevicePeerPointers.length];
 
-      for (int i = 0; i < pDevicePointers.length; i++)
-        lJOCLDevicePointers[i] = (cl_device_id) pDevicePointers[i].getPointer();
+      for (int i = 0; i < pClearCLDevicePeerPointers.length; i++)
+        lJOCLDevicePointers[i] =
+                               (cl_device_id) pClearCLDevicePeerPointers[i].getPointer();
 
       return lJOCLDevicePointers;
     });

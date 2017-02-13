@@ -7,13 +7,19 @@ package clearcl.util;
  */
 public class ElapsedTime
 {
+  /**
+   * This flag can be set statically to enable/disable stdout logging of elapsed
+   * times. Practical for performance evaluation.
+   */
   public static boolean sStandardOutput = false;
 
   /**
    * Measures the elapsed time of a Runnable.
    * 
    * @param pDescription
+   *          description of the runnable
    * @param pRunnable
+   *          runnable
    */
   public static void measure(String pDescription, Runnable pRunnable)
   {
@@ -24,9 +30,12 @@ public class ElapsedTime
    * Measures the elapsed time of a Runnable. An optional boolean flag can be
    * used to switch of the timing.
    * 
-   * @param pActive true -> measure, false -> execute without measuring
-   * @param pDescription description of the code (runnable)
-   * @param pRunnable runnable
+   * @param pActive
+   *          true -> measure, false -> execute without measuring
+   * @param pDescription
+   *          description of the code (runnable)
+   * @param pRunnable
+   *          runnable
    */
   public static void measure(boolean pActive,
                              String pDescription,
@@ -38,8 +47,17 @@ public class ElapsedTime
       return;
     }
 
+    Throwable lThrowable = null;
+
     long lNanosStart = System.nanoTime();
-    pRunnable.run();
+    try
+    {
+      pRunnable.run();
+    }
+    catch (Throwable e)
+    {
+      lThrowable = e;
+    }
     long lNanosStop = System.nanoTime();
 
     long lElapsedNanos = lNanosStop - lNanosStart;
@@ -49,6 +67,9 @@ public class ElapsedTime
       System.out.format("%g ms for %s \n",
                         lElapsedTimeInMilliseconds,
                         pDescription);
+
+    if (lThrowable != null)
+      throw new RuntimeException(lThrowable);
 
   }
 }

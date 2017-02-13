@@ -1,7 +1,6 @@
 package clearcl.viewer.jfx;
 
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -11,7 +10,6 @@ import javafx.scene.paint.Paint;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 /**
@@ -27,7 +25,6 @@ public class PanZoomScene extends Scene
   private Affine mAffine = new Affine();
   private Scale mScale;
   private Translate mTranslate;
-  private Point2D mSceneCenterInRoot;
   private boolean mPivotInitialized;
 
   private volatile float mMouseX, mMouseY;
@@ -107,8 +104,8 @@ public class PanZoomScene extends Scene
         {
           pStage.setFullScreen(!pStage.isFullScreen());
 
-          Platform.runLater(()->resetZoomPivot());
-          
+          Platform.runLater(() -> resetZoomPivot());
+
         }
         else
         {
@@ -205,6 +202,10 @@ public class PanZoomScene extends Scene
     mAffine.append(mScale);
   }
 
+  /**
+   * Resets the zoom pivo point, typically after a change in the window size or
+   * shape.
+   */
   public void resetZoomPivot()
   {
     double lSceneWidth = getWidth();
@@ -235,11 +236,21 @@ public class PanZoomScene extends Scene
     }
   }
 
+  /**
+   * Returns mouse x position
+   * 
+   * @return x position
+   */
   public float getMouseX()
   {
     return mMouseX;
   }
 
+  /**
+   * Returns mouse y position
+   * 
+   * @return y position
+   */
   public float getMouseY()
   {
     return mMouseY;

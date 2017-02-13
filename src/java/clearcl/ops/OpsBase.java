@@ -16,7 +16,7 @@ public class OpsBase
   /**
    * Instantiates an op.
    * 
-   * @param pClearCLQueue
+   * @param pClearCLQueue queue
    */
   public OpsBase(ClearCLQueue pClearCLQueue)
   {
@@ -28,7 +28,7 @@ public class OpsBase
   /**
    * Returns queue used by op.
    * 
-   * @return
+   * @return queue
    */
   public ClearCLQueue getQueue()
   {

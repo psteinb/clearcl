@@ -7,5 +7,23 @@ package clearcl.enums;
  */
 public enum KernelAccessType
 {
-  ReadOnly, WriteOnly, ReadWrite, Undefined;
+  /**
+   * 
+   */
+  ReadOnly, 
+  
+  /**
+   * 
+   */
+  WriteOnly, 
+  
+  /**
+   * 
+   */
+  ReadWrite, 
+  
+  /**
+   * 
+   */
+  Undefined;
 }

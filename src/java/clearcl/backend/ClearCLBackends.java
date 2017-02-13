@@ -1,8 +1,6 @@
 package clearcl.backend;
 
 import java.util.ArrayList;
-import java.util.Collections;
-
 import clearcl.backend.javacl.ClearCLBackendJavaCL;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.benchmark.Benchmark;
@@ -17,6 +15,9 @@ import clearcl.util.OsCheck;
 public class ClearCLBackends
 {
 
+  /**
+   * This flag controls verbosity of the backend.
+   */
   public static boolean sStdOutVerbose = false;
 
   /**
