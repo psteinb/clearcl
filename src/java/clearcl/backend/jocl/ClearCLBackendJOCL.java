@@ -606,6 +606,8 @@ public class ClearCLBackendJOCL extends ClearCLBackendBase
                                 final Object pObject)
   {
     BackendUtils.checkExceptions(() -> {
+      long lObjectSize = Size.of(pObject);
+      
       final cl_kernel lKernelPointer =
                                      (cl_kernel) pKernelPeerPointer.getPointer();
 
@@ -613,80 +615,80 @@ public class ClearCLBackendJOCL extends ClearCLBackendBase
       if (pObject instanceof Byte)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to(new byte[]
         { (byte) pObject })));
       else if (pObject instanceof Character)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to(new char[]
         { (char) pObject })));
       else if (pObject instanceof Short)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to(new short[]
         { (short) pObject })));
       else if (pObject instanceof Integer)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to(new int[]
         { (int) pObject })));
       else if (pObject instanceof Long)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to(new long[]
         { (long) pObject })));
       else if (pObject instanceof Float)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to(new float[]
         { (float) pObject })));
       else if (pObject instanceof Double)
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to(new double[]
         { (double) pObject })));
       // ARRAY TYPES:
       else if (pObject instanceof byte[])
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to((byte[]) pObject)));
       else if (pObject instanceof char[])
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to((char[]) pObject)));
       else if (pObject instanceof short[])
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to((short[]) pObject)));
       else if (pObject instanceof int[])
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to((int[]) pObject)));
       else if (pObject instanceof long[])
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to((long[]) pObject)));
       else if (pObject instanceof float[])
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to((float[]) pObject)));
       else if (pObject instanceof double[])
         BackendUtils.checkOpenCLError(CL.clSetKernelArg(lKernelPointer,
                                                         pIndex,
-                                                        Size.of(pObject.getClass()),
+                                                        lObjectSize,
                                                         Pointer.to((double[]) pObject)));
 
       else if (pObject instanceof ClearCLBuffer)

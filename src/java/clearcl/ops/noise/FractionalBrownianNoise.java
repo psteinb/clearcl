@@ -1,4 +1,4 @@
-package clearcl.ops;
+package clearcl.ops.noise;
 
 import java.io.IOException;
 
@@ -7,6 +7,7 @@ import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
 import clearcl.ClearCLQueue;
 import clearcl.ocllib.OCLlib;
+import clearcl.ops.OpsBase;
 
 /**
  * Fractional Brownian Noise generation.
@@ -37,7 +38,7 @@ public class FractionalBrownianNoise extends OpsBase
     super(pClearCLQueue);
 
     ClearCLProgram lNoiseProgram =
-                                 getClearCLContext().createProgram(OCLlib.class,
+                                 getContext().createProgram(OCLlib.class,
                                                                    "noise/noisetexture.cl");
     // lNoiseProgram.addBuildOptionAllMathOpt();
     lNoiseProgram.buildAndLog();

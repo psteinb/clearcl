@@ -68,7 +68,8 @@ public class ClearCLProgram extends ClearCLBase
    * in cl files. This method is preferred because it is more resiliant to
    * refactoring.
    * 
-   * @param pReferenceClass reference class
+   * @param pReferenceClass
+   *          reference class
    */
   public void addIncludesReferenceClass(Class<?> pReferenceClass)
   {
@@ -114,6 +115,17 @@ public class ClearCLProgram extends ClearCLBase
 
     InputStream lResourceAsStream =
                                   pClassForRessource.getResourceAsStream(pIncludeRessourceName);
+
+    if (lResourceAsStream == null)
+    {
+      String lMessage =
+                      String.format("Cannot find source: [%s] %s",
+                                    pClassForRessource.getSimpleName()
+                                                      .toString(),
+                                    pIncludeRessourceName);
+      throw new IOException(lMessage);
+    }
+
     String lSourceCode = StringUtils.streamToString(lResourceAsStream,
                                                     "UTF-8");
     lStringBuilder.append(lSourceCode);
@@ -200,7 +212,8 @@ public class ClearCLProgram extends ClearCLBase
    * Adds an building option for this program. You must rebuild after this call
    * for changes to take effect.
    * 
-   * @param pOption option string
+   * @param pOption
+   *          option string
    */
   public void addBuildOption(String pOption)
   {
@@ -240,8 +253,10 @@ public class ClearCLProgram extends ClearCLBase
 
   /**
    * Builds program and logs any errors on the stdout
+   * 
    * @return build status
-   * @throws IOException thrown if source code includes cannot be resolved
+   * @throws IOException
+   *           thrown if source code includes cannot be resolved
    */
   public BuildStatus buildAndLog() throws IOException
   {
@@ -379,9 +394,12 @@ public class ClearCLProgram extends ClearCLBase
       else
         lReferenceClass = findClassByName(lClassName);
 
-      if(lReferenceClass==null)
-        System.err.println("reference class unknown: "+lClassName+" in line: '"+lIncludeLine+"'" );
-      
+      if (lReferenceClass == null)
+        System.err.println("reference class unknown: " + lClassName
+                           + " in line: '"
+                           + lIncludeLine
+                           + "'");
+
       InputStream lResourceAsStream =
                                     lReferenceClass.getResourceAsStream(lIncludeName);
 

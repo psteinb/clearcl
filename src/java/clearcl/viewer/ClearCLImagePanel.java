@@ -19,7 +19,7 @@ import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.ClearCLUnsupportedException;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.ocllib.OCLlib;
-import clearcl.ops.MinMax;
+import clearcl.ops.math.MinMax;
 import clearcl.util.ElapsedTime;
 import clearcl.util.Region2;
 import coremem.ContiguousMemoryInterface;
@@ -108,7 +108,11 @@ public class ClearCLImagePanel extends StackPane
     try
     {
       mProgram = lContext.createProgram(OCLlib.class,
-                                        "render/render.cl");
+                                        "render/img2D.cl",
+                                        "render/ortho/avgproj3D.cl",
+                                        "render/ortho/colproj3D.cl",
+                                        "render/ortho/maxproj3D.cl",
+                                        "render/ortho/slice3D.cl");
 
       mProgram.addBuildOptionAllMathOpt();
       mProgram.buildAndLog();
@@ -271,7 +275,7 @@ public class ClearCLImagePanel extends StackPane
         mRenderKernel.setGlobalSizes(Region2.region(mClearCLImage.getDimensions()));
 
         mRenderKernel.setArgument("image", mClearCLImage);
-        mRenderKernel.setArgument("rgbbuffer", mRenderRGBBuffer);
+        mRenderKernel.setArgument("rgbabuffer", mRenderRGBBuffer);
 
         mRenderKernel.setArgument("vmin", lMin);
         mRenderKernel.setArgument("vmax", lMax);

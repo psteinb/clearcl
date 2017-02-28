@@ -1,4 +1,4 @@
-package clearcl.ops;
+package clearcl.ops.math;
 
 import java.io.IOException;
 
@@ -12,6 +12,7 @@ import clearcl.enums.HostAccessType;
 import clearcl.enums.KernelAccessType;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.ocllib.OCLlib;
+import clearcl.ops.OpsBase;
 import coremem.buffers.ContiguousBuffer;
 import coremem.enums.NativeTypeEnum;
 
@@ -41,7 +42,7 @@ public class MinMax extends OpsBase
     super(pClearCLQueue);
 
     ClearCLProgram lMinMaxProgram =
-                                  getClearCLContext().createProgram(OCLlib.class,
+                                  getContext().createProgram(OCLlib.class,
                                                                     "reduction/reductions.cl");
     lMinMaxProgram.addBuildOptionAllMathOpt();
     lMinMaxProgram.buildAndLog();
@@ -91,7 +92,7 @@ public class MinMax extends OpsBase
         || mScratchBuffer.getLength() != 2 * lReduction)
     {
       mScratchBuffer =
-                     getClearCLContext().createBuffer(HostAccessType.ReadOnly,
+                     getContext().createBuffer(HostAccessType.ReadOnly,
                                                       KernelAccessType.WriteOnly,
                                                       NativeTypeEnum.Float,
                                                       2 * lReduction);
@@ -171,7 +172,7 @@ public class MinMax extends OpsBase
         || mScratchBuffer.getLength() != 2 * lVolume)
     {
       mScratchBuffer =
-                     getClearCLContext().createBuffer(HostAccessType.ReadWrite,
+                     getContext().createBuffer(HostAccessType.ReadWrite,
                                                       KernelAccessType.WriteOnly,
                                                       NativeTypeEnum.Float,
                                                       2 * lVolume);
@@ -200,7 +201,7 @@ public class MinMax extends OpsBase
       float lMaxValue = lContiguousBuffer.readFloat();
       lMax = Math.max(lMax, lMaxValue);
 
-      if (Float.isInfinite(lMaxValue))
+      if (Float.isInfinite(lMinValue) || Float.isInfinite(lMaxValue))
         System.err.println("INFINITE VALUE!!!");
       // System.out.format("min=%f, max=%f \n",lMin,lMax);
     }

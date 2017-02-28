@@ -276,6 +276,8 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
    */
   private void setArgumentsInternal()
   {
+    System.out.println("kernel:" + this.toString());
+
     for (final Map.Entry<String, Integer> lEntry : mNameToIndexMap.entrySet())
     {
       final String lArgumentName = lEntry.getKey();
@@ -286,8 +288,10 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 
         Argument lArgument = mIndexToArgumentMap.get(lArgumentIndex);
 
-        // System.out.format("index: %d, arg name: %s, arg: '%s'
-        // \n",lArgumentIndex, lArgumentName, lArgument.argument);
+        System.out.format("index: %d, arg name: %s, arg: '%s' \n",
+                          lArgumentIndex,
+                          lArgumentName,
+                          lArgument==null?"default~"+mDefaultArgumentsMap.get(lArgumentName):lArgument.argument);
 
         if (lArgument == null)
         {
@@ -304,7 +308,7 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 
         if (lArgument.argument instanceof ClearCLLocalMemory)
         {
-          //TODO: why do we need lLocalMemory for ?
+          // TODO: why do we need lLocalMemory for ?
           @SuppressWarnings("unused")
           final ClearCLLocalMemory lLocalMemory =
                                                 (ClearCLLocalMemory) lArgument.argument;
@@ -421,14 +425,16 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   @Override
   public String toString()
   {
-    return String.format("ClearCLKernel [mClearCLProgram=%s, mName=%s]",
-                         mClearCLProgram,
-                         mName);
+    return String.format("ClearCLKernel [mName=%s, mClearCLProgram=%s]",
+                         mName,
+                         mClearCLProgram);
   }
 
   /**
    * Returns the map of defaults arguments
-   * @param pKernelName kernel name
+   * 
+   * @param pKernelName
+   *          kernel name
    * @return default args map
    */
   private ConcurrentHashMap<String, Number> getKernelDefaultArgumentsMap(final String pKernelName)
@@ -582,7 +588,8 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   /**
    * Sets whether this kernel should log its execution time.
    * 
-   * @param pLogExecutionTime true for logging
+   * @param pLogExecutionTime
+   *          true for logging
    */
   public void setLogExecutionTime(final boolean pLogExecutionTime)
   {
