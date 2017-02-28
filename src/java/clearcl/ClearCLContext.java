@@ -40,6 +40,15 @@ public class ClearCLContext extends ClearCLBase
 
     mDefaultQueue = createQueue();
   }
+  
+  /**
+   * Returns context's device
+   * @return device
+   */
+  public ClearCLDevice getDevice()
+  {
+    return mDevice;
+  }
 
   /**
    * Returns the default queue. All devices are created with a default queue.
@@ -493,5 +502,7 @@ public class ClearCLContext extends ClearCLBase
     getBackend().releaseContext(getPeerPointer());
     setPeerPointer(null);
   }
+
+
 
 }
