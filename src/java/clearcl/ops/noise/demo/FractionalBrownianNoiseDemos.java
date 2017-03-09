@@ -1,4 +1,4 @@
-package clearcl.ops.demo;
+package clearcl.ops.noise.demo;
 
 import java.io.IOException;
 
@@ -13,7 +13,7 @@ import clearcl.backend.ClearCLBackends;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
-import clearcl.ops.FractionalBrownianNoise;
+import clearcl.ops.noise.FractionalBrownianNoise;
 import clearcl.util.ElapsedTime;
 import clearcl.viewer.ClearCLImageViewer;
 import coremem.enums.NativeTypeEnum;

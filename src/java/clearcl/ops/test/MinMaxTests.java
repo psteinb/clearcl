@@ -17,7 +17,7 @@ import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.KernelAccessType;
-import clearcl.ops.MinMax;
+import clearcl.ops.math.MinMax;
 import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
 

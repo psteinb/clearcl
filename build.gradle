@@ -59,13 +59,16 @@ dependencies
 {
 
 	// CoreMem:
-	compile ('net.coremem:CoreMem:[0.3.3,)') {transitive= true; changing= true}
+	compile ('net.coremem:CoreMem:[0.3.4,)') {transitive= true; changing= true}
 	
 	// JAVACL Backend:
 	compile ('com.nativelibs4java:javacl:1.0.0-RC4') {transitive= true; changing= false}
 		
 	// JOCL backend:
 	compile ('org.jocl:jocl:2.0.0') {transitive= true; changing= false}
+	
+	// Vecmath:
+    compile ('javax.vecmath:vecmath:1.5.2')
 
 	// Junit:
 	compile group: 'junit', name: 'junit', version: '4.12'

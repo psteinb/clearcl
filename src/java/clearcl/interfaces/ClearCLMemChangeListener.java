@@ -14,7 +14,7 @@ public interface ClearCLMemChangeListener
 
   /**
    * Called when the image or buffer has changed. It may happen that this is
-   * called but not effective change of the data occured, however, if there is a
+   * called but no effective change of the data occured, however, if there is a
    * real change then a call is made.
    * 
    * @param pQueue queue on whichb change happened (or null if no queue involved)

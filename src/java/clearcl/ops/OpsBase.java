@@ -50,7 +50,7 @@ public class OpsBase
    * 
    * @return context
    */
-  public ClearCLContext getClearCLContext()
+  public ClearCLContext getContext()
   {
     return mClearCLContext;
   }

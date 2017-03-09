@@ -19,7 +19,7 @@ import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.ClearCLUnsupportedException;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.ocllib.OCLlib;
-import clearcl.ops.MinMax;
+import clearcl.ops.math.MinMax;
 import clearcl.util.ElapsedTime;
 import clearcl.util.Region2;
 import coremem.ContiguousMemoryInterface;
@@ -83,7 +83,8 @@ public class ClearCLImagePanel extends StackPane
   /**
    * Creates a panel for a given ClearCL image.
    * 
-   * @param pClearCLImage image
+   * @param pClearCLImage
+   *          image
    */
   public ClearCLImagePanel(ClearCLImageInterface pClearCLImage)
   {
@@ -108,7 +109,11 @@ public class ClearCLImagePanel extends StackPane
     try
     {
       mProgram = lContext.createProgram(OCLlib.class,
-                                        "render/render.cl");
+                                        "render/img2D.cl",
+                                        "render/ortho/avgproj3D.cl",
+                                        "render/ortho/colproj3D.cl",
+                                        "render/ortho/maxproj3D.cl",
+                                        "render/ortho/slice3D.cl");
 
       mProgram.addBuildOptionAllMathOpt();
       mProgram.buildAndLog();
@@ -177,8 +182,6 @@ public class ClearCLImagePanel extends StackPane
 
     updateImage();
   }
-  
-  
 
   /**
    * Updates the display of this ImageView. This is called automatically through
@@ -207,11 +210,26 @@ public class ClearCLImagePanel extends StackPane
         if (mAuto.get() || mTrueMin == null)
         {
           float[] lMinMax = mMinMax.minmax(mClearCLImage, 32);
-          mTrueMin = (1-cSmoothingFactor)*lMinMax[0]+ cSmoothingFactor*mTrueMin;
-          mTrueMax = (1-cSmoothingFactor)*lMinMax[1]+ cSmoothingFactor*mTrueMax;
+
+          float lMinValue = lMinMax[0];
+          float lMaxValue = lMinMax[1];
+
+          if (Float.isInfinite(lMinValue)
+              || Float.isInfinite(lMaxValue))
+            System.err.println("Image has infinite value! "+mClearCLImage);
+          else
+          {
+            // System.out.format("min=%f, max=%f \n",lMin,lMax);
+
+            mTrueMin = (1 - cSmoothingFactor) * lMinValue
+                       + cSmoothingFactor * mTrueMin;
+            mTrueMax = (1 - cSmoothingFactor) * lMaxValue
+                       + cSmoothingFactor * mTrueMax;
+          }
 
           lMin = mTrueMin;
           lMax = mTrueMax;
+
         }
         else
         {
@@ -271,7 +289,7 @@ public class ClearCLImagePanel extends StackPane
         mRenderKernel.setGlobalSizes(Region2.region(mClearCLImage.getDimensions()));
 
         mRenderKernel.setArgument("image", mClearCLImage);
-        mRenderKernel.setArgument("rgbbuffer", mRenderRGBBuffer);
+        mRenderKernel.setArgument("rgbabuffer", mRenderRGBBuffer);
 
         mRenderKernel.setArgument("vmin", lMin);
         mRenderKernel.setArgument("vmax", lMax);
@@ -336,6 +354,7 @@ public class ClearCLImagePanel extends StackPane
 
   /**
    * Returns auto property
+   * 
    * @return auto property
    */
   public BooleanProperty getAutoProperty()
@@ -345,6 +364,7 @@ public class ClearCLImagePanel extends StackPane
 
   /**
    * Returns min property
+   * 
    * @return min property
    */
   public FloatProperty getMinProperty()
@@ -354,6 +374,7 @@ public class ClearCLImagePanel extends StackPane
 
   /**
    * Returns max property
+   * 
    * @return max property
    */
   public FloatProperty getMaxProperty()
@@ -363,6 +384,7 @@ public class ClearCLImagePanel extends StackPane
 
   /**
    * Returns gamma property
+   * 
    * @return gamma property
    */
   public FloatProperty getGammaProperty()
@@ -372,6 +394,7 @@ public class ClearCLImagePanel extends StackPane
 
   /**
    * Returns z property
+   * 
    * @return z property
    */
   public IntegerProperty getZProperty()
@@ -381,12 +404,12 @@ public class ClearCLImagePanel extends StackPane
 
   /**
    * Returns render mode property
+   * 
    * @return render mode property
    */
   public ObjectProperty<RenderMode> getRenderModeProperty()
   {
     return mRenderMode;
   }
-  
 
 }

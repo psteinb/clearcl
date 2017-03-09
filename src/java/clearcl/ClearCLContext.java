@@ -31,9 +31,10 @@ public class ClearCLContext extends ClearCLBase
    *          device
    * @param pContextPointer
    *          context peer pointer
+   * @param pContextPointer2
    */
   ClearCLContext(final ClearCLDevice pClearCLDevice,
-                 final ClearCLPeerPointer pContextPointer)
+                 ClearCLPeerPointer pContextPointer)
   {
     super(pClearCLDevice.getBackend(), pContextPointer);
     mDevice = pClearCLDevice;
@@ -43,6 +44,16 @@ public class ClearCLContext extends ClearCLBase
   
   /**
    * Returns context's device
+   * @return device
+   */
+  public ClearCLDevice getDevice()
+  {
+    return mDevice;
+  }
+
+  /**
+   * Returns corresponding device
+   * 
    * @return device
    */
   public ClearCLDevice getDevice()
@@ -68,7 +79,7 @@ public class ClearCLContext extends ClearCLBase
   public ClearCLQueue createQueue()
   {
     final ClearCLPeerPointer lQueuePointer =
-                                           getBackend().getQueuePeerPointer(mDevice.getPeerPointer(),
+                                           getBackend().getQueuePeerPointer(getDevice().getPeerPointer(),
                                                                             getPeerPointer(),
                                                                             true);
     final ClearCLQueue lClearCLQueue =
@@ -242,7 +253,7 @@ public class ClearCLContext extends ClearCLBase
       throw new OpenCLException(-61);
 
     final ClearCLPeerPointer lBufferPointer =
-                                            getBackend().getBufferPeerPointer(mDevice.getPeerPointer(),
+                                            getBackend().getBufferPeerPointer(getDevice().getPeerPointer(),
                                                                               getPeerPointer(),
                                                                               pMemAllocMode,
                                                                               pHostAccessType,
@@ -297,9 +308,9 @@ public class ClearCLContext extends ClearCLBase
     return createImage(MemAllocMode.Best,
                        HostAccessType.ReadWrite,
                        KernelAccessType.ReadWrite,
-                       mDevice.getType()
-                              .isCPU() ? ImageChannelOrder.Intensity
-                                       : ImageChannelOrder.R,
+                       getDevice().getType()
+                                  .isCPU() ? ImageChannelOrder.Intensity
+                                           : ImageChannelOrder.R,
                        pImageChannelType,
                        pDimensions);
   }
@@ -351,9 +362,9 @@ public class ClearCLContext extends ClearCLBase
     return createImage(MemAllocMode.Best,
                        pHostAccessType,
                        pKernelAccessType,
-                       mDevice.getType()
-                              .isCPU() ? ImageChannelOrder.Intensity
-                                       : ImageChannelOrder.R,
+                       getDevice().getType()
+                                  .isCPU() ? ImageChannelOrder.Intensity
+                                           : ImageChannelOrder.R,
                        pImageChannelType,
                        pDimensions);
   }
@@ -419,7 +430,7 @@ public class ClearCLContext extends ClearCLBase
                                ImageType.fromDimensions(pDimensions);
 
     final ClearCLPeerPointer lImage =
-                                    getBackend().getImagePeerPointer(mDevice.getPeerPointer(),
+                                    getBackend().getImagePeerPointer(getDevice().getPeerPointer(),
                                                                      getPeerPointer(),
                                                                      pMemAllocMode,
                                                                      pHostAccessType,
@@ -451,9 +462,10 @@ public class ClearCLContext extends ClearCLBase
    */
   public ClearCLProgram createProgram(final String... pSourceCode)
   {
-    final ClearCLProgram lClearCLProgram = new ClearCLProgram(mDevice,
-                                                              this,
-                                                              null);
+    final ClearCLProgram lClearCLProgram =
+                                         new ClearCLProgram(getDevice(),
+                                                            this,
+                                                            null);
     for (final String lSourceCode : pSourceCode)
       lClearCLProgram.addSource(lSourceCode);
 
@@ -490,7 +502,7 @@ public class ClearCLContext extends ClearCLBase
   public String toString()
   {
     return String.format("ClearCLContext [device=%s]",
-                         mDevice.toString());
+                         getDevice().toString());
   }
 
   /* (non-Javadoc)
