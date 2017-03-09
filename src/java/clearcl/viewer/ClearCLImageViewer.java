@@ -41,13 +41,30 @@ public class ClearCLImageViewer
   /**
    * Opens a window showing the image content. View can be panned and zoomed.
    * 
-   * @param pImage imag to view
+   * @param pImage
+   *          imag to view
    * @return image viewer
    */
   public static ClearCLImageViewer view(ClearCLImageInterface pImage)
   {
-    ClearCLImageViewer lViewImage = new ClearCLImageViewer(pImage,
-                                                           "Image");
+    return view(pImage, "Image");
+  }
+
+  /**
+   * Opens a window showing the image content. View can be panned and zoomed.
+   * 
+   * @param pImage
+   *          imag to view
+   * @param pWindowTitle
+   *          window title
+   * @return image viewer
+   */
+  public static ClearCLImageViewer view(ClearCLImageInterface pImage,
+                                        String pWindowTitle)
+  {
+    ClearCLImageViewer lViewImage =
+                                  new ClearCLImageViewer(pImage,
+                                                         pWindowTitle);
     return lViewImage;
   }
 
@@ -213,17 +230,15 @@ public class ClearCLImageViewer
 
       if (pClearCLImage.getDimension() == 3)
       {
-        mZSlider = new Slider(0,
-                                     pClearCLImage.getDepth() - 1,
-                                     0);
+        mZSlider = new Slider(0, pClearCLImage.getDepth() - 1, 0);
         getZSlider().setMaxHeight(Double.MAX_VALUE);
         getZSlider().setOrientation(Orientation.VERTICAL);
 
         getZSlider().valueProperty()
-          .bindBidirectional(mImagePanel.getZProperty());
-        
-        getZSlider().setValue((pClearCLImage.getDepth() - 1.0)/2);
-        
+                    .bindBidirectional(mImagePanel.getZProperty());
+
+        getZSlider().setValue((pClearCLImage.getDepth() - 1.0) / 2);
+
         GridPane.setVgrow(getZSlider(), Priority.ALWAYS);
         // GridPane.setColumnSpan(lZ, 4);
         // GridPane.setFillWidth(lZ, true);
@@ -235,7 +250,7 @@ public class ClearCLImageViewer
           getZSlider().setDisable(lRenderMode != RenderMode.Slice);
         });
         getZSlider().setDisable(mImagePanel.getRenderModeProperty()
-                                 .get() != RenderMode.Slice);
+                                           .get() != RenderMode.Slice);
 
       }
 
@@ -250,8 +265,10 @@ public class ClearCLImageViewer
                                                     pWindowHeight,
                                                     Color.BLACK);
 
-      /*lPanZoomScene.setScale(Math.pow(Math.min(((double)pWindowWidth) / pClearCLImage.getWidth(),
-                                      ((double)pWindowHeight) / pClearCLImage.getHeight()),0.8));/**/
+      double lInitialScale = 0.90*Math.pow(Math.min(((double)pWindowWidth) / pClearCLImage.getWidth(),
+                                               ((double)pWindowHeight) / pClearCLImage.getHeight()),0.9);
+      
+      lPanZoomScene.scaleScene(lInitialScale,false);/**/
 
       mStage.setScene(lPanZoomScene);
       mStage.show();
@@ -269,7 +286,9 @@ public class ClearCLImageViewer
 
   /**
    * Sets the render mode property.
-   * @param pRenderMode render mode
+   * 
+   * @param pRenderMode
+   *          render mode
    */
   public void setRenderMode(RenderMode pRenderMode)
   {
@@ -306,7 +325,8 @@ public class ClearCLImageViewer
   }
 
   /**
-   * Returns this  viewer's z slider
+   * Returns this viewer's z slider
+   * 
    * @return z slider
    */
   public Slider getZSlider()

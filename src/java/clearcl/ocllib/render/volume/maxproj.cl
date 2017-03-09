@@ -66,7 +66,7 @@ __kernel void image_render_maxproj_3d(
   float4 orig0, orig;
   float4 direc0, direc;
   
-  orig0 = matrix_mult(iPMatrix, front);
+  orig0  = matrix_mult(iPMatrix, front);
   orig0 *= 1.f/orig0.w; 
 
   orig  = matrix_mult(iMVMatrix, orig0);

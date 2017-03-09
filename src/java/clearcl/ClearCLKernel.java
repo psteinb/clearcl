@@ -276,7 +276,7 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
    */
   private void setArgumentsInternal()
   {
-    System.out.println("kernel:" + this.toString());
+    //System.out.println("kernel:" + this.toString());
 
     for (final Map.Entry<String, Integer> lEntry : mNameToIndexMap.entrySet())
     {
@@ -288,10 +288,10 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
 
         Argument lArgument = mIndexToArgumentMap.get(lArgumentIndex);
 
-        System.out.format("index: %d, arg name: %s, arg: '%s' \n",
+        /*System.out.format("index: %d, arg name: %s, arg: '%s' \n",
                           lArgumentIndex,
                           lArgumentName,
-                          lArgument==null?"default~"+mDefaultArgumentsMap.get(lArgumentName):lArgument.argument);
+                          lArgument==null?"default~"+mDefaultArgumentsMap.get(lArgumentName):lArgument.argument);/**/
 
         if (lArgument == null)
         {

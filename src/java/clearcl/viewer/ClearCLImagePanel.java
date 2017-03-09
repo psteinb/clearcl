@@ -83,7 +83,8 @@ public class ClearCLImagePanel extends StackPane
   /**
    * Creates a panel for a given ClearCL image.
    * 
-   * @param pClearCLImage image
+   * @param pClearCLImage
+   *          image
    */
   public ClearCLImagePanel(ClearCLImageInterface pClearCLImage)
   {
@@ -181,8 +182,6 @@ public class ClearCLImagePanel extends StackPane
 
     updateImage();
   }
-  
-  
 
   /**
    * Updates the display of this ImageView. This is called automatically through
@@ -211,11 +210,26 @@ public class ClearCLImagePanel extends StackPane
         if (mAuto.get() || mTrueMin == null)
         {
           float[] lMinMax = mMinMax.minmax(mClearCLImage, 32);
-          mTrueMin = (1-cSmoothingFactor)*lMinMax[0]+ cSmoothingFactor*mTrueMin;
-          mTrueMax = (1-cSmoothingFactor)*lMinMax[1]+ cSmoothingFactor*mTrueMax;
+
+          float lMinValue = lMinMax[0];
+          float lMaxValue = lMinMax[1];
+
+          if (Float.isInfinite(lMinValue)
+              || Float.isInfinite(lMaxValue))
+            System.err.println("Image has infinite value! "+mClearCLImage);
+          else
+          {
+            // System.out.format("min=%f, max=%f \n",lMin,lMax);
+
+            mTrueMin = (1 - cSmoothingFactor) * lMinValue
+                       + cSmoothingFactor * mTrueMin;
+            mTrueMax = (1 - cSmoothingFactor) * lMaxValue
+                       + cSmoothingFactor * mTrueMax;
+          }
 
           lMin = mTrueMin;
           lMax = mTrueMax;
+
         }
         else
         {
@@ -340,6 +354,7 @@ public class ClearCLImagePanel extends StackPane
 
   /**
    * Returns auto property
+   * 
    * @return auto property
    */
   public BooleanProperty getAutoProperty()
@@ -349,6 +364,7 @@ public class ClearCLImagePanel extends StackPane
 
   /**
    * Returns min property
+   * 
    * @return min property
    */
   public FloatProperty getMinProperty()
@@ -358,6 +374,7 @@ public class ClearCLImagePanel extends StackPane
 
   /**
    * Returns max property
+   * 
    * @return max property
    */
   public FloatProperty getMaxProperty()
@@ -367,6 +384,7 @@ public class ClearCLImagePanel extends StackPane
 
   /**
    * Returns gamma property
+   * 
    * @return gamma property
    */
   public FloatProperty getGammaProperty()
@@ -376,6 +394,7 @@ public class ClearCLImagePanel extends StackPane
 
   /**
    * Returns z property
+   * 
    * @return z property
    */
   public IntegerProperty getZProperty()
@@ -385,12 +404,12 @@ public class ClearCLImagePanel extends StackPane
 
   /**
    * Returns render mode property
+   * 
    * @return render mode property
    */
   public ObjectProperty<RenderMode> getRenderModeProperty()
   {
     return mRenderMode;
   }
-  
 
 }

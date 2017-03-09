@@ -23,7 +23,7 @@ __kernel void buffersum(         const float p,
 {
 	int x = get_global_id(0);
 	
-		c[x] = a[x] + b[x] + p * CONSTANT;
+	c[x] = a[x] + b[x] + p * CONSTANT;
 	
 	//if(x%100000==1)
 	//  printf("this is a test string c[%d] = %f + %f + %f = %f \n", x, a[x], b[x], p,  c[x]);

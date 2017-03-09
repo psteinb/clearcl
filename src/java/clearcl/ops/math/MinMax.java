@@ -200,10 +200,6 @@ public class MinMax extends OpsBase
       lMin = Math.min(lMin, lMinValue);
       float lMaxValue = lContiguousBuffer.readFloat();
       lMax = Math.max(lMax, lMaxValue);
-
-      if (Float.isInfinite(lMinValue) || Float.isInfinite(lMaxValue))
-        System.err.println("INFINITE VALUE!!!");
-      // System.out.format("min=%f, max=%f \n",lMin,lMax);
     }
 
     return new float[]

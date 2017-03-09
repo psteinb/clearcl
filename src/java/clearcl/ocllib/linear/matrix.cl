@@ -1,5 +1,5 @@
 
-
+// Loads a matrix from a buffer with offset
 inline float16 matrix_load(int offset, __constant float* pointer) 
 {
     float16 matrix = vload16(offset, pointer);
@@ -7,6 +7,7 @@ inline float16 matrix_load(int offset, __constant float* pointer)
 }
 
 
+// 4x4 matrix multiplication:
 inline float4 matrix_mult(float16 matrix, float4 vector) 
 {
   const float4 result;
@@ -17,8 +18,32 @@ inline float4 matrix_mult(float16 matrix, float4 vector)
   return result;             
 }
 
+// 4x4 matrix transpose 
 inline float16 matrix_transpose(float16 matrix) 
 {
   return matrix.s048C159D26AE37BF;
+}
+
+/*
+// read_imagef with matrix multiplication, int4 version:
+inline float4 trans_read_imagef( image3d_t image,
+                           sampler_t sampler,
+                           float16 matrix,
+                           int4 vector)
+{
+  const int4 transvector = convert_int4(matrix_mult(matrix,convert_float4(vector))); 
+  return read_imagef(image, sampler, transvector);
+}
+/**/
+
+// read_imagef with matrix multiplication, float4 version:
+inline float4 trans_read_imagef( image3d_t image,
+                                 sampler_t sampler,
+                                 float16 matrix,
+                                 float4 vector)
+{
+  vector.w=1;
+  const float4 transvector = matrix_mult(matrix,vector); 
+  return read_imagef(image, sampler, transvector);
 }
 

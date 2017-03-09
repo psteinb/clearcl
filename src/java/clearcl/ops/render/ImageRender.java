@@ -18,6 +18,7 @@ import clearcl.ocllib.OCLlib;
 import clearcl.ops.OpsBase;
 import clearcl.ops.render.enums.Algorithm;
 import clearcl.ops.render.enums.Parameter;
+import clearcl.util.MatrixUtils;
 import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
 
@@ -117,51 +118,19 @@ public class ImageRender extends OpsBase
 
   private ClearCLBuffer getMatrixBuffer(Parameter pParameter)
   {
+    Matrix4f lMatrix = mMatrixParameters.get(pParameter);
+    if (lMatrix == null)
+      return null;
+    
     ClearCLBuffer lBuffer = mMatrixBufferParameters.get(pParameter);
-    if (lBuffer == null)
-    {
-      Matrix4f lMatrix = mMatrixParameters.get(pParameter);
-      if (lMatrix == null)
-        return null;
-
-      lBuffer = matrixToClearCLBuffer(lMatrix);
-      mMatrixBufferParameters.put(pParameter, lBuffer);
-    }
-
+    lBuffer = MatrixUtils.matrixToBuffer(getContext(),lBuffer,lMatrix);
+    mMatrixBufferParameters.put(pParameter, lBuffer);
+    
     return lBuffer;
   }
 
-  private ClearCLBuffer matrixToClearCLBuffer(Matrix4f pMatrix)
-  {
-    ClearCLContext lContext = getContext();
 
-    ClearCLBuffer lClearCLBuffer =
-                                 lContext.createBuffer(MemAllocMode.Best,
-                                                       HostAccessType.WriteOnly,
-                                                       KernelAccessType.ReadOnly,
-                                                       1,
-                                                       NativeTypeEnum.Float,
-                                                       16);
-    float[] lMatrixToArray = matrixToArray(pMatrix);
 
-    OffHeapMemory lBuffer = OffHeapMemory.allocateFloats(16);
-    lBuffer.copyFrom(lMatrixToArray);
-
-    lClearCLBuffer.readFrom(lBuffer, true);
-
-    return lClearCLBuffer;
-  }
-
-  private float[] matrixToArray(Matrix4f pMatrix)
-  {
-    float[] lArray = new float[16];
-    int k = 0;
-    for (int i = 0; i < 4; i++)
-      for (int j = 0; j < 4; j++)
-        lArray[k++] = pMatrix.getElement(i, j);
-
-    return lArray;
-  }
 
   public void render(ClearCLImage p3DImage,
                      ClearCLBuffer pRGBABuffer,
