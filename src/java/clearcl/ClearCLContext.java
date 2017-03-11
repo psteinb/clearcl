@@ -52,16 +52,6 @@ public class ClearCLContext extends ClearCLBase
   }
 
   /**
-   * Returns corresponding device
-   * 
-   * @return device
-   */
-  public ClearCLDevice getDevice()
-  {
-    return mDevice;
-  }
-
-  /**
    * Returns the default queue. All devices are created with a default queue.
    * 
    * @return default queue
