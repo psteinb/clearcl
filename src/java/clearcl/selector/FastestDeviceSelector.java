@@ -84,7 +84,10 @@ public class FastestDeviceSelector implements DeviceSelector
   {
     for (ClearCLDevice lDevice : pDevices)
     {
-      if (lDevice.getName().trim().toLowerCase().equals(pDeviceName.toLowerCase()))
+      if (lDevice.getName()
+                 .trim()
+                 .toLowerCase()
+                 .equals(pDeviceName.toLowerCase()))
         return lDevice;
     }
     return null;

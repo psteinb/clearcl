@@ -44,7 +44,7 @@ public class ClearCLBestDeviceTests
    *           NA
    */
   @Test
-  public void testBackenJavaCL() throws Exception
+  public void testBackendJavaCL() throws Exception
   {
     ClearCLBackendJavaCL lClearCLBackendJavaCL =
                                                new ClearCLBackendJavaCL();
