@@ -64,7 +64,7 @@ public class ClearCLBestDeviceTests
                                                             BadDeviceSelector.NotIntegratedIntel,
                                                             GlobalMemorySelector.MAX);
 
-        // System.out.println(lClearClDevice);
+        System.out.println(lClearClDevice);
         assertTrue(lClearClDevice != null);
       }
 
@@ -74,7 +74,7 @@ public class ClearCLBestDeviceTests
                                                             BadDeviceSelector.NotIntegratedIntel,
                                                             FastestDeviceSelector.FastestForImages);
 
-        // System.out.println(lClearClDevice);
+        System.out.println(lClearClDevice);
         assertTrue(lClearClDevice != null);
       }
 
@@ -83,7 +83,7 @@ public class ClearCLBestDeviceTests
                                      lClearCL.getBestDevice(DeviceTypeSelector.GPU,
                                                             FastestDeviceSelector.FastestForImages);
 
-        // System.out.println(lClearClDevice);
+        System.out.println(lClearClDevice);
         assertTrue(lClearClDevice != null);
       }
 
@@ -92,7 +92,7 @@ public class ClearCLBestDeviceTests
                                      lClearCL.getBestDevice(DeviceTypeSelector.GPU,
                                                             FastestDeviceSelector.FastestForBuffers);
 
-        // System.out.println(lClearClDevice);
+        System.out.println(lClearClDevice);
         assertTrue(lClearClDevice != null);
       }
     }
