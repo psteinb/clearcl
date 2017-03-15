@@ -33,7 +33,7 @@ Find the latest version on [BinTray](https://bintray.com/clearvolume/ClearVolume
 
 ### With Gradle:
 ~~~~
-     compile 'net.clearvolume:clearcl:0.3.20'
+     compile 'net.clearvolume:clearcl:0.3.36'
 ~~~~
 
 ~~~~
@@ -49,7 +49,7 @@ repositories {
 <dependency>
   <groupId>net.clearvolume</groupId>
   <artifactId>clearcl</artifactId>
-  <version>0.3.20</version>
+  <version>0.3.36</version>
   <type>pom</type>
 </dependency>
 ~~~~
@@ -64,6 +64,8 @@ repositories {
      <url>http://dl.bintray.com/clearvolume/ClearVolume</url>
  </repository>
 ~~~~
+
+
 
 ## Getting started:
 
@@ -91,5 +93,4 @@ using specific classes. ClearCL backends further encapsulate these within [Clear
 ## Contributors
 
 * Loic Royer ( royer -at- mpi-cbg -point- de )
-* Martin Weigert ( mweigert -at- mpi-cbg -point- de )
 * you?
