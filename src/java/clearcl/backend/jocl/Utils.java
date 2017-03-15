@@ -6,13 +6,13 @@ import static org.jocl.CL.clGetPlatformInfo;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import org.jocl.Pointer;
-import org.jocl.cl_device_id;
-import org.jocl.cl_platform_id;
-
 import clearcl.ClearCLPeerPointer;
 import clearcl.backend.BackendUtils;
 import clearcl.backend.SizeOf;
+
+import org.jocl.Pointer;
+import org.jocl.cl_device_id;
+import org.jocl.cl_platform_id;
 
 /**
  * Utility class for JOCL backend

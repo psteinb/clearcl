@@ -9,8 +9,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import org.junit.Test;
-
 import clearcl.ClearCL;
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLContext;
@@ -30,6 +28,8 @@ import clearcl.enums.KernelAccessType;
 import clearcl.exceptions.OpenCLException;
 import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
+
+import org.junit.Test;
 
 /**
  * Basic tests.

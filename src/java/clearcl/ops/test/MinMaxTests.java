@@ -4,8 +4,6 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import org.junit.Test;
-
 import clearcl.ClearCL;
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLContext;
@@ -21,6 +19,8 @@ import clearcl.ops.math.MinMax;
 import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
 
+import org.junit.Test;
+
 /**
  * MinMax tests
  *
@@ -31,12 +31,15 @@ public class MinMaxTests
 
   /**
    * Tests min max computation with buffer float.
-   * @throws IOException NA
+   * 
+   * @throws IOException
+   *           NA
    */
   @Test
   public void testMinMaxBufferFloat() throws IOException
   {
-    ClearCLBackendInterface lClearCLBackend = new ClearCLBackendJavaCL();
+    ClearCLBackendInterface lClearCLBackend =
+                                            new ClearCLBackendJavaCL();
 
     try (ClearCL lClearCL = new ClearCL(lClearCLBackend))
     {
@@ -44,12 +47,14 @@ public class MinMaxTests
 
       ClearCLContext lCreateContext = lBestGPUDevice.createContext();
 
-      ClearCLBuffer lCLBuffer = lCreateContext.createBuffer(HostAccessType.ReadWrite,
-                                                            KernelAccessType.ReadWrite,
-                                                            NativeTypeEnum.Float,
-                                                            2048 * 2048 + 1);
+      ClearCLBuffer lCLBuffer =
+                              lCreateContext.createBuffer(HostAccessType.ReadWrite,
+                                                          KernelAccessType.ReadWrite,
+                                                          NativeTypeEnum.Float,
+                                                          2048 * 2048 + 1);
 
-      OffHeapMemory lBuffer = OffHeapMemory.allocateFloats(lCLBuffer.getLength());
+      OffHeapMemory lBuffer =
+                            OffHeapMemory.allocateFloats(lCLBuffer.getLength());
 
       float lJavaMin = Float.POSITIVE_INFINITY;
       float lJavaMax = Float.NEGATIVE_INFINITY;
@@ -61,17 +66,18 @@ public class MinMaxTests
         lBuffer.setFloatAligned(i, lValue);
       }
 
-      //System.out.println("lJavaMin=" + lJavaMin);
-      //System.out.println("lJavaMax=" + lJavaMax);
+      // System.out.println("lJavaMin=" + lJavaMin);
+      // System.out.println("lJavaMax=" + lJavaMax);
 
       lCLBuffer.readFrom(lBuffer, true);
 
-      MinMax lReductions = new MinMax(lCreateContext.getDefaultQueue());
+      MinMax lReductions =
+                         new MinMax(lCreateContext.getDefaultQueue());
 
       float[] lOpenCLMinMax = lReductions.minmax(lCLBuffer, 3712);
 
-      //System.out.println("lOpenCL Min=" + lOpenCLMinMax[0]);
-      //System.out.println("lOpenCL Max=" + lOpenCLMinMax[1]);
+      // System.out.println("lOpenCL Min=" + lOpenCLMinMax[0]);
+      // System.out.println("lOpenCL Max=" + lOpenCLMinMax[1]);
 
       assertEquals(lJavaMin, lOpenCLMinMax[0], 0.0001);
       assertEquals(lJavaMax, lOpenCLMinMax[1], 0.0001);
@@ -104,13 +110,16 @@ public class MinMaxTests
   }
 
   /**
-   * Tests min max computation of 1D image 
-   * @throws IOException NA
+   * Tests min max computation of 1D image
+   * 
+   * @throws IOException
+   *           NA
    */
   @Test
   public void testMinMaxImage1F() throws IOException
   {
-    ClearCLBackendInterface lClearCLBackend = new ClearCLBackendJavaCL();
+    ClearCLBackendInterface lClearCLBackend =
+                                            new ClearCLBackendJavaCL();
 
     try (ClearCL lClearCL = new ClearCL(lClearCLBackend))
     {
@@ -118,11 +127,12 @@ public class MinMaxTests
 
       ClearCLContext lCreateContext = lBestGPUDevice.createContext();
 
-      ClearCLImage lClearCLImage = lCreateContext.createImage(HostAccessType.ReadWrite,
-                                                              KernelAccessType.ReadWrite,
-                                                              ImageChannelOrder.Intensity,
-                                                              ImageChannelDataType.Float,
-                                                              2048 + 1);
+      ClearCLImage lClearCLImage =
+                                 lCreateContext.createImage(HostAccessType.ReadWrite,
+                                                            KernelAccessType.ReadWrite,
+                                                            ImageChannelOrder.Intensity,
+                                                            ImageChannelDataType.Float,
+                                                            2048 + 1);
 
       testMinMaxWith(lCreateContext, lClearCLImage);
 
@@ -131,13 +141,16 @@ public class MinMaxTests
   }
 
   /**
-   * Tests min max computation of 2D image 
-   * @throws IOException NA
+   * Tests min max computation of 2D image
+   * 
+   * @throws IOException
+   *           NA
    */
   @Test
   public void testMinMaxImage2F() throws IOException
   {
-    ClearCLBackendInterface lClearCLBackend = new ClearCLBackendJavaCL();
+    ClearCLBackendInterface lClearCLBackend =
+                                            new ClearCLBackendJavaCL();
 
     try (ClearCL lClearCL = new ClearCL(lClearCLBackend))
     {
@@ -145,12 +158,13 @@ public class MinMaxTests
 
       ClearCLContext lCreateContext = lBestGPUDevice.createContext();
 
-      ClearCLImage lClearCLImage = lCreateContext.createImage(HostAccessType.ReadWrite,
-                                                              KernelAccessType.ReadWrite,
-                                                              ImageChannelOrder.Intensity,
-                                                              ImageChannelDataType.Float,
-                                                              2048 + 1,
-                                                              2048 - 1);
+      ClearCLImage lClearCLImage =
+                                 lCreateContext.createImage(HostAccessType.ReadWrite,
+                                                            KernelAccessType.ReadWrite,
+                                                            ImageChannelOrder.Intensity,
+                                                            ImageChannelDataType.Float,
+                                                            2048 + 1,
+                                                            2048 - 1);
 
       testMinMaxWith(lCreateContext, lClearCLImage);
 
@@ -159,13 +173,16 @@ public class MinMaxTests
   }
 
   /**
-   * Tests min max computation of 3D image 
-   * @throws IOException NA
+   * Tests min max computation of 3D image
+   * 
+   * @throws IOException
+   *           NA
    */
   @Test
   public void testMinMaxImage3F() throws IOException
   {
-    ClearCLBackendInterface lClearCLBackend = new ClearCLBackendJavaCL();
+    ClearCLBackendInterface lClearCLBackend =
+                                            new ClearCLBackendJavaCL();
 
     try (ClearCL lClearCL = new ClearCL(lClearCLBackend))
     {
@@ -173,13 +190,14 @@ public class MinMaxTests
 
       ClearCLContext lCreateContext = lBestGPUDevice.createContext();
 
-      ClearCLImage lClearCLImage = lCreateContext.createImage(HostAccessType.ReadWrite,
-                                                              KernelAccessType.ReadWrite,
-                                                              ImageChannelOrder.Intensity,
-                                                              ImageChannelDataType.Float,
-                                                              128 + 1,
-                                                              128 - 1,
-                                                              128 - 3);
+      ClearCLImage lClearCLImage =
+                                 lCreateContext.createImage(HostAccessType.ReadWrite,
+                                                            KernelAccessType.ReadWrite,
+                                                            ImageChannelOrder.Intensity,
+                                                            ImageChannelDataType.Float,
+                                                            128 + 1,
+                                                            128 - 1,
+                                                            128 - 3);
 
       testMinMaxWith(lCreateContext, lClearCLImage);
 
@@ -190,31 +208,32 @@ public class MinMaxTests
   private void testMinMaxWith(ClearCLContext lCreateContext,
                               ClearCLImage lClearCLImage) throws IOException
   {
-    OffHeapMemory lBuffer = OffHeapMemory.allocateFloats(lClearCLImage.getVolume());
+    OffHeapMemory lBuffer =
+                          OffHeapMemory.allocateFloats(lClearCLImage.getVolume());
 
     float lJavaMin = Float.POSITIVE_INFINITY;
     float lJavaMax = Float.NEGATIVE_INFINITY;
     for (int i = 0; i < lClearCLImage.getVolume(); i++)
     {
-      float lValue = (1f+(i%127)) / 128;
+      float lValue = (1f + (i % 127)) / 128;
       lJavaMin = Math.min(lJavaMin, lValue);
       lJavaMax = Math.max(lJavaMax, lValue);
       lBuffer.setFloatAligned(i, lValue);
     }
 
-    //System.out.println("lJavaMin=" + lJavaMin);
-    //System.out.println("lJavaMax=" + lJavaMax);
+    // System.out.println("lJavaMin=" + lJavaMin);
+    // System.out.println("lJavaMax=" + lJavaMax);
 
     lClearCLImage.readFrom(lBuffer, true);
 
     MinMax lReductions = new MinMax(lCreateContext.getDefaultQueue());
 
-    //System.out.println("before minmax");
+    // System.out.println("before minmax");
     float[] lOpenCLMinMax = lReductions.minmax(lClearCLImage, 32);
-    //System.out.println("after minmax");
+    // System.out.println("after minmax");
 
-    //System.out.println("lOpenCL Min=" + lOpenCLMinMax[0]);
-    //System.out.println("lOpenCL Max=" + lOpenCLMinMax[1]);
+    // System.out.println("lOpenCL Min=" + lOpenCLMinMax[0]);
+    // System.out.println("lOpenCL Max=" + lOpenCLMinMax[1]);
 
     assertEquals(lJavaMin, lOpenCLMinMax[0], 0.0000001);
     assertEquals(lJavaMax, lOpenCLMinMax[1], 0.0000001);

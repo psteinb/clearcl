@@ -14,7 +14,8 @@ public class ClearCLInvalidExecutionRange extends ClearCLException
   /**
    * Instanciates the exception with a given message.
    * 
-   * @param pMessage message
+   * @param pMessage
+   *          message
    */
   public ClearCLInvalidExecutionRange(String pMessage)
   {

@@ -22,7 +22,8 @@ public class GlobalMemorySelector implements DeviceSelector
    * Global memory selector that returns the devices with at least a given
    * amount of memory.
    * 
-   * @param pAtLeastBytes least amount of memory in bytes
+   * @param pAtLeastBytes
+   *          least amount of memory in bytes
    * @return device selector
    */
   public static GlobalMemorySelector ATLEAST(long pAtLeastBytes)

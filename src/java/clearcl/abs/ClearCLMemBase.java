@@ -127,7 +127,5 @@ public abstract class ClearCLMemBase extends ClearCLBase
                          getBackend(),
                          getPeerPointer());
   }
-  
-  
 
 }

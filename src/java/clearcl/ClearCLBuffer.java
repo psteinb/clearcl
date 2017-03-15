@@ -31,7 +31,6 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   private long mNumberOfChannels;
   private final long[] mDimensions;
 
-
   /**
    * This constructor is called internally from an OpenCl context.
    * 
@@ -39,7 +38,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    *          context
    * @param pBufferPointer
    *          buffer pointer
-   * @param pMemAllocMode 
+   * @param pMemAllocMode
    * @param pHostAccessType
    *          host access type
    * @param pKernelAccessType
@@ -51,14 +50,18 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    */
   ClearCLBuffer(ClearCLContext pClearCLContext,
                 ClearCLPeerPointer pBufferPointer,
-                MemAllocMode pMemAllocMode, 
+                MemAllocMode pMemAllocMode,
                 HostAccessType pHostAccessType,
                 KernelAccessType pKernelAccessType,
                 long pNumberOfChannels,
                 NativeTypeEnum pNativeType,
                 long... pDimensions)
   {
-    super(pClearCLContext.getBackend(), pBufferPointer, pMemAllocMode, pHostAccessType, pKernelAccessType);
+    super(pClearCLContext.getBackend(),
+          pBufferPointer,
+          pMemAllocMode,
+          pHostAccessType,
+          pKernelAccessType);
     mClearCLContext = pClearCLContext;
     mNumberOfChannels = pNumberOfChannels;
     mNativeType = pNativeType;
@@ -67,8 +70,11 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Fills the buffer with a given byte.
-   * @param pByte byte to fill buffer with
-   * @param pBlockingFill true -> blocking call, false -> asynchronous call
+   * 
+   * @param pByte
+   *          byte to fill buffer with
+   * @param pBlockingFill
+   *          true -> blocking call, false -> asynchronous call
    */
   public void fill(byte pByte, boolean pBlockingFill)
   {
@@ -669,7 +675,6 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   {
     return mClearCLContext;
   }
-  
 
   /**
    * Returns data type.
@@ -716,8 +721,6 @@ public class ClearCLBuffer extends ClearCLMemBase implements
     return getLength() * getNumberOfChannels()
            * mNativeType.getSizeInBytes();
   }
-
-
 
   @Override
   public String toString()

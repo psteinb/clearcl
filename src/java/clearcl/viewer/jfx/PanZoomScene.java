@@ -164,7 +164,7 @@ public class PanZoomScene extends Scene
       double lDelta = event.getDeltaY() * 0.001;
       double lDeltaFactor = Math.exp(lDelta);
 
-      scaleScene(lDeltaFactor,true);
+      scaleScene(lDeltaFactor, true);
 
       if (!mPivotInitialized)
       {
@@ -177,12 +177,12 @@ public class PanZoomScene extends Scene
 
     widthProperty().addListener((obs, o, n) -> {
       // resetZoomPivot();
-      scaleScene(Math.sqrt(n.doubleValue() / o.doubleValue()),true);
+      scaleScene(Math.sqrt(n.doubleValue() / o.doubleValue()), true);
     });
 
     heightProperty().addListener((obs, o, n) -> {
       // resetZoomPivot();
-      scaleScene(Math.sqrt(n.doubleValue() / o.doubleValue()),true);
+      scaleScene(Math.sqrt(n.doubleValue() / o.doubleValue()), true);
     });
 
   }
@@ -190,8 +190,10 @@ public class PanZoomScene extends Scene
   /**
    * Scales scene by an isotropic factor
    * 
-   * @param pScaleFactor scale factor
-   * @param pClamp true -> limit to factor 2 up/down scaling
+   * @param pScaleFactor
+   *          scale factor
+   * @param pClamp
+   *          true -> limit to factor 2 up/down scaling
    */
   public void scaleScene(double pScaleFactor, boolean pClamp)
   {

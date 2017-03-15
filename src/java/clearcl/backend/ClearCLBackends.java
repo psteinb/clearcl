@@ -1,6 +1,7 @@
 package clearcl.backend;
 
 import java.util.ArrayList;
+
 import clearcl.backend.javacl.ClearCLBackendJavaCL;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.benchmark.Benchmark;
@@ -44,7 +45,7 @@ public class ClearCLBackends
     {
       System.err.println("Failed to instanciate JavaCL backend during backend enumeration (not critical)");
     }
-    
+
     return lList;
   }
 
@@ -123,10 +124,10 @@ public class ClearCLBackends
       lClearCLBackend = getFunctionalBackend();
       break;
     }
-    
-    if(lClearCLBackend==null)
+
+    if (lClearCLBackend == null)
       lClearCLBackend = new ClearCLBackendJOCL();
-    
+
     println(" --> Using backend: "
             + lClearCLBackend.getClass().getSimpleName());
 

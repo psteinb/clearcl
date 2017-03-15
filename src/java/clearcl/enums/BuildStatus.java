@@ -8,5 +8,5 @@ package clearcl.enums;
 @SuppressWarnings("javadoc")
 public enum BuildStatus
 {
-  None, Error, Success, InProgress;
+ None, Error, Success, InProgress;
 }

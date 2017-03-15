@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.junit.Test;
-
 import clearcl.ClearCL;
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLContext;
@@ -24,6 +22,8 @@ import clearcl.selector.DeviceTypeSelector;
 import clearcl.selector.GlobalMemorySelector;
 import coremem.enums.NativeTypeEnum;
 
+import org.junit.Test;
+
 /**
  * Basic Kernel tests
  *
@@ -36,7 +36,9 @@ public class ClearCLKernelTests
 
   /**
    * Test with JOCL backend
-   * @throws Exception NA
+   * 
+   * @throws Exception
+   *           NA
    */
   @Test
   public void testBackendJOCL() throws Exception
@@ -49,12 +51,15 @@ public class ClearCLKernelTests
 
   /**
    * Test with JavaCL backend
-   * @throws Exception NA
+   * 
+   * @throws Exception
+   *           NA
    */
   @Test
   public void testBackendJavaCL() throws Exception
   {
-    ClearCLBackendJavaCL lClearCLBackendJavaCL = new ClearCLBackendJavaCL();
+    ClearCLBackendJavaCL lClearCLBackendJavaCL =
+                                               new ClearCLBackendJavaCL();
 
     testWithBackend(lClearCLBackendJavaCL);
 
@@ -65,39 +70,43 @@ public class ClearCLKernelTests
     try (ClearCL lClearCL = new ClearCL(pClearCLBackendInterface))
     {
 
-      ClearCLDevice lClearClDevice = lClearCL.getBestDevice(DeviceTypeSelector.GPU,
-                                                            BadDeviceSelector.NotIntegratedIntel,
-                                                            GlobalMemorySelector.MAX);
+      ClearCLDevice lClearClDevice =
+                                   lClearCL.getBestDevice(DeviceTypeSelector.GPU,
+                                                          BadDeviceSelector.NotIntegratedIntel,
+                                                          GlobalMemorySelector.MAX);
 
-      //System.out.println(lClearClDevice.getInfoString());
+      // System.out.println(lClearClDevice.getInfoString());
 
       ClearCLContext lContext = lClearClDevice.createContext();
 
-      ClearCLProgram lProgram = lContext.createProgram(this.getClass(),
-                                                       "test.cl");
+      ClearCLProgram lProgram =
+                              lContext.createProgram(this.getClass(),
+                                                     "test.cl");
       lProgram.addDefine("CONSTANT", "10");
       lProgram.addBuildOptionAllMathOpt();
 
       BuildStatus lBuildStatus = lProgram.buildAndLog();
 
-
       assertEquals(lBuildStatus, BuildStatus.Success);
       // assertTrue(lProgram.getBuildLog().isEmpty());
 
-      ClearCLBuffer lBufferA = lContext.createBuffer(HostAccessType.WriteOnly,
-                                                     KernelAccessType.ReadOnly,
-                                                     NativeTypeEnum.Float,
-                                                     cFloatArrayLength);
+      ClearCLBuffer lBufferA =
+                             lContext.createBuffer(HostAccessType.WriteOnly,
+                                                   KernelAccessType.ReadOnly,
+                                                   NativeTypeEnum.Float,
+                                                   cFloatArrayLength);
 
-      ClearCLBuffer lBufferB = lContext.createBuffer(HostAccessType.WriteOnly,
-                                                     KernelAccessType.ReadOnly,
-                                                     NativeTypeEnum.Float,
-                                                     cFloatArrayLength);
+      ClearCLBuffer lBufferB =
+                             lContext.createBuffer(HostAccessType.WriteOnly,
+                                                   KernelAccessType.ReadOnly,
+                                                   NativeTypeEnum.Float,
+                                                   cFloatArrayLength);
 
-      ClearCLBuffer lBufferC = lContext.createBuffer(HostAccessType.ReadOnly,
-                                                     KernelAccessType.WriteOnly,
-                                                     NativeTypeEnum.Float,
-                                                     cFloatArrayLength);
+      ClearCLBuffer lBufferC =
+                             lContext.createBuffer(HostAccessType.ReadOnly,
+                                                   KernelAccessType.WriteOnly,
+                                                   NativeTypeEnum.Float,
+                                                   cFloatArrayLength);
 
       ClearCLKernel lKernel = lProgram.createKernel("buffersum");
       lKernel.setGlobalSizes(cFloatArrayLength);
@@ -150,7 +159,7 @@ public class ClearCLKernelTests
       }
 
       boolean lFailed = false;
-      
+
       // what if a argument is missing?
       try
       {
@@ -182,7 +191,7 @@ public class ClearCLKernelTests
       {
         System.out.println("Caught as expected: " + e);
       }
-      
+
       assertTrue(!lFailed);
 
     }

@@ -38,7 +38,8 @@ public class RawWriter extends WriterBase
 
   /**
    * Instanciates an image raw writer. The voxel values produced by the phantom
-   * are scaled accoding to y = a*x+b, and the data is saved using the provided data type.
+   * are scaled accoding to y = a*x+b, and the data is saved using the provided
+   * data type.
    * 
    * @param pNativeTypeEnum
    *          native type to save to.
@@ -47,7 +48,9 @@ public class RawWriter extends WriterBase
    * @param pOffset
    *          value offset b
    */
-  public RawWriter(NativeTypeEnum pNativeTypeEnum, float pScaling, float pOffset)
+  public RawWriter(NativeTypeEnum pNativeTypeEnum,
+                   float pScaling,
+                   float pOffset)
   {
     super(pNativeTypeEnum, pScaling, pOffset);
   }

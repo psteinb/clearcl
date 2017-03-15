@@ -8,5 +8,5 @@ package clearcl.enums;
 @SuppressWarnings("javadoc")
 public enum BenchmarkTest
 {
-  Buffer, Image
+ Buffer, Image
 }

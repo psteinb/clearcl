@@ -276,7 +276,7 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
    */
   private void setArgumentsInternal()
   {
-    //System.out.println("kernel:" + this.toString());
+    // System.out.println("kernel:" + this.toString());
 
     for (final Map.Entry<String, Integer> lEntry : mNameToIndexMap.entrySet())
     {

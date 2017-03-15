@@ -44,7 +44,7 @@ __kernel void image_render_2df(          __read_only  image2d_t  image,
 //default image_render_2df vmax=1f
 //default image_render_2df gamma=1f
 __kernel void buffer_render_2df(__global              float*     image,
-                                __global __write_only uchar*     rgbbuffer,
+                                __global __write_only uchar*     rgbabuffer,
                                                       float      vmin,
                                                       float      vmax,
                                                       float      gamma)
@@ -60,5 +60,5 @@ __kernel void buffer_render_2df(__global              float*     image,
   
   uchar bytevalue = (uchar)(255*value);
   
-  vstore4((uchar4){bytevalue,bytevalue,bytevalue,255}, i, rgbbuffer);
+  vstore4((uchar4){bytevalue,bytevalue,bytevalue,255}, i, rgbabuffer);
 }

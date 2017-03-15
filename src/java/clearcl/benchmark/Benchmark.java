@@ -157,7 +157,8 @@ public class Benchmark
    * @param pRepeats
    *          nb of repeats
    * @return elapsed time in ms
-   * @throws IOException NA
+   * @throws IOException
+   *           NA
    */
   public static double executeBenchmarkOnDevice(ClearCLDevice pClearClDevice,
                                                 BenchmarkTest pBenchmarkTest,

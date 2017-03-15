@@ -1,7 +1,6 @@
 package clearcl.viewer.demo;
 
 import java.io.IOException;
-import org.junit.Test;
 
 import clearcl.ClearCL;
 import clearcl.ClearCLContext;
@@ -16,6 +15,8 @@ import clearcl.enums.ImageChannelOrder;
 import clearcl.ocllib.OCLlib;
 import clearcl.test.ClearCLBasicTests;
 import clearcl.viewer.ClearCLImageViewer;
+
+import org.junit.Test;
 
 /**
  * View image demos

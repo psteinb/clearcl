@@ -2,8 +2,6 @@ package clearcl.test;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
-
 import clearcl.ClearCL;
 import clearcl.ClearCLDevice;
 import clearcl.backend.ClearCLBackendInterface;
@@ -13,6 +11,8 @@ import clearcl.selector.BadDeviceSelector;
 import clearcl.selector.DeviceTypeSelector;
 import clearcl.selector.FastestDeviceSelector;
 import clearcl.selector.GlobalMemorySelector;
+
+import org.junit.Test;
 
 /**
  * Test 'best device' functionality

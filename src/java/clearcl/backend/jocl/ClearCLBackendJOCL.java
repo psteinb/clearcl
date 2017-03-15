@@ -20,19 +20,6 @@ import static org.jocl.CL.clReleaseProgram;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
-import org.jocl.CL;
-import org.jocl.Pointer;
-import org.jocl.cl_command_queue;
-import org.jocl.cl_context;
-import org.jocl.cl_context_properties;
-import org.jocl.cl_device_id;
-import org.jocl.cl_image_desc;
-import org.jocl.cl_image_format;
-import org.jocl.cl_kernel;
-import org.jocl.cl_mem;
-import org.jocl.cl_platform_id;
-import org.jocl.cl_program;
-
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLImage;
 import clearcl.ClearCLLocalMemory;
@@ -54,8 +41,21 @@ import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.util.Size;
 
+import org.jocl.CL;
+import org.jocl.Pointer;
+import org.jocl.cl_command_queue;
+import org.jocl.cl_context;
+import org.jocl.cl_context_properties;
+import org.jocl.cl_device_id;
+import org.jocl.cl_image_desc;
+import org.jocl.cl_image_format;
+import org.jocl.cl_kernel;
+import org.jocl.cl_mem;
+import org.jocl.cl_platform_id;
+import org.jocl.cl_program;
+
 /**
- * CLearCL JOCL backend. Uses the JOCL library to access OpenCL functions. 
+ * CLearCL JOCL backend. Uses the JOCL library to access OpenCL functions.
  *
  * @author royer
  */
@@ -607,7 +607,7 @@ public class ClearCLBackendJOCL extends ClearCLBackendBase
   {
     BackendUtils.checkExceptions(() -> {
       long lObjectSize = Size.of(pObject);
-      
+
       final cl_kernel lKernelPointer =
                                      (cl_kernel) pKernelPeerPointer.getPointer();
 

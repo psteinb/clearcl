@@ -12,7 +12,9 @@ public class ClearCLIllegalArgumentException extends ClearCLException
 
   /**
    * Instanciates an exception with a given error message
-   * @param pMessage error message
+   * 
+   * @param pMessage
+   *          error message
    */
   public ClearCLIllegalArgumentException(String pMessage)
   {

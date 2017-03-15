@@ -6,16 +6,6 @@ import java.nio.Buffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bridj.Pointer;
-import org.bridj.Pointer.StringType;
-import org.bridj.SizeT;
-
-import com.nativelibs4java.opencl.CLPlatform.ContextProperties;
-import com.nativelibs4java.opencl.library.IOpenCLLibrary;
-import com.nativelibs4java.opencl.library.OpenCLLibrary;
-import com.nativelibs4java.opencl.library.cl_image_desc;
-import com.nativelibs4java.opencl.library.cl_image_format;
-
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLImage;
 import clearcl.ClearCLLocalMemory;
@@ -34,9 +24,20 @@ import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.ClearCLUnsupportedException;
 import clearcl.exceptions.OpenCLException;
+
+import com.nativelibs4java.opencl.CLPlatform.ContextProperties;
+import com.nativelibs4java.opencl.library.IOpenCLLibrary;
+import com.nativelibs4java.opencl.library.OpenCLLibrary;
+import com.nativelibs4java.opencl.library.cl_image_desc;
+import com.nativelibs4java.opencl.library.cl_image_format;
+
 import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.util.Size;
+
+import org.bridj.Pointer;
+import org.bridj.Pointer.StringType;
+import org.bridj.SizeT;
 
 /**
  * CLearCL JOCL backend. Uses the JavaCL library to access OpenCL functions.

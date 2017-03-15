@@ -6,21 +6,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.vecmath.Matrix4f;
 
 import clearcl.ClearCLBuffer;
-import clearcl.ClearCLContext;
 import clearcl.ClearCLImage;
 import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
 import clearcl.ClearCLQueue;
-import clearcl.enums.HostAccessType;
-import clearcl.enums.KernelAccessType;
-import clearcl.enums.MemAllocMode;
 import clearcl.ocllib.OCLlib;
 import clearcl.ops.OpsBase;
 import clearcl.ops.render.enums.Algorithm;
 import clearcl.ops.render.enums.Parameter;
 import clearcl.util.MatrixUtils;
-import coremem.enums.NativeTypeEnum;
-import coremem.offheap.OffHeapMemory;
 
 /**
  * Fractional Brownian Noise generation.
@@ -121,16 +115,15 @@ public class ImageRender extends OpsBase
     Matrix4f lMatrix = mMatrixParameters.get(pParameter);
     if (lMatrix == null)
       return null;
-    
+
     ClearCLBuffer lBuffer = mMatrixBufferParameters.get(pParameter);
-    lBuffer = MatrixUtils.matrixToBuffer(getContext(),lBuffer,lMatrix);
+    lBuffer = MatrixUtils.matrixToBuffer(getContext(),
+                                         lBuffer,
+                                         lMatrix);
     mMatrixBufferParameters.put(pParameter, lBuffer);
-    
+
     return lBuffer;
   }
-
-
-
 
   public void render(ClearCLImage p3DImage,
                      ClearCLBuffer pRGBABuffer,

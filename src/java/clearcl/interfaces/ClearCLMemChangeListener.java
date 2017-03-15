@@ -17,10 +17,12 @@ public interface ClearCLMemChangeListener
    * called but no effective change of the data occured, however, if there is a
    * real change then a call is made.
    * 
-   * @param pQueue queue on whichb change happened (or null if no queue involved)
+   * @param pQueue
+   *          queue on whichb change happened (or null if no queue involved)
    * @param pClearCLMemBase
    *          buffer or image that changed.
    */
-  public void change(ClearCLQueue pQueue, ClearCLMemBase pClearCLMemBase);
+  public void change(ClearCLQueue pQueue,
+                     ClearCLMemBase pClearCLMemBase);
 
 }

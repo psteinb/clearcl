@@ -2,9 +2,9 @@ package clearcl.backend.jocl.test.jocl;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
-
 import clearcl.backend.jocl.ClearCLBackendJOCL;
+
+import org.junit.Test;
 
 /**
  *
@@ -22,7 +22,7 @@ public class ClearCLBackendJOCLTests
   {
     ClearCLBackendJOCL lClearCLBackendJOCL = new ClearCLBackendJOCL();
 
-    assertTrue(lClearCLBackendJOCL.getNumberOfPlatforms() > 0);    
+    assertTrue(lClearCLBackendJOCL.getNumberOfPlatforms() > 0);
   }
 
 }

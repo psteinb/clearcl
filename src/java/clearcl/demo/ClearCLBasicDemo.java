@@ -2,12 +2,11 @@ package clearcl.demo;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-
-import org.junit.Test;
 
 import clearcl.ClearCL;
 import clearcl.ClearCLBuffer;
@@ -27,6 +26,8 @@ import clearcl.test.ClearCLBasicTests;
 import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
 
+import org.junit.Test;
+
 /**
  * ClearCL basic demos
  *
@@ -39,7 +40,9 @@ public class ClearCLBasicDemo
 
   /**
    * Basic demo
-   * @throws Exception NA
+   * 
+   * @throws Exception
+   *           NA
    */
   @Test
   public void demoClearCL() throws Exception

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import org.junit.Test;
-
 import clearcl.ClearCL;
 import clearcl.ClearCLDevice;
 import clearcl.backend.ClearCLBackendInterface;
@@ -13,6 +11,8 @@ import clearcl.backend.javacl.ClearCLBackendJavaCL;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.benchmark.Benchmark;
 import clearcl.enums.BenchmarkTest;
+
+import org.junit.Test;
 
 /**
  * Bencmark demo

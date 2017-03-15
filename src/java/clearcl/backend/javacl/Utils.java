@@ -15,6 +15,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import clearcl.ClearCLPeerPointer;
+import clearcl.backend.BackendUtils;
+import clearcl.backend.SizeOf;
+import clearcl.exceptions.ClearCLUnsupportedException;
+
+import com.nativelibs4java.opencl.CLPlatform.ContextProperties;
+import com.nativelibs4java.opencl.JavaCL.OpenCLProbeLibrary;
+import com.nativelibs4java.opencl.library.IOpenCLLibrary.cl_platform_id;
+import com.nativelibs4java.opencl.library.OpenCLLibrary;
+
 import org.bridj.BridJ;
 import org.bridj.Platform;
 import org.bridj.Pointer;
@@ -22,16 +32,6 @@ import org.bridj.Pointer.StringType;
 import org.bridj.SizeT;
 import org.bridj.util.ProcessUtils;
 import org.bridj.util.StringUtils;
-
-import com.nativelibs4java.opencl.CLPlatform.ContextProperties;
-import com.nativelibs4java.opencl.JavaCL.OpenCLProbeLibrary;
-import com.nativelibs4java.opencl.library.IOpenCLLibrary.cl_platform_id;
-import com.nativelibs4java.opencl.library.OpenCLLibrary;
-
-import clearcl.ClearCLPeerPointer;
-import clearcl.backend.BackendUtils;
-import clearcl.backend.SizeOf;
-import clearcl.exceptions.ClearCLUnsupportedException;
 
 /**
  * Utility class for JavaCL backend
@@ -455,9 +455,12 @@ public class Utils
 
   /**
    * 
-   * @param pOpenCLLibrary  OpenCL library access
-   * @param pPlatform platform
-   * @param pContextPropertiesMap context properties map
+   * @param pOpenCLLibrary
+   *          OpenCL library access
+   * @param pPlatform
+   *          platform
+   * @param pContextPropertiesMap
+   *          context properties map
    * @return context properties
    */
   public static long[] getContextProps(OpenCLLibrary pOpenCLLibrary,
@@ -466,7 +469,7 @@ public class Utils
   {
     int nContextProperties =
                            pContextPropertiesMap == null ? 0
-                                                     : pContextPropertiesMap.size();
+                                                         : pContextPropertiesMap.size();
     final long[] properties = new long[(nContextProperties + 1) * 2
                                        + 1];
     properties[0] = CL_CONTEXT_PLATFORM;

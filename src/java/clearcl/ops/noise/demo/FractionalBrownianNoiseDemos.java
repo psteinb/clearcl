@@ -2,8 +2,6 @@ package clearcl.ops.noise.demo;
 
 import java.io.IOException;
 
-import org.junit.Test;
-
 import clearcl.ClearCL;
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLContext;
@@ -17,6 +15,8 @@ import clearcl.ops.noise.FractionalBrownianNoise;
 import clearcl.util.ElapsedTime;
 import clearcl.viewer.ClearCLImageViewer;
 import coremem.enums.NativeTypeEnum;
+
+import org.junit.Test;
 
 /**
  * Fractional Brownian Noise Demos
@@ -35,7 +35,7 @@ public class FractionalBrownianNoiseDemos
    *           NA
    */
   @Test
-  public void test2DFBM() throws InterruptedException, IOException
+  public void demo2DFBM() throws InterruptedException, IOException
   {
     ElapsedTime.sStandardOutput = true;
 
@@ -84,7 +84,7 @@ public class FractionalBrownianNoiseDemos
    *           NA
    */
   @Test
-  public void testFBM3D() throws InterruptedException, IOException
+  public void demoFBM3D() throws InterruptedException, IOException
   {
     ElapsedTime.sStandardOutput = true;
 

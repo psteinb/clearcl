@@ -2,13 +2,13 @@ package clearcl.test;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
-
 import clearcl.ClearCL;
 import clearcl.ClearCLDevice;
 import clearcl.ClearCLHostImageBuffer;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 import coremem.enums.NativeTypeEnum;
+
+import org.junit.Test;
 
 /**
  * Host image tests

@@ -17,9 +17,9 @@ public class TiffWriter extends WriterBase implements WriterInterface
 {
 
   /**
-   * Instanciates a Image TIFF writer. The voxel values produced by the
-   * phantom are scaled accoding to y = a*x+b, and the data is saved using the
-   * provided data type.
+   * Instanciates a Image TIFF writer. The voxel values produced by the phantom
+   * are scaled accoding to y = a*x+b, and the data is saved using the provided
+   * data type.
    * 
    * @param pNativeTypeEnum
    *          native type to save to.

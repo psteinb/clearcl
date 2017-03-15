@@ -1,43 +1,34 @@
-package clearcl.ops.render.test;
-
-import static org.junit.Assert.*;
-
-import javax.vecmath.Matrix4f;
-
-import org.junit.Test;
+package clearcl.ops.render.demo;
 
 import clearcl.ClearCL;
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLContext;
 import clearcl.ClearCLDevice;
 import clearcl.ClearCLImage;
-import clearcl.ClearCLProgram;
 import clearcl.backend.ClearCLBackendInterface;
 import clearcl.backend.ClearCLBackends;
-import clearcl.enums.BuildStatus;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
-import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
 import clearcl.ops.render.ImageRender;
 import clearcl.ops.render.enums.Algorithm;
-import clearcl.ops.render.enums.Parameter;
-import clearcl.test.ClearCLBasicTests;
 import clearcl.util.Region2;
 import clearcl.viewer.ClearCLImageViewer;
 import coremem.enums.NativeTypeEnum;
+
+import org.junit.Test;
 
 /**
  *
  *
  * @author royer
  */
-public class ImageRenderTest
+public class ImageRenderDemos
 {
 
   @Test
-  public void test() throws InterruptedException
+  public void demoVolRenderMaxProj() throws InterruptedException
   {
     ClearCLBackendInterface lClearCLBackend =
                                             ClearCLBackends.getBestBackend();

@@ -43,7 +43,7 @@ public class MinMax extends OpsBase
 
     ClearCLProgram lMinMaxProgram =
                                   getContext().createProgram(OCLlib.class,
-                                                                    "reduction/reductions.cl");
+                                                             "reduction/reductions.cl");
     lMinMaxProgram.addBuildOptionAllMathOpt();
     lMinMaxProgram.buildAndLog();
 
@@ -93,9 +93,9 @@ public class MinMax extends OpsBase
     {
       mScratchBuffer =
                      getContext().createBuffer(HostAccessType.ReadOnly,
-                                                      KernelAccessType.WriteOnly,
-                                                      NativeTypeEnum.Float,
-                                                      2 * lReduction);
+                                               KernelAccessType.WriteOnly,
+                                               NativeTypeEnum.Float,
+                                               2 * lReduction);
       mScratchHostBuffer =
                          ClearCLHostImageBuffer.allocateSameAs(mScratchBuffer);
     }
@@ -173,9 +173,9 @@ public class MinMax extends OpsBase
     {
       mScratchBuffer =
                      getContext().createBuffer(HostAccessType.ReadWrite,
-                                                      KernelAccessType.WriteOnly,
-                                                      NativeTypeEnum.Float,
-                                                      2 * lVolume);
+                                               KernelAccessType.WriteOnly,
+                                               NativeTypeEnum.Float,
+                                               2 * lVolume);
       mScratchHostBuffer =
                          ClearCLHostImageBuffer.allocateSameAs(mScratchBuffer);
     }

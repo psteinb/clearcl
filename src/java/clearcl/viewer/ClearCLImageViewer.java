@@ -1,11 +1,6 @@
 package clearcl.viewer;
 
 import java.util.concurrent.CountDownLatch;
-
-import com.sun.javafx.application.PlatformImpl;
-
-import clearcl.interfaces.ClearCLImageInterface;
-import clearcl.viewer.jfx.PanZoomScene;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -23,6 +18,11 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+
+import clearcl.interfaces.ClearCLImageInterface;
+import clearcl.viewer.jfx.PanZoomScene;
+
+import com.sun.javafx.application.PlatformImpl;
 
 /**
  * utility to display ClearCL images and monitoring the change of their content.
@@ -265,10 +265,13 @@ public class ClearCLImageViewer
                                                     pWindowHeight,
                                                     Color.BLACK);
 
-      double lInitialScale = 0.90*Math.pow(Math.min(((double)pWindowWidth) / pClearCLImage.getWidth(),
-                                               ((double)pWindowHeight) / pClearCLImage.getHeight()),0.9);
-      
-      lPanZoomScene.scaleScene(lInitialScale,false);/**/
+      double lInitialScale = 0.90 * Math.pow(
+                                             Math.min(((double) pWindowWidth)
+                                                      / pClearCLImage.getWidth(),
+                                                      ((double) pWindowHeight) / pClearCLImage.getHeight()),
+                                             0.9);
+
+      lPanZoomScene.scaleScene(lInitialScale, false);/**/
 
       mStage.setScene(lPanZoomScene);
       mStage.show();

@@ -6,24 +6,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-
-import clearcl.ClearCLBuffer;
-import clearcl.ClearCLContext;
-import clearcl.ClearCLHostImageBuffer;
-import clearcl.ClearCLImage;
-import clearcl.ClearCLKernel;
-import clearcl.ClearCLProgram;
-import clearcl.enums.HostAccessType;
-import clearcl.enums.KernelAccessType;
-import clearcl.enums.MemAllocMode;
-import clearcl.exceptions.ClearCLUnsupportedException;
-import clearcl.interfaces.ClearCLImageInterface;
-import clearcl.ocllib.OCLlib;
-import clearcl.ops.math.MinMax;
-import clearcl.util.ElapsedTime;
-import clearcl.util.Region2;
-import coremem.ContiguousMemoryInterface;
-import coremem.enums.NativeTypeEnum;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
@@ -44,6 +26,24 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+
+import clearcl.ClearCLBuffer;
+import clearcl.ClearCLContext;
+import clearcl.ClearCLHostImageBuffer;
+import clearcl.ClearCLImage;
+import clearcl.ClearCLKernel;
+import clearcl.ClearCLProgram;
+import clearcl.enums.HostAccessType;
+import clearcl.enums.KernelAccessType;
+import clearcl.enums.MemAllocMode;
+import clearcl.exceptions.ClearCLUnsupportedException;
+import clearcl.interfaces.ClearCLImageInterface;
+import clearcl.ocllib.OCLlib;
+import clearcl.ops.math.MinMax;
+import clearcl.util.ElapsedTime;
+import clearcl.util.Region2;
+import coremem.ContiguousMemoryInterface;
+import coremem.enums.NativeTypeEnum;
 
 /**
  * JavaFX Panel for displaying the contents of a ClearCLImage.
@@ -216,7 +216,8 @@ public class ClearCLImagePanel extends StackPane
 
           if (Float.isInfinite(lMinValue)
               || Float.isInfinite(lMaxValue))
-            System.err.println("Image has infinite value! "+mClearCLImage);
+            System.err.println("Image has infinite value! "
+                               + mClearCLImage);
           else
           {
             // System.out.format("min=%f, max=%f \n",lMin,lMax);

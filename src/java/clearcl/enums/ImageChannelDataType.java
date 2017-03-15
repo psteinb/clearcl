@@ -65,7 +65,7 @@ public enum ImageChannelDataType
   {
     return (this == Float) || (this == HalfFloat);
   }
-  
+
   /**
    * Returns true if this is an integer channel data type.
    * 
@@ -75,7 +75,7 @@ public enum ImageChannelDataType
   {
     return !isFloat();
   }
-  
+
   /**
    * Returns true if this is channel data type has a sign.
    * 

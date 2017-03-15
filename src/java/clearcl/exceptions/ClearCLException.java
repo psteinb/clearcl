@@ -12,8 +12,10 @@ public class ClearCLException extends RuntimeException
   /**
    * Instanciates a ClearCL exception from a message and a cause.
    * 
-   * @param pMessage message
-   * @param pCause cause
+   * @param pMessage
+   *          message
+   * @param pCause
+   *          cause
    */
   public ClearCLException(String pMessage, Throwable pCause)
   {
@@ -22,8 +24,9 @@ public class ClearCLException extends RuntimeException
 
   /**
    * Instanciates a ClearCL exception from a message and a cause.
-   *    
-   * @param pMessage message
+   * 
+   * @param pMessage
+   *          message
    */
   public ClearCLException(String pMessage)
   {

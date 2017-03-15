@@ -39,7 +39,7 @@ public class FractionalBrownianNoise extends OpsBase
 
     ClearCLProgram lNoiseProgram =
                                  getContext().createProgram(OCLlib.class,
-                                                                   "noise/noisetexture.cl");
+                                                            "noise/noisetexture.cl");
     // lNoiseProgram.addBuildOptionAllMathOpt();
     lNoiseProgram.buildAndLog();
     System.out.println(lNoiseProgram.getSourceCode());

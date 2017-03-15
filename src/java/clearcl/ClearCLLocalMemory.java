@@ -5,7 +5,8 @@ import coremem.interfaces.SizedInBytes;
 import coremem.util.Size;
 
 /**
- * ClearCLLocalMemory is the ClearCL abstraction for local memory passed to kernels.
+ * ClearCLLocalMemory is the ClearCL abstraction for local memory passed to
+ * kernels.
  *
  * @author royer
  */
@@ -16,11 +17,14 @@ public class ClearCLLocalMemory implements SizedInBytes
 
   /**
    * Instantiates a local memory object,
-   * @param pNativeTypeEnum native type
-   * @param pNumberOfElements number of elements
+   * 
+   * @param pNativeTypeEnum
+   *          native type
+   * @param pNumberOfElements
+   *          number of elements
    */
   public ClearCLLocalMemory(NativeTypeEnum pNativeTypeEnum,
-                     long pNumberOfElements)
+                            long pNumberOfElements)
   {
 
     mNativeTypeEnum = pNativeTypeEnum;
@@ -30,7 +34,7 @@ public class ClearCLLocalMemory implements SizedInBytes
   @Override
   public long getSizeInBytes()
   {
-    return Size.of(mNativeTypeEnum)*mNumberOfElements;
+    return Size.of(mNativeTypeEnum) * mNumberOfElements;
   }
 
 }

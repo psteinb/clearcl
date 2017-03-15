@@ -16,7 +16,8 @@ public class OpsBase
   /**
    * Instantiates an op.
    * 
-   * @param pClearCLQueue queue
+   * @param pClearCLQueue
+   *          queue
    */
   public OpsBase(ClearCLQueue pClearCLQueue)
   {
@@ -38,7 +39,8 @@ public class OpsBase
   /**
    * Sets queue used by op.
    * 
-   * @param pClearCLQueue queueu
+   * @param pClearCLQueue
+   *          queueu
    */
   public void setClearCLQueue(ClearCLQueue pClearCLQueue)
   {
@@ -58,7 +60,8 @@ public class OpsBase
   /**
    * Returns OpenCL context.
    * 
-   * @param pClearCLContext new context
+   * @param pClearCLContext
+   *          new context
    */
   public void setClearCLContext(ClearCLContext pClearCLContext)
   {

@@ -41,9 +41,10 @@ public class ClearCLContext extends ClearCLBase
 
     mDefaultQueue = createQueue();
   }
-  
+
   /**
    * Returns context's device
+   * 
    * @return device
    */
   public ClearCLDevice getDevice()
@@ -504,7 +505,5 @@ public class ClearCLContext extends ClearCLBase
     getBackend().releaseContext(getPeerPointer());
     setPeerPointer(null);
   }
-
-
 
 }

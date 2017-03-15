@@ -118,11 +118,10 @@ public class ClearCLProgram extends ClearCLBase
 
     if (lResourceAsStream == null)
     {
-      String lMessage =
-                      String.format("Cannot find source: [%s] %s",
-                                    pClassForRessource.getSimpleName()
-                                                      .toString(),
-                                    pIncludeRessourceName);
+      String lMessage = String.format("Cannot find source: [%s] %s",
+                                      pClassForRessource.getSimpleName()
+                                                        .toString(),
+                                      pIncludeRessourceName);
       throw new IOException(lMessage);
     }
 

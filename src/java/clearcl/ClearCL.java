@@ -165,7 +165,8 @@ public class ClearCL extends ClearCLBase
    * device from the list (max global mem size), others pick devices of a
    * certain type (e.g. GPU or CPU).
    * 
-   * @param pDeviceSelectors vararg list of device selectors
+   * @param pDeviceSelectors
+   *          vararg list of device selectors
    * @return list of selected devices
    */
   public ArrayList<ClearCLDevice> getBestDevices(DeviceSelector... pDeviceSelectors)
