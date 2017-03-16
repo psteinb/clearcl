@@ -63,7 +63,7 @@ dependencies
 {
 
 	// CoreMem:
-	compile ('net.coremem:CoreMem:[0.3.4,)') {transitive= true; changing= true}
+	compile ('net.coremem:CoreMem:0.4.1')  {transitive= true; changing= true}
 	
 	// JAVACL Backend:
 	compile ('com.nativelibs4java:javacl:1.0.0-RC4') {transitive= true; changing= false}
