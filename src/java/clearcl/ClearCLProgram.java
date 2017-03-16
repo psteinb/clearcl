@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import clearcl.abs.ClearCLBase;
 import clearcl.enums.BuildStatus;
 import clearcl.exceptions.ClearCLProgramNotBuiltException;
+import clearcl.ocllib.OCLlib;
 import clearcl.util.StringUtils;
 
 /**
@@ -318,11 +319,41 @@ public class ClearCLProgram extends ClearCLBase
   public String getSourceCode() throws IOException
   {
     String lConcatenatedSourceCode = concatenateSourceCode();
+
     String lSourceCodeWithDefines =
                                   insertDefines(lConcatenatedSourceCode);
     String lSourceCodeWithDefinesAndIncludes =
                                              insertIncludes(lSourceCodeWithDefines);
-    return lSourceCodeWithDefinesAndIncludes;
+    String lSourceCodeWithPreamble =
+                                   insertPreamble(lSourceCodeWithDefinesAndIncludes);
+    return lSourceCodeWithPreamble;
+  }
+
+  private String insertPreamble(String pSourceCode) throws IOException
+  {
+    InputStream lResourceAsStream =
+                                  OCLlib.class.getResourceAsStream("preamble/preamble.cl");
+
+    if (lResourceAsStream == null)
+    {
+      String lMessage =
+                      String.format("Cannot find preamble file at 'preamble/preamble.cl'");
+      throw new IOException(lMessage);
+    }
+    String lPreambleCode =
+                         StringUtils.streamToString(lResourceAsStream,
+                                                    "UTF-8");
+
+    StringBuilder lStringBuilder = new StringBuilder();
+
+    lStringBuilder.append("\n\n");
+    lStringBuilder.append(" //###########################################################################\n");
+    lStringBuilder.append("// Preamble:\n");
+    lStringBuilder.append(lPreambleCode);
+    lStringBuilder.append("\n\n");
+    lStringBuilder.append(pSourceCode);
+
+    return lStringBuilder.toString();
   }
 
   private String insertDefines(String pSourceCode)
