@@ -1,6 +1,5 @@
 package clearcl.ops.render;
 
-import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.vecmath.Matrix4f;
@@ -42,8 +41,6 @@ public class ImageRender extends OpsBase
    *          queue
    * @param pVolumeRenderAlgorithm
    *          type of volume rendering algorithm
-   * @throws IOException
-   *           thrown if kernels cannot be read
    */
   public ImageRender(ClearCLQueue pClearCLQueue,
                      Algorithm pVolumeRenderAlgorithm)
@@ -87,6 +84,7 @@ public class ImageRender extends OpsBase
     setMatrixParameter(Parameter.ModelViewMatrix, lIdentityMatrix);
   }
 
+  @SuppressWarnings("unused")
   private void setArguments(ClearCLKernel pNoiseKernel,
                             ClearCLBuffer pBuffer)
   {
@@ -94,16 +92,40 @@ public class ImageRender extends OpsBase
 
   }
 
+  /**
+   * Sets float parameter.
+   * 
+   * @param pParameter
+   *          parameter
+   * @param pValue
+   *          value
+   */
   public void setFloatParameter(Parameter pParameter, float pValue)
   {
     mFloatParameters.put(pParameter, pValue);
   }
 
+  /**
+   * Sets integer parameter
+   * 
+   * @param pParameter
+   *          parameter
+   * @param pValue
+   *          value
+   */
   public void setIntegerParameter(Parameter pParameter, int pValue)
   {
     mIntegerParameters.put(pParameter, pValue);
   }
 
+  /**
+   * Sets matrix parameter
+   * 
+   * @param pParameter
+   *          parameter
+   * @param pMatrix
+   *          matrix
+   */
   public void setMatrixParameter(Parameter pParameter,
                                  Matrix4f pMatrix)
   {
@@ -125,6 +147,16 @@ public class ImageRender extends OpsBase
     return lBuffer;
   }
 
+  /**
+   * Renders
+   * 
+   * @param p3DImage
+   *          3D image input
+   * @param pRGBABuffer
+   *          RGBA buffer output
+   * @param waitToFinish
+   *          true -> wait fro computation to finish.
+   */
   public void render(ClearCLImage p3DImage,
                      ClearCLBuffer pRGBABuffer,
                      boolean waitToFinish)

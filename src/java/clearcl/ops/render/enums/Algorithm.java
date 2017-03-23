@@ -1,9 +1,16 @@
 package clearcl.ops.render.enums;
 
+/**
+ * Different volume rendering algorithms.
+ *
+ * @author royer
+ */
 public enum Algorithm implements AlgorithmInterface
 {
- MaximumProjection("render/volume/maxproj.cl",
-                   "image_render_maxproj_3d");
+ /**
+  * Maximum projection
+  */
+ MaximumProjection("render/volume/maxproj.cl", "image_render_maxproj_3d");
 
   private final String mKernelPath, mKernelName;
 

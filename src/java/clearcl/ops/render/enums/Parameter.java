@@ -1,7 +1,14 @@
 package clearcl.ops.render.enums;
 
+/**
+ * Rendering parameter
+ *
+ * @author royer
+ */
+@SuppressWarnings("javadoc")
 public enum Parameter implements ParameterInterface
 {
+
  Max("vmax"),
  Min("vmin"),
  Gamma("gamma"),

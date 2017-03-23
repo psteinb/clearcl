@@ -54,12 +54,12 @@ public class ClearCLImagePanel extends StackPane
 {
   private static final float cSmoothingFactor = 0.2f;
 
-  private Canvas mCanvas;
-  private GraphicsContext mGraphicsContext2D;
-  private ClearCLImageInterface mClearCLImage;
-  private ClearCLBuffer mRenderRGBBuffer;
-  private ClearCLHostImageBuffer mClearCLHostImage;
-  private byte[] mPixelArray;
+  private volatile Canvas mCanvas;
+  private volatile GraphicsContext mGraphicsContext2D;
+  private volatile ClearCLImageInterface mClearCLImage;
+  private volatile ClearCLBuffer mRenderRGBBuffer;
+  private volatile ClearCLHostImageBuffer mClearCLHostImage;
+  private volatile byte[] mPixelArray;
   private ClearCLProgram mProgram;
   private ClearCLKernel mRenderKernel;
   private MinMax mMinMax;
@@ -98,13 +98,7 @@ public class ClearCLImagePanel extends StackPane
       throw new ClearCLUnsupportedException("1D image visualizationnot supported");
     }
 
-    mRenderRGBBuffer =
-                     lContext.createBuffer(MemAllocMode.AllocateHostPointer,
-                                           HostAccessType.ReadOnly,
-                                           KernelAccessType.WriteOnly,
-                                           4,
-                                           NativeTypeEnum.Byte,
-                                           Region2.region(mClearCLImage.getDimensions()));
+    ensureBuffersAllocated(mClearCLImage);
 
     try
     {
@@ -132,31 +126,13 @@ public class ClearCLImagePanel extends StackPane
       throw new RuntimeException("Cannot build program", e);
     }
 
-    mClearCLHostImage =
-                      ClearCLHostImageBuffer.allocateSameAs(mRenderRGBBuffer);
-
     backgroundProperty().set(new Background(new BackgroundFill(Color.BLACK,
                                                                CornerRadii.EMPTY,
                                                                Insets.EMPTY)));/**/
 
-    mCanvas = new Canvas(pClearCLImage.getWidth(),
-                         pClearCLImage.getHeight());
-    // mCanvas.setCache(false);
-    // mCanvas.setCacheHint(CacheHint.SPEED);
-    mGraphicsContext2D = mCanvas.getGraphicsContext2D();
+    ensureCanvasIsSetup(pClearCLImage);
 
-    getChildren().add(mCanvas);
-    StackPane.setAlignment(mCanvas, Pos.CENTER);
-
-    mGraphicsContext2D = mCanvas.getGraphicsContext2D();
-
-    pClearCLImage.addListener((q, s) -> {
-
-      ElapsedTime.measure("q.waitToFinish();",
-                          () -> q.waitToFinish());
-
-      updateImage();
-    });
+    addImageListener(pClearCLImage);
 
     mMin.addListener((e) -> {
       updateImage();
@@ -181,6 +157,98 @@ public class ClearCLImagePanel extends StackPane
                                       pClearCLImage.getDepth()));
 
     updateImage();
+  }
+
+  private void ensureCanvasIsSetup(ClearCLImageInterface pClearCLImage)
+  {
+    if (mCanvas != null
+        && (int) mCanvas.getWidth() == (int) pClearCLImage.getWidth()
+        && (int) mCanvas.getHeight() == (int) pClearCLImage.getHeight())
+      return;
+
+    if (mCanvas != null)
+      getChildren().remove(mCanvas);
+
+    mCanvas = new Canvas(pClearCLImage.getWidth(),
+                         pClearCLImage.getHeight());
+
+    getChildren().add(mCanvas);
+    StackPane.setAlignment(mCanvas, Pos.CENTER);
+
+    mGraphicsContext2D = mCanvas.getGraphicsContext2D();
+  }
+
+  private void addImageListener(ClearCLImageInterface pClearCLImage)
+  {
+    pClearCLImage.addListener((q, s) -> {
+      q.waitToFinish();
+      updateImage();
+    });
+  }
+
+  private void ensureBuffersAllocated(ClearCLImageInterface pNewImage)
+  {
+    if (mRenderRGBBuffer == null
+        || mRenderRGBBuffer.getWidth() != pNewImage.getWidth()
+        || mRenderRGBBuffer.getHeight() != pNewImage.getHeight())
+    {
+      if (mRenderRGBBuffer != null)
+        mRenderRGBBuffer.close();
+
+      mRenderRGBBuffer =
+                       pNewImage.getContext()
+                                .createBuffer(MemAllocMode.AllocateHostPointer,
+                                              HostAccessType.ReadOnly,
+                                              KernelAccessType.WriteOnly,
+                                              4,
+                                              NativeTypeEnum.Byte,
+                                              Region2.region(pNewImage.getDimensions()));
+    }
+
+    if (mClearCLHostImage == null
+        || mClearCLHostImage.getWidth() != pNewImage.getWidth()
+        || mClearCLHostImage.getHeight() != pNewImage.getHeight())
+    {
+      if (mClearCLHostImage != null)
+        mClearCLHostImage.close();
+      mClearCLHostImage =
+                        ClearCLHostImageBuffer.allocateSameAs(mRenderRGBBuffer);
+    }
+  }
+
+  /**
+   * Sets a new image to be viewed. The image must have the same dimensionality
+   * as the original image, but the actual width, height or depth can be
+   * different.
+   * 
+   * @param pImage
+   *          new image
+   */
+  public void setImage(ClearCLImageInterface pImage)
+  {
+    boolean lTryLock = false;
+    try
+    {
+      lTryLock = mLock.tryLock(1000, TimeUnit.MILLISECONDS);
+    }
+    catch (InterruptedException e)
+    {
+    }
+
+    if (lTryLock)
+    {
+      try
+      {
+        mClearCLImage.getContext().getDefaultQueue().waitToFinish();
+        ensureBuffersAllocated(pImage);
+        mClearCLImage = pImage;
+        addImageListener(pImage);
+      }
+      finally
+      {
+        mLock.unlock();
+      }
+    }
   }
 
   /**
@@ -325,25 +393,50 @@ public class ClearCLImagePanel extends StackPane
 
         Platform.runLater(() -> {
 
-          PixelFormat<ByteBuffer> lPixelFormat =
-                                               PixelFormat.getByteBgraInstance();
-          PixelWriter pixelWriter =
-                                  mGraphicsContext2D.getPixelWriter();
+          boolean lTryLock2 = false;
+          try
+          {
+            lTryLock2 = mLock.tryLock(1, TimeUnit.MILLISECONDS);
+          }
+          catch (InterruptedException e)
+          {
+          }
 
-          pixelWriter.setPixels(0,
-                                0,
-                                (int) lWidth,
-                                (int) lHeight,
-                                lPixelFormat,
-                                mPixelArray,
-                                0,
-                                (int) (lWidth * 4));
+          if (lTryLock2)
+          {
+            try
+            {
+              if (mClearCLImage.getWidth() != lWidth
+                  || mClearCLImage.getHeight() != lHeight)
+                return;
 
-          mGraphicsContext2D.beginPath();
-          mGraphicsContext2D.rect(0, 0, lWidth, lHeight);
-          mGraphicsContext2D.setStroke(Color.RED);
-          mGraphicsContext2D.stroke();/**/
-          mGraphicsContext2D.closePath();
+              ensureCanvasIsSetup(mClearCLImage);
+
+              PixelFormat<ByteBuffer> lPixelFormat =
+                                                   PixelFormat.getByteBgraInstance();
+              PixelWriter pixelWriter =
+                                      mGraphicsContext2D.getPixelWriter();
+
+              pixelWriter.setPixels(0,
+                                    0,
+                                    (int) lWidth,
+                                    (int) lHeight,
+                                    lPixelFormat,
+                                    mPixelArray,
+                                    0,
+                                    (int) (lWidth * 4));
+
+              mGraphicsContext2D.beginPath();
+              mGraphicsContext2D.rect(0, 0, lWidth, lHeight);
+              mGraphicsContext2D.setStroke(Color.RED);
+              mGraphicsContext2D.stroke();/**/
+              mGraphicsContext2D.closePath();
+            }
+            finally
+            {
+              mLock.unlock();
+            }
+          }
         });
       }
       finally

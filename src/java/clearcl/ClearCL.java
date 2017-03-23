@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import clearcl.abs.ClearCLBase;
 import clearcl.backend.ClearCLBackendInterface;
 import clearcl.selector.BadDeviceSelector;
+import clearcl.selector.DeviceName;
 import clearcl.selector.DeviceSelector;
 import clearcl.selector.DeviceTypeSelector;
 import clearcl.selector.FastestDeviceSelector;
@@ -52,6 +53,20 @@ public class ClearCL extends ClearCLBase
     ClearCLPeerPointer lPlatformIdPointer =
                                           getBackend().getPlatformPeerPointer(pPlatformIndex);
     return new ClearCLPlatform(this, lPlatformIdPointer);
+  }
+
+  /**
+   * Returns the first device twhich name constain sthe given substring.
+   * 
+   * @param pNameSubString
+   *          name substring
+   * @return device
+   */
+  public ClearCLDevice getDeviceByName(String pNameSubString)
+  {
+    ClearCLDevice lClearClDevice =
+                                 getBestDevice(DeviceName.subString(pNameSubString));
+    return lClearClDevice;
   }
 
   /**

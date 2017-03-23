@@ -19,6 +19,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import clearcl.ClearCLImage;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.viewer.jfx.PanZoomScene;
 
@@ -285,6 +286,18 @@ public class ClearCLImageViewer
     {
     }
 
+  }
+
+  /**
+   * Sets a new image. The image must have the same dimensionality as the
+   * original image, but teh actual width, height or depth can be different.
+   * 
+   * @param pImage
+   *          new image
+   */
+  public void setImage(ClearCLImage pImage)
+  {
+    mImagePanel.setImage(pImage);
   }
 
   /**

@@ -27,6 +27,12 @@ import org.junit.Test;
 public class ImageRenderDemos
 {
 
+  /**
+   * Demonstration of max projection volume rendering
+   * 
+   * @throws InterruptedException
+   *           NA
+   */
   @Test
   public void demoVolRenderMaxProj() throws InterruptedException
   {

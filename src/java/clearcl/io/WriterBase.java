@@ -32,7 +32,7 @@ public abstract class WriterBase implements WriterInterface
     super();
     setScaling(pScaling);
     setOffset(pOffset);
-
+    mNativeTypeEnum = pNativeTypeEnum;
   }
 
   /**

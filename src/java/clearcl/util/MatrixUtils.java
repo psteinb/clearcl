@@ -22,8 +22,10 @@ public class MatrixUtils
    * Converts Matrix4f into an array that can be sent to an OpenCL kernel as a
    * float16.
    * 
+   * 
    * @param pMatrix
-   * @return
+   *          matrix to convert
+   * @return array of 16 floats representing 4x4 matrix
    */
   public static final float[] matrixToArray(Matrix4f pMatrix)
   {
