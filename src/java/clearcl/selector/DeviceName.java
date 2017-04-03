@@ -23,8 +23,7 @@ public class DeviceName implements DeviceSelector
    */
   public static DeviceSelector subString(String pNameSubString)
   {
-    // TODO Auto-generated method stub
-    return null;
+    return new DeviceName(pNameSubString);
   }
 
   /**
@@ -34,9 +33,10 @@ public class DeviceName implements DeviceSelector
    * @param pDiscrete
    *          if true select discrete, if false select non-discrete.
    */
-  private DeviceName()
+  private DeviceName(String pNameSubString)
   {
     super();
+    setNameSubString(pNameSubString);
   }
 
   /**
@@ -45,23 +45,17 @@ public class DeviceName implements DeviceSelector
    * @param pNameSubString
    *          substring that should be contained in device name
    */
-  public void setNameSubstring(String pNameSubString)
+  public void setNameSubString(String pNameSubString)
   {
     mNameSubString = pNameSubString;
   }
 
-  /* (non-Javadoc)
-   * @see clearcl.selector.DeviceSelector#init(java.util.ArrayList)
-   */
   @Override
   public void init(ArrayList<ClearCLDevice> pDevices)
   {
 
   }
 
-  /* (non-Javadoc)
-   * @see clearcl.selector.DeviceSelector#selected(clearcl.ClearCLDevice)
-   */
   @Override
   public boolean selected(ClearCLDevice pClearCLDevice)
   {
