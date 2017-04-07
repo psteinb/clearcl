@@ -1,9 +1,6 @@
 package clearcl.viewer;
 
-import static java.lang.Math.toIntExact;
-
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import javafx.application.Platform;
@@ -17,10 +14,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.PixelFormat;
-import javafx.scene.image.PixelWriter;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -42,6 +36,7 @@ import clearcl.ocllib.OCLlib;
 import clearcl.ops.math.MinMax;
 import clearcl.util.ElapsedTime;
 import clearcl.util.Region2;
+import clearcl.viewer.jfx.DirectWritableImage;
 import coremem.ContiguousMemoryInterface;
 import coremem.enums.NativeTypeEnum;
 
@@ -54,8 +49,9 @@ public class ClearCLImagePanel extends StackPane
 {
   private static final float cSmoothingFactor = 0.2f;
 
-  private volatile Canvas mCanvas;
-  private volatile GraphicsContext mGraphicsContext2D;
+  private volatile DirectWritableImage mDirectWritableImage;
+  private volatile ImageView mImageView;
+
   private volatile ClearCLImageInterface mClearCLImage;
   private volatile ClearCLBuffer mRenderRGBBuffer;
   private volatile ClearCLHostImageBuffer mClearCLHostImage;
@@ -161,21 +157,23 @@ public class ClearCLImagePanel extends StackPane
 
   private void ensureCanvasIsSetup(ClearCLImageInterface pClearCLImage)
   {
-    if (mCanvas != null
-        && (int) mCanvas.getWidth() == (int) pClearCLImage.getWidth()
-        && (int) mCanvas.getHeight() == (int) pClearCLImage.getHeight())
+    if (mDirectWritableImage != null
+        && (int) mDirectWritableImage.getWidth() == (int) pClearCLImage.getWidth()
+        && (int) mDirectWritableImage.getHeight() == (int) pClearCLImage.getHeight())
       return;
 
-    if (mCanvas != null)
-      getChildren().remove(mCanvas);
+    if (mDirectWritableImage != null)
+      getChildren().remove(mDirectWritableImage);
 
-    mCanvas = new Canvas(pClearCLImage.getWidth(),
-                         pClearCLImage.getHeight());
+    mDirectWritableImage =
+                         new DirectWritableImage((int) pClearCLImage.getWidth(),
+                                                 (int) pClearCLImage.getHeight());
 
-    getChildren().add(mCanvas);
-    StackPane.setAlignment(mCanvas, Pos.CENTER);
+    mImageView = new ImageView(mDirectWritableImage);
 
-    mGraphicsContext2D = mCanvas.getGraphicsContext2D();
+    getChildren().add(mImageView);
+    StackPane.setAlignment(mImageView, Pos.CENTER);
+
   }
 
   private void addImageListener(ClearCLImageInterface pClearCLImage)
@@ -381,16 +379,6 @@ public class ClearCLImagePanel extends StackPane
         ContiguousMemoryInterface lContiguousMemory =
                                                     mClearCLHostImage.getContiguousMemory();
 
-        if (mPixelArray == null
-            || mPixelArray.length != lContiguousMemory.getSizeInBytes())
-        {
-          mPixelArray =
-                      new byte[toIntExact(lContiguousMemory.getSizeInBytes())];
-        }
-
-        ElapsedTime.measure("lContiguousMemory.copyTo(mPixelArray)",
-                            () -> lContiguousMemory.copyTo(mPixelArray));
-
         Platform.runLater(() -> {
 
           boolean lTryLock2 = false;
@@ -411,26 +399,8 @@ public class ClearCLImagePanel extends StackPane
                 return;
 
               ensureCanvasIsSetup(mClearCLImage);
+              mDirectWritableImage.replaceBuffer(lContiguousMemory);
 
-              PixelFormat<ByteBuffer> lPixelFormat =
-                                                   PixelFormat.getByteBgraInstance();
-              PixelWriter pixelWriter =
-                                      mGraphicsContext2D.getPixelWriter();
-
-              pixelWriter.setPixels(0,
-                                    0,
-                                    (int) lWidth,
-                                    (int) lHeight,
-                                    lPixelFormat,
-                                    mPixelArray,
-                                    0,
-                                    (int) (lWidth * 4));
-
-              mGraphicsContext2D.beginPath();
-              mGraphicsContext2D.rect(0, 0, lWidth, lHeight);
-              mGraphicsContext2D.setStroke(Color.RED);
-              mGraphicsContext2D.stroke();/**/
-              mGraphicsContext2D.closePath();
             }
             finally
             {
