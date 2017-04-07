@@ -20,10 +20,12 @@ public class ElapsedTime
    *          description of the runnable
    * @param pRunnable
    *          runnable
+   * @return elapsed time in milliseconds
    */
-  public static void measure(String pDescription, Runnable pRunnable)
+  public static double measure(String pDescription,
+                               Runnable pRunnable)
   {
-    measure(true, pDescription, pRunnable);
+    return measure(true, pDescription, pRunnable);
   }
 
   /**
@@ -36,15 +38,16 @@ public class ElapsedTime
    *          description of the code (runnable)
    * @param pRunnable
    *          runnable
+   * @return elapsed time in milliseconds
    */
-  public static void measure(boolean pActive,
-                             String pDescription,
-                             Runnable pRunnable)
+  public static double measure(boolean pActive,
+                               String pDescription,
+                               Runnable pRunnable)
   {
     if (!pActive)
     {
       pRunnable.run();
-      return;
+      return 0;
     }
 
     Throwable lThrowable = null;
@@ -71,5 +74,6 @@ public class ElapsedTime
     if (lThrowable != null)
       throw new RuntimeException(lThrowable);
 
+    return lElapsedTimeInMilliseconds;
   }
 }
