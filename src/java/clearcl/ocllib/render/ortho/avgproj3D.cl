@@ -1,12 +1,12 @@
 
 
-//default image_render_avgproj_3df vmin=0f
-//default image_render_avgproj_3df vmax=1f
-//default image_render_avgproj_3df gamma=1f
-//default image_render_avgproj_3df zmin=0i
-//default image_render_avgproj_3df zmax=16000i
-//default image_render_avgproj_3df zstep=1i
-__kernel void image_render_avgproj_3df(          __read_only  image3d_t  image,
+//default image_render_avgproj_3d vmin=0f
+//default image_render_avgproj_3d vmax=1f
+//default image_render_avgproj_3d gamma=1f
+//default image_render_avgproj_3d zmin=0i
+//default image_render_avgproj_3d zmax=16000i
+//default image_render_avgproj_3d zstep=1i
+__kernel void image_render_avgproj_3d(          __read_only  image3d_t  image,
                                         __global __write_only uchar*     rgbabuffer,
                                                               float      vmin,
                                                               float      vmax,
@@ -16,8 +16,6 @@ __kernel void image_render_avgproj_3df(          __read_only  image3d_t  image,
                                                               int        zstep
                                                               )
 {
-  const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
-  
   const int width  = get_image_width(image);
   const int height = get_image_height(image);
   const int depth  = get_image_depth(image);
@@ -34,7 +32,14 @@ __kernel void image_render_avgproj_3df(          __read_only  image3d_t  image,
   {
     for(int i=0; i<8; i++)
     {
-      const float value = read_imagef(image, sampler, pos).x;
+      #if defined FLOAT
+       const float value = read_imagef(image, pos).x;
+      #elif defined UINT
+       const float value = read_imageui(image, pos).x;
+      #elif defined INT
+       const float value = read_imagei(image, pos).x;
+      #endif
+      
       acc += value;
       pos.z+=zstep;
     }

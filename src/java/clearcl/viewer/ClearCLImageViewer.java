@@ -70,6 +70,32 @@ public class ClearCLImageViewer
   }
 
   /**
+   * Opens a window showing the image content. View can be panned and zoomed.
+   * 
+   * @param pImage
+   *          imag to view
+   * @param pWindowTitle
+   *          window title
+   * @param pWindowWidth
+   *          window width
+   * @param pWindowHeight
+   *          window height
+   * @return image viewer
+   */
+  public static ClearCLImageViewer view(ClearCLImageInterface pImage,
+                                        String pWindowTitle,
+                                        int pWindowWidth,
+                                        int pWindowHeight)
+  {
+    ClearCLImageViewer lViewImage =
+                                  new ClearCLImageViewer(pImage,
+                                                         pWindowTitle,
+                                                         pWindowWidth,
+                                                         pWindowHeight);
+    return lViewImage;
+  }
+
+  /**
    * Creates a view for a given image, window title.
    * 
    * @param pClearCLImage
@@ -119,6 +145,7 @@ public class ClearCLImageViewer
                                                        Insets.EMPTY)));/**/
 
       mImagePanel = new ClearCLImagePanel(pClearCLImage);
+      mImagePanel.getIsActive().bind(mStage.showingProperty());
 
       mControlPane = new GridPane();
       RowConstraints row1 = new RowConstraints();
@@ -290,7 +317,8 @@ public class ClearCLImageViewer
 
   /**
    * Sets a new image. The image must have the same dimensionality as the
-   * original image, but teh actual width, height or depth can be different.
+   * original image (1D, 2D, 3D), but the actual width, height or depth can be
+   * different.
    * 
    * @param pImage
    *          new image
@@ -298,6 +326,7 @@ public class ClearCLImageViewer
   public void setImage(ClearCLImage pImage)
   {
     mImagePanel.setImage(pImage);
+    mZSlider.setMax(pImage.getDepth() - 1);
   }
 
   /**

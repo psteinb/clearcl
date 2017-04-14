@@ -85,4 +85,14 @@ public enum ImageChannelDataType
   {
     return mIsSigned;
   }
+
+  /**
+   * Returns true if this is channel data type is unsigned.
+   * 
+   * @return true if data type is unsigned, false otherwise
+   */
+  public boolean isUnSigned()
+  {
+    return !mIsSigned;
+  }
 }

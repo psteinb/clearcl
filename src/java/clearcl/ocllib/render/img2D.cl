@@ -3,22 +3,26 @@
 //default image_render_2df vmin=0f
 //default image_render_2df vmax=1f
 //default image_render_2df gamma=1f
-__kernel void image_render_2df(          __read_only  image2d_t  image,
+__kernel void image_render_2d(           __read_only  image2d_t  image,
                                 __global __write_only uchar*     rgbabuffer,
-        		                                      float      vmin,
-        		                                      float      vmax,
-        		                                      float      gamma)
+            		                                      float      vmin,
+            		                                      float      vmax,
+            		                                      float      gamma)
 {
-  const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
-    
-
-  const int width = get_image_width(image);
+   const int width = get_image_width(image);
   const int height = get_image_height(image);
   
   int2 pos = {get_global_id(0),get_global_id(1)}; 
-  float4 value4 = read_imagef(image, sampler, pos);
-    
-  float value = clamp(native_powr((value4.x-vmin)/(vmax-vmin),gamma),0.0f,1.0f);
+ 
+  #if defined FLOAT
+   const float valueraw = read_imagef(image,  pos).x;
+  #elif defined UINT
+   const float valueraw = read_imageui(image, pos).x;
+  #elif defined INT
+   const float valueraw = read_imagei(image,  pos).x;
+  #endif
+     
+  float value = clamp(native_powr((valueraw-vmin)/(vmax-vmin),gamma),0.0f,1.0f);
 	
   uchar bytevalue = (uchar)(255*value);
 	

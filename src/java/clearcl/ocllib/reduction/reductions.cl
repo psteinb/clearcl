@@ -1,7 +1,7 @@
 __kernel
-void reduce_min_buffer_f(__global float* buffer,
-                         int    length,
-                __global float* result) 
+void reduce_min_buffer( __global float* buffer,
+                                   int    length,
+                          __global float* result) 
 {
   int index  = get_global_id(0);
   int stride = get_global_size(0);
@@ -25,11 +25,9 @@ void reduce_min_buffer_f(__global float* buffer,
 
 
 __kernel
-void reduce_min_image_1df(__read_only image1d_t  image,
-                          __global    float*     result) 
+void reduce_min_image_1d(__read_only image1d_t  image,
+                         __global    float*     result) 
 {
-  const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
-  
   const int width = get_image_width(image);
   
   int x  = get_global_id(0);
@@ -40,7 +38,14 @@ void reduce_min_image_1df(__read_only image1d_t  image,
   
   for(int lx=x; lx<width; lx+=stridex)
   {
-    float value = (read_imagef(image, sampler, lx)).x;
+    #if defined FLOAT
+     float value = (float)(read_imagef(image, lx)).x;
+    #elif defined UINT
+     float value = (float)(read_imageui(image, lx)).x;
+    #elif defined INT
+     float value = (float)(read_imagei(image, lx)).x;
+    #endif
+    
     min = fmin(min, value);
     max = fmax(max, value);
   }
@@ -51,15 +56,12 @@ void reduce_min_image_1df(__read_only image1d_t  image,
   result[index+1] = max;
 }
 
-
     
 
 __kernel
-void reduce_min_image_2df(__read_only image2d_t  image,
+void reduce_min_image_2d( __read_only image2d_t  image,
                           __global    float*     result) 
 {
-  const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
-  
   const int width = get_image_width(image);
   const int height = get_image_height(image);
   
@@ -78,7 +80,14 @@ void reduce_min_image_2df(__read_only image2d_t  image,
     {
       const int2 pos = {lx,ly};
    
-      float value = (read_imagef(image, sampler, pos)).x;
+      #if defined FLOAT
+       float value = (float)(read_imagef(image, pos)).x;
+      #elif defined UINT
+       float value = (float)(read_imageui(image, pos)).x;
+      #elif defined INT
+       float value = (float)(read_imagei(image, pos)).x;
+      #endif
+      
       min = fmin(min, value);
       max = fmax(max, value);
     }
@@ -94,11 +103,9 @@ void reduce_min_image_2df(__read_only image2d_t  image,
 
     
 __kernel
-void reduce_min_image_3df(__read_only image3d_t  image,
+void reduce_min_image_3d (__read_only image3d_t  image,
                           __global    float*     result) 
 {
-  const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
-  
   const int width   = get_image_width(image);
   const int height  = get_image_height(image);
   const int depth   = get_image_depth(image);
@@ -122,7 +129,14 @@ void reduce_min_image_3df(__read_only image3d_t  image,
       {
         const int4 pos = {lx,ly,lz,0};
      
-        float value = (read_imagef(image, sampler, pos)).x;
+        #if defined FLOAT
+         float value = (float)(read_imagef(image, pos)).x;
+        #elif defined UINT
+         float value = (float)(read_imageui(image, pos)).x;
+        #elif defined INT
+         float value = (float)(read_imagei(image, pos)).x;
+        #endif
+        
         min = fmin(min, value);
         max = fmax(max, value);
       }
@@ -130,7 +144,9 @@ void reduce_min_image_3df(__read_only image3d_t  image,
   }
 
   int index = 2*(x+stridex*y+stridex*stridey*z);
-  
+
   result[index+0] = min;
   result[index+1] = max;
 }
+
+

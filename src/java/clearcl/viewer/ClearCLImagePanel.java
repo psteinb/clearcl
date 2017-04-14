@@ -13,12 +13,15 @@ import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 import clearcl.ClearCLBuffer;
@@ -28,6 +31,7 @@ import clearcl.ClearCLImage;
 import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
 import clearcl.enums.HostAccessType;
+import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.ClearCLUnsupportedException;
@@ -45,7 +49,7 @@ import coremem.enums.NativeTypeEnum;
  *
  * @author royer
  */
-public class ClearCLImagePanel extends StackPane
+public class ClearCLImagePanel extends BorderPane
 {
   private static final float cSmoothingFactor = 0.2f;
 
@@ -55,13 +59,14 @@ public class ClearCLImagePanel extends StackPane
   private volatile ClearCLImageInterface mClearCLImage;
   private volatile ClearCLBuffer mRenderRGBBuffer;
   private volatile ClearCLHostImageBuffer mClearCLHostImage;
-  private volatile byte[] mPixelArray;
-  private ClearCLProgram mProgram;
+  private ClearCLProgram mProgramFloat, mProgramUint, mProgramInt;
   private ClearCLKernel mRenderKernel;
   private MinMax mMinMax;
 
   private ReentrantLock mLock = new ReentrantLock();
 
+  private final BooleanProperty mIsActive =
+                                          new SimpleBooleanProperty(true);
   private final BooleanProperty mAuto =
                                       new SimpleBooleanProperty(true);
   private final FloatProperty mMin = new SimpleFloatProperty(0);
@@ -98,15 +103,40 @@ public class ClearCLImagePanel extends StackPane
 
     try
     {
-      mProgram = lContext.createProgram(OCLlib.class,
-                                        "render/img2D.cl",
-                                        "render/ortho/avgproj3D.cl",
-                                        "render/ortho/colproj3D.cl",
-                                        "render/ortho/maxproj3D.cl",
-                                        "render/ortho/slice3D.cl");
+      mProgramFloat =
+                    lContext.createProgram(OCLlib.class,
+                                           "render/img2D.cl",
+                                           "render/ortho/avgproj3D.cl",
+                                           "render/ortho/colproj3D.cl",
+                                           "render/ortho/maxproj3D.cl",
+                                           "render/ortho/slice3D.cl");
 
-      mProgram.addBuildOptionAllMathOpt();
-      mProgram.buildAndLog();
+      mProgramFloat.addBuildOptionAllMathOpt();
+      mProgramFloat.addDefine("FLOAT");
+      mProgramFloat.buildAndLog();
+
+      mProgramUint =
+                   lContext.createProgram(OCLlib.class,
+                                          "render/img2D.cl",
+                                          "render/ortho/avgproj3D.cl",
+                                          "render/ortho/colproj3D.cl",
+                                          "render/ortho/maxproj3D.cl",
+                                          "render/ortho/slice3D.cl");
+
+      mProgramUint.addBuildOptionAllMathOpt();
+      mProgramUint.addDefine("UINT");
+      mProgramUint.buildAndLog();
+
+      mProgramInt = lContext.createProgram(OCLlib.class,
+                                           "render/img2D.cl",
+                                           "render/ortho/avgproj3D.cl",
+                                           "render/ortho/colproj3D.cl",
+                                           "render/ortho/maxproj3D.cl",
+                                           "render/ortho/slice3D.cl");
+
+      mProgramInt.addBuildOptionAllMathOpt();
+      mProgramInt.addDefine("INT");
+      mProgramInt.buildAndLog();
 
       if (pClearCLImage.getDimension() == 1)
       {
@@ -170,17 +200,32 @@ public class ClearCLImagePanel extends StackPane
                                                  (int) pClearCLImage.getHeight());
 
     mImageView = new ImageView(mDirectWritableImage);
+    mImageView.setStyle("-fx-padding: 10");
+    mImageView.setStyle("-fx-background-color: red");
+    mImageView.setStyle("-fx-border-color: red");
+    setBorder(new Border(new BorderStroke(Color.RED,
+                                          BorderStrokeStyle.SOLID,
+                                          CornerRadii.EMPTY,
+                                          BorderWidths.DEFAULT)));/**/
 
-    getChildren().add(mImageView);
-    StackPane.setAlignment(mImageView, Pos.CENTER);
+    this.setWidth(mDirectWritableImage.getWidth());
+    this.setHeight(mDirectWritableImage.getHeight());
+
+    setCenter(mImageView);
+    BorderPane.setMargin(mImageView, Insets.EMPTY);
+    // StackPane.setAlignment(mImageView, Pos.CENTER);
 
   }
 
   private void addImageListener(ClearCLImageInterface pClearCLImage)
   {
     pClearCLImage.addListener((q, s) -> {
-      q.waitToFinish();
-      updateImage();
+
+      if (getIsActive().get())
+      {
+        q.waitToFinish();
+        updateImage();
+      }
     });
   }
 
@@ -255,7 +300,6 @@ public class ClearCLImagePanel extends StackPane
    */
   public void updateImage()
   {
-
     boolean lTryLock = false;
     try
     {
@@ -276,6 +320,9 @@ public class ClearCLImagePanel extends StackPane
         if (mAuto.get() || mTrueMin == null)
         {
           float[] lMinMax = mMinMax.minmax(mClearCLImage, 32);
+          /*System.out.format("computed: min=%f, max=%f \n",
+                            lMinMax[0],
+                            lMinMax[1]);/**/
 
           float lMinValue = lMinMax[0];
           float lMaxValue = lMinMax[1];
@@ -286,12 +333,12 @@ public class ClearCLImagePanel extends StackPane
                                + mClearCLImage);
           else
           {
-            // System.out.format("min=%f, max=%f \n",lMin,lMax);
 
             mTrueMin = (1 - cSmoothingFactor) * lMinValue
                        + cSmoothingFactor * mTrueMin;
             mTrueMax = (1 - cSmoothingFactor) * lMaxValue
                        + cSmoothingFactor * mTrueMax;
+
           }
 
           lMin = mTrueMin;
@@ -304,12 +351,33 @@ public class ClearCLImagePanel extends StackPane
           lMax = mTrueMin + (mTrueMax - mTrueMin) * mMax.get();
         }
 
+        /*System.out.format("true:    min=%f, max=%f \n",
+                          mTrueMin,
+                          mTrueMax);
+        System.out.format("current: min=%f, max=%f \n", lMin, lMax);/**/
+
         if (mClearCLImage.getDimension() == 2)
         {
           if (mClearCLImage instanceof ClearCLImage)
-            mRenderKernel = mProgram.getKernel("image_render_2df");
+          {
+            ClearCLImage lImage = (ClearCLImage) mClearCLImage;
+            ImageChannelDataType lDataType =
+                                           lImage.getChannelDataType();
+
+            if (lDataType.isNormalized() || lDataType.isFloat())
+              mRenderKernel =
+                            mProgramFloat.getKernel("image_render_2d");
+            else if (lDataType.isInteger() && lDataType.isUnSigned())
+              mRenderKernel =
+                            mProgramUint.getKernel("image_render_2d");
+            else if (lDataType.isInteger() && lDataType.isSigned())
+              mRenderKernel =
+                            mProgramInt.getKernel("image_render_2d");
+
+          }
           else if (mClearCLImage instanceof ClearCLBuffer)
-            mRenderKernel = mProgram.getKernel("buffer_render_2df");
+            mRenderKernel =
+                          mProgramFloat.getKernel("buffer_render_2df");
 
         }
         else if (mClearCLImage.getDimension() == 3)
@@ -318,36 +386,96 @@ public class ClearCLImagePanel extends StackPane
           {
           case AvgProjection:
             if (mClearCLImage instanceof ClearCLImage)
-              mRenderKernel =
-                            mProgram.getKernel("image_render_avgproj_3df");
+            {
+              ClearCLImage lImage = (ClearCLImage) mClearCLImage;
+              ImageChannelDataType lDataType =
+                                             lImage.getChannelDataType();
+
+              if (lDataType.isNormalized() || lDataType.isFloat())
+                mRenderKernel =
+                              mProgramFloat.getKernel("image_render_avgproj_3d");
+              else if (lDataType.isInteger()
+                       && lDataType.isUnSigned())
+                mRenderKernel =
+                              mProgramUint.getKernel("image_render_avgproj_3d");
+              else if (lDataType.isInteger() && lDataType.isSigned())
+                mRenderKernel =
+                              mProgramInt.getKernel("image_render_avgproj_3d");
+
+            }
             else if (mClearCLImage instanceof ClearCLBuffer)
               mRenderKernel =
-                            mProgram.getKernel("buffer_render_avgproj_3df");
+                            mProgramFloat.getKernel("buffer_render_avgproj_3df");
             break;
           case ColorProjection:
             if (mClearCLImage instanceof ClearCLImage)
-              mRenderKernel =
-                            mProgram.getKernel("image_render_colorproj_3df");
+            {
+              ClearCLImage lImage = (ClearCLImage) mClearCLImage;
+              ImageChannelDataType lDataType =
+                                             lImage.getChannelDataType();
+
+              if (lDataType.isNormalized() || lDataType.isFloat())
+                mRenderKernel =
+                              mProgramFloat.getKernel("image_render_colorproj_3d");
+              else if (lDataType.isInteger()
+                       && lDataType.isUnSigned())
+                mRenderKernel =
+                              mProgramUint.getKernel("image_render_colorproj_3d");
+              else if (lDataType.isInteger() && lDataType.isSigned())
+                mRenderKernel =
+                              mProgramInt.getKernel("image_render_colorproj_3d");
+
+            }
             else if (mClearCLImage instanceof ClearCLBuffer)
               mRenderKernel =
-                            mProgram.getKernel("buffer_render_colorproj_3df");
+                            mProgramFloat.getKernel("buffer_render_colorproj_3df");
             break;
           case MaxProjection:
             if (mClearCLImage instanceof ClearCLImage)
-              mRenderKernel =
-                            mProgram.getKernel("image_render_maxproj_3df");
+            {
+              ClearCLImage lImage = (ClearCLImage) mClearCLImage;
+              ImageChannelDataType lDataType =
+                                             lImage.getChannelDataType();
+
+              if (lDataType.isNormalized() || lDataType.isFloat())
+                mRenderKernel =
+                              mProgramFloat.getKernel("image_render_maxproj_3d");
+              else if (lDataType.isInteger()
+                       && lDataType.isUnSigned())
+                mRenderKernel =
+                              mProgramUint.getKernel("image_render_maxproj_3d");
+              else if (lDataType.isInteger() && lDataType.isSigned())
+                mRenderKernel =
+                              mProgramInt.getKernel("image_render_maxproj_3d");
+
+            }
             else if (mClearCLImage instanceof ClearCLBuffer)
               mRenderKernel =
-                            mProgram.getKernel("buffer_render_maxproj_3df");
+                            mProgramFloat.getKernel("buffer_render_maxproj_3df");
             break;
           default:
           case Slice:
             if (mClearCLImage instanceof ClearCLImage)
-              mRenderKernel =
-                            mProgram.getKernel("image_render_slice_3df");
+            {
+              ClearCLImage lImage = (ClearCLImage) mClearCLImage;
+              ImageChannelDataType lDataType =
+                                             lImage.getChannelDataType();
+
+              if (lDataType.isNormalized() || lDataType.isFloat())
+                mRenderKernel =
+                              mProgramFloat.getKernel("image_render_slice_3d");
+              else if (lDataType.isInteger()
+                       && lDataType.isUnSigned())
+                mRenderKernel =
+                              mProgramUint.getKernel("image_render_slice_3d");
+              else if (lDataType.isInteger() && lDataType.isSigned())
+                mRenderKernel =
+                              mProgramInt.getKernel("image_render_slice_3d");
+
+            }
             else if (mClearCLImage instanceof ClearCLBuffer)
               mRenderKernel =
-                            mProgram.getKernel("buffer_render_slice_3df");
+                            mProgramFloat.getKernel("buffer_render_slice_3df");
             break;
           }
 
@@ -414,6 +542,17 @@ public class ClearCLImagePanel extends StackPane
         mLock.unlock();
       }
     }
+  }
+
+  /**
+   * Returns the is-active property that decides whether to react to image
+   * updates or not.
+   * 
+   * @return is-active property
+   */
+  public BooleanProperty getIsActive()
+  {
+    return mIsActive;
   }
 
   /**

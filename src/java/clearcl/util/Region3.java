@@ -58,4 +58,12 @@ public class Region3
     return lArray;
   }
 
+  public static long volume(long[] pRegion)
+  {
+    long lVolume = 1;
+    for (int i = 0; i < pRegion.length; i++)
+      lVolume *= pRegion[i] == 0 ? 1 : pRegion[i];
+    return lVolume;
+  }
+
 }

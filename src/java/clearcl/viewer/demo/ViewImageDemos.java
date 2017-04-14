@@ -11,10 +11,10 @@ import clearcl.ClearCLProgram;
 import clearcl.backend.ClearCLBackendInterface;
 import clearcl.backend.ClearCLBackends;
 import clearcl.enums.ImageChannelDataType;
-import clearcl.enums.ImageChannelOrder;
 import clearcl.ocllib.OCLlib;
 import clearcl.test.ClearCLBasicTests;
 import clearcl.viewer.ClearCLImageViewer;
+import coremem.offheap.OffHeapMemory;
 
 import org.junit.Test;
 
@@ -35,8 +35,8 @@ public class ViewImageDemos
    *           NA
    */
   @Test
-  public void demoViewImage2D() throws InterruptedException,
-                                IOException
+  public void demoViewImage2DF() throws InterruptedException,
+                                 IOException
   {
 
     ClearCLBackendInterface lClearCLBackendInterface =
@@ -57,10 +57,9 @@ public class ViewImageDemos
       lProgram.build();
 
       ClearCLImage lImage =
-                          lContext.createImage(ImageChannelOrder.Intensity,
-                                               ImageChannelDataType.Float,
-                                               512,
-                                               512);
+                          lContext.createSingleChannelImage(ImageChannelDataType.Float,
+                                                            512,
+                                                            512);
 
       ClearCLKernel lKernel = lProgram.createKernel("fillimagexor");
       lKernel.setArgument("image", lImage);
@@ -83,6 +82,63 @@ public class ViewImageDemos
       }
 
       lViewImage.waitWhileShowing();
+
+    }
+
+  }
+
+  /**
+   * Demos 2D image viewing.
+   * 
+   * @throws InterruptedException
+   *           NA
+   * @throws IOException
+   *           NA
+   */
+  @Test
+  public void demoViewImage2DUI() throws InterruptedException,
+                                  IOException
+  {
+
+    ClearCLBackendInterface lClearCLBackendInterface =
+                                                     ClearCLBackends.getBestBackend();
+    try (ClearCL lClearCL = new ClearCL(lClearCLBackendInterface))
+    {
+      ClearCLDevice lFastestGPUDevice =
+                                      lClearCL.getFastestGPUDeviceForImages();
+
+      System.out.println(lFastestGPUDevice);
+
+      ClearCLContext lContext = lFastestGPUDevice.createContext();
+
+      int lSize = 213;
+
+      ClearCLImage lImage =
+                          lContext.createSingleChannelImage(ImageChannelDataType.UnsignedInt16,
+                                                            lSize,
+                                                            lSize);
+
+      ClearCLImageViewer lViewImage = ClearCLImageViewer.view(lImage);
+
+      OffHeapMemory lBuffer = OffHeapMemory.allocateShorts(lSize
+                                                           * lSize);
+
+      for (int i = 0; i < 10000 && lViewImage.isShowing(); i++)
+      {
+
+        for (int y = 0; y < lSize; y++)
+          for (int x = 0; x < lSize; x++)
+            lBuffer.setShortAligned(x + lSize * y,
+                                    (short) ((x + i) ^ y));
+
+        lImage.readFrom(lBuffer, true);
+
+        lImage.notifyListenersOfChange(lContext.getDefaultQueue());
+
+        Thread.sleep(10);
+      }
+
+      lViewImage.waitWhileShowing();
     }
 
   }
@@ -96,8 +152,8 @@ public class ViewImageDemos
    *           NA
    */
   @Test
-  public void demoViewImage3D() throws InterruptedException,
-                                IOException
+  public void demoViewImage3DF() throws InterruptedException,
+                                 IOException
   {
 
     ClearCLBackendInterface lClearCLBackendInterface =
@@ -118,11 +174,11 @@ public class ViewImageDemos
 
       int lSize = 213;
 
-      ClearCLImage lImage = lContext.createImage(ImageChannelOrder.R,
-                                                 ImageChannelDataType.UnsignedInt8,
-                                                 lSize,
-                                                 lSize,
-                                                 lSize);
+      ClearCLImage lImage =
+                          lContext.createSingleChannelImage(ImageChannelDataType.Float,
+                                                            lSize,
+                                                            lSize,
+                                                            lSize);
 
       ClearCLKernel lKernel = lProgram.createKernel("sphere");
       lKernel.setArgument("image", lImage);
@@ -173,4 +229,62 @@ public class ViewImageDemos
 
   }
 
+  /**
+   * Demos 3D image viewing - No Animation
+   * 
+   * @throws InterruptedException
+   *           NA
+   * @throws IOException
+   *           NA
+   */
+  @Test
+  public void demoViewImage3DUI() throws InterruptedException,
+                                  IOException
+  {
+
+    ClearCLBackendInterface lClearCLBackendInterface =
+                                                     ClearCLBackends.getBestBackend();
+    try (ClearCL lClearCL = new ClearCL(lClearCLBackendInterface))
+    {
+      ClearCLDevice lFastestGPUDevice =
+                                      lClearCL.getFastestGPUDeviceForImages();
+
+      System.out.println(lFastestGPUDevice);
+
+      ClearCLContext lContext = lFastestGPUDevice.createContext();
+
+      int lSize = 213;
+
+      ClearCLImage lImage =
+                          lContext.createSingleChannelImage(ImageChannelDataType.UnsignedInt16,
+                                                            lSize,
+                                                            lSize,
+                                                            lSize);
+
+      ClearCLImageViewer lViewImage = ClearCLImageViewer.view(lImage);
+
+      OffHeapMemory lBuffer =
+                            OffHeapMemory.allocateShorts(lSize * lSize
+                                                         * lSize);
+
+      for (int i = 0; i < 10000 && lViewImage.isShowing(); i++)
+      {
+        for (int z = 0; z < lSize; z++)
+          for (int y = 0; y < lSize; y++)
+            for (int x = 0; x < lSize; x++)
+              lBuffer.setShortAligned(x + lSize * y
+                                      + lSize * lSize * z,
+                                      (short) ((x + i) ^ y ^ z));
+
+        lImage.readFrom(lBuffer, true);
+
+        lImage.notifyListenersOfChange(lContext.getDefaultQueue());
+
+        Thread.sleep(10);
+      }
+
+      lViewImage.waitWhileShowing();
+    }
+
+  }
 }

@@ -349,12 +349,12 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   /**
    * Executes kernel for current set of arguments on default queue.
    * 
-   * @param pBlockingRun
+   * @param pWaitToFinish
    *          if true the call is blocking, false otherwise
    */
-  public void run(final boolean pBlockingRun)
+  public void run(final boolean pWaitToFinish)
   {
-    run(mClearCLContext.getDefaultQueue(), pBlockingRun);
+    run(mClearCLContext.getDefaultQueue(), pWaitToFinish);
   }
 
   /**
@@ -365,11 +365,11 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
    * 
    * @param pClearCLQueue
    *          queue
-   * @param pBlockingRun
+   * @param pWaitToFinish
    *          if true the call is blocking, false otherwise
    */
   public void run(final ClearCLQueue pClearCLQueue,
-                  final boolean pBlockingRun)
+                  final boolean pWaitToFinish)
   {
 
     ElapsedTime.measure(isLogExecutionTime(),
@@ -391,37 +391,13 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
                                                               getGlobalSizes(),
                                                               getLocalSizes());
 
-                          // for (Map.Entry<Integer, Argument> lEntry :
-                          // mIndexToArgumentMap.entrySet())
-                          // {
-                          // Object lArgument = lEntry.getValue().argument;
-                          // if (lArgument instanceof ClearCLMemInterface)
-                          // {
-                          // ClearCLMemInterface lClearCLMemInterface =
-                          // (ClearCLMemInterface)
-                          // lArgument;
-                          //
-                          // if (lClearCLMemInterface.getHostAccessType()
-                          // .isReadableFromHost())
-                          // {
-                          // AsynchronousNotification.notifyChange(() -> {
-                          // pClearCLQueue.waitToFinish();
-                          // lClearCLMemInterface.notifyListenersOfChange(mClearCLContext.getDefaultQueue());
-                          // });
-                          // }
-                          // }
-                          // }
-
-                          if (pBlockingRun)
+                          if (pWaitToFinish)
                             pClearCLQueue.waitToFinish();
 
                         });
 
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Object#toString()
-   */
   @Override
   public String toString()
   {

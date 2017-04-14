@@ -9,6 +9,7 @@ import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
 import clearcl.ClearCLQueue;
 import clearcl.enums.HostAccessType;
+import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.KernelAccessType;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.ocllib.OCLlib;
@@ -28,6 +29,10 @@ public class MinMax extends OpsBase
   private ClearCLHostImageBuffer mScratchHostBuffer;
   private ClearCLKernel mMinKernelBufferF, mMinKernelImage1F,
       mMinKernelImage2F, mMinKernelImage3F;
+  private ClearCLKernel mMinKernelImage1UI, mMinKernelImage2UI,
+      mMinKernelImage3UI;
+  private ClearCLKernel mMinKernelImage1I, mMinKernelImage2I,
+      mMinKernelImage3I;
 
   /**
    * Instanciates a MinMax object given a queue.
@@ -41,20 +46,59 @@ public class MinMax extends OpsBase
   {
     super(pClearCLQueue);
 
-    ClearCLProgram lMinMaxProgram =
-                                  getContext().createProgram(OCLlib.class,
-                                                             "reduction/reductions.cl");
-    lMinMaxProgram.addBuildOptionAllMathOpt();
-    lMinMaxProgram.buildAndLog();
+    {
+      ClearCLProgram lMinMaxFloatProgram =
+                                         getContext().createProgram(OCLlib.class,
+                                                                    "reduction/reductions.cl");
+      lMinMaxFloatProgram.addBuildOptionAllMathOpt();
+      lMinMaxFloatProgram.addDefine("FLOAT");
+      lMinMaxFloatProgram.buildAndLog();
 
-    mMinKernelBufferF =
-                      lMinMaxProgram.createKernel("reduce_min_buffer_f");
-    mMinKernelImage1F =
-                      lMinMaxProgram.createKernel("reduce_min_image_1df");
-    mMinKernelImage2F =
-                      lMinMaxProgram.createKernel("reduce_min_image_2df");
-    mMinKernelImage3F =
-                      lMinMaxProgram.createKernel("reduce_min_image_3df");
+      mMinKernelBufferF =
+                        lMinMaxFloatProgram.createKernel("reduce_min_buffer");
+
+      mMinKernelImage1F =
+                        lMinMaxFloatProgram.createKernel("reduce_min_image_1d");
+      mMinKernelImage2F =
+                        lMinMaxFloatProgram.createKernel("reduce_min_image_2d");
+      mMinKernelImage3F =
+                        lMinMaxFloatProgram.createKernel("reduce_min_image_3d");
+    }
+
+    {
+      ClearCLProgram lMinMaxUintProgram =
+                                        getContext().createProgram(OCLlib.class,
+                                                                   "reduction/reductions.cl");
+      lMinMaxUintProgram.addBuildOptionAllMathOpt();
+      lMinMaxUintProgram.addDefine("UINT");
+      lMinMaxUintProgram.buildAndLog();
+
+      mMinKernelImage1UI =
+                         lMinMaxUintProgram.createKernel("reduce_min_image_1d");
+      mMinKernelImage2UI =
+                         lMinMaxUintProgram.createKernel("reduce_min_image_2d");
+      mMinKernelImage3UI =
+                         lMinMaxUintProgram.createKernel("reduce_min_image_3d");
+
+    }
+
+    {
+      ClearCLProgram lMinMaxIntProgram =
+                                       getContext().createProgram(OCLlib.class,
+                                                                  "reduction/reductions.cl");
+      lMinMaxIntProgram.addBuildOptionAllMathOpt();
+      lMinMaxIntProgram.addDefine("INT");
+      lMinMaxIntProgram.buildAndLog();
+
+      mMinKernelImage1I =
+                        lMinMaxIntProgram.createKernel("reduce_min_image_1d");
+      mMinKernelImage2I =
+                        lMinMaxIntProgram.createKernel("reduce_min_image_2d");
+      mMinKernelImage3I =
+                        lMinMaxIntProgram.createKernel("reduce_min_image_3d");
+
+    }
+
   }
 
   /**
@@ -146,23 +190,43 @@ public class MinMax extends OpsBase
     long[] lGlobalSizes = null;
     long lVolume = 1;
 
+    ImageChannelDataType lDataType = pImage.getChannelDataType();
+
     if (pImage.getDimension() == 1)
     {
-      lKernel = mMinKernelImage1F;
+      if (lDataType.isNormalized() || lDataType.isFloat())
+        lKernel = mMinKernelImage1F;
+      else if (lDataType.isInteger() && lDataType.isUnSigned())
+        lKernel = mMinKernelImage1UI;
+      else if (lDataType.isInteger() && lDataType.isSigned())
+        lKernel = mMinKernelImage1I;
+
       lGlobalSizes = new long[]
       { lReduction };
       lVolume = lReduction;
     }
     else if (pImage.getDimension() == 2)
     {
-      lKernel = mMinKernelImage2F;
+      if (lDataType.isNormalized() || lDataType.isFloat())
+        lKernel = mMinKernelImage2F;
+      else if (lDataType.isInteger() && lDataType.isUnSigned())
+        lKernel = mMinKernelImage2UI;
+      else if (lDataType.isInteger() && lDataType.isSigned())
+        lKernel = mMinKernelImage2I;
+
       lGlobalSizes = new long[]
       { lReduction, lReduction };
       lVolume = lReduction * lReduction;
     }
     else if (pImage.getDimension() == 3)
     {
-      lKernel = mMinKernelImage3F;
+      if (lDataType.isNormalized() || lDataType.isFloat())
+        lKernel = mMinKernelImage3F;
+      else if (lDataType.isInteger() && lDataType.isUnSigned())
+        lKernel = mMinKernelImage3UI;
+      else if (lDataType.isInteger() && lDataType.isSigned())
+        lKernel = mMinKernelImage3I;
+
       lGlobalSizes = new long[]
       { lReduction, lReduction, lReduction };
       lVolume = lReduction * lReduction * lReduction;
@@ -200,6 +264,8 @@ public class MinMax extends OpsBase
       lMin = Math.min(lMin, lMinValue);
       float lMaxValue = lContiguousBuffer.readFloat();
       lMax = Math.max(lMax, lMaxValue);
+      // if (lMin != 0 && lMax != 0)
+      // System.out.format("reduced: min=%f, max=%f \n", lMin, lMax);
     }
 
     return new float[]

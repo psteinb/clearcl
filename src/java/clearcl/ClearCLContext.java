@@ -19,6 +19,7 @@ import coremem.enums.NativeTypeEnum;
  */
 public class ClearCLContext extends ClearCLBase
 {
+  private boolean mDebugNotifyAllocation = false;
 
   private final ClearCLDevice mDevice;
 
@@ -232,6 +233,7 @@ public class ClearCLContext extends ClearCLBase
                                     final NativeTypeEnum pNativeType,
                                     final long... pDimensions)
   {
+    notifyMemoryAllocation();
 
     long lVolume = 1;
     for (int i = 0; i < pDimensions.length; i++)
@@ -417,6 +419,8 @@ public class ClearCLContext extends ClearCLBase
                                   final ImageChannelDataType pImageChannelType,
                                   final long... pDimensions)
   {
+    notifyMemoryAllocation();
+
     final ImageType lImageType =
                                ImageType.fromDimensions(pDimensions);
 
@@ -486,9 +490,38 @@ public class ClearCLContext extends ClearCLBase
     return lClearCLProgram;
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Object#toString()
+  /**
+   * Returns the boolean flag that decides whether to print a message with a
+   * stack trace every time a buffer or image is allocated. this is practical to
+   * detect OpenCl memory trashing/leaking
+   * 
+   * @return true -> debug messages, false -> no debug messages
    */
+  public boolean isDebugNotifyAllocation()
+  {
+    return mDebugNotifyAllocation;
+  }
+
+  /**
+   * Sets the debug allocation notification flag.
+   * 
+   * @param pDebugNotifyAllocation
+   *          true -> debug messages, false -> no debug messages
+   */
+  public void setDebugNotifyAllocation(boolean pDebugNotifyAllocation)
+  {
+    mDebugNotifyAllocation = pDebugNotifyAllocation;
+  }
+
+  private void notifyMemoryAllocation()
+  {
+    if (isDebugNotifyAllocation())
+    {
+      System.out.println("!!CLEARCL ALLOCATION!!");
+      Thread.dumpStack();
+    }
+  }
+
   @Override
   public String toString()
   {
@@ -496,9 +529,6 @@ public class ClearCLContext extends ClearCLBase
                          getDevice().toString());
   }
 
-  /* (non-Javadoc)
-   * @see clearcl.ClearCLBase#close()
-   */
   @Override
   public void close()
   {

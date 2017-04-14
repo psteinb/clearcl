@@ -20,6 +20,7 @@ import coremem.ContiguousMemoryInterface;
 import coremem.buffers.ContiguousBuffer;
 import coremem.enums.NativeTypeEnum;
 import coremem.fragmented.FragmentedMemoryInterface;
+import coremem.interop.NIOBuffersInterop;
 import coremem.offheap.OffHeapMemory;
 
 /**
@@ -375,6 +376,10 @@ public class ClearCLImage extends ClearCLMemBase implements
     if (!getHostAccessType().isReadableFromHost())
       throw new ClearCLHostAccessException("Image not readable from host");
 
+    if (pContiguousMemory.getSizeInBytes() != getPixelSizeInBytes()
+                                              * Region3.volume(pRegion))
+      throw new ClearCLIllegalArgumentException("Attempting to write to buffer of wrong size!");
+
     ClearCLPeerPointer lHostMemPointer =
                                        getBackend().wrap(pContiguousMemory);
 
@@ -407,6 +412,13 @@ public class ClearCLImage extends ClearCLMemBase implements
     if (!getHostAccessType().isReadableFromHost())
       throw new ClearCLHostAccessException("Image not readable from host");
 
+    OffHeapMemory lCoreMemBuffer =
+                                 NIOBuffersInterop.getContiguousMemoryFrom(pBuffer);
+
+    if (lCoreMemBuffer.getSizeInBytes() != getPixelSizeInBytes()
+                                           * Region3.volume(pRegion))
+      throw new ClearCLIllegalArgumentException("Attempting to write to buffer of wrong size!");
+
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pBuffer);
 
     getBackend().enqueueReadFromImage(mClearCLContext.getDefaultQueue()
@@ -437,6 +449,10 @@ public class ClearCLImage extends ClearCLMemBase implements
   {
     if (!getHostAccessType().isWritableFromHost())
       throw new ClearCLHostAccessException("Image not writable from host");
+
+    if (pContiguousMemory.getSizeInBytes() != getPixelSizeInBytes()
+                                              * Region3.volume(pRegion))
+      throw new ClearCLIllegalArgumentException("Attempting to read from a buffer of wrong size!");
 
     ClearCLPeerPointer lHostMemPointer =
                                        getBackend().wrap(pContiguousMemory);
@@ -489,6 +505,10 @@ public class ClearCLImage extends ClearCLMemBase implements
     if (!getHostAccessType().isWritableFromHost())
       throw new ClearCLHostAccessException("Image not writable from host");
 
+    if (pFragmentedMemory.getSizeInBytes() != getPixelSizeInBytes()
+                                              * Region3.volume(pRegion))
+      throw new ClearCLIllegalArgumentException("Attempting to read from buffer of wrong size!");
+
     ClearCLPeerPointer lHostMemPointer =
                                        getBackend().wrap(pFragmentedMemory);
 
@@ -538,6 +558,13 @@ public class ClearCLImage extends ClearCLMemBase implements
   {
     if (!getHostAccessType().isWritableFromHost())
       throw new ClearCLHostAccessException("Image not writable from host");
+
+    OffHeapMemory lCoreMemBuffer =
+                                 NIOBuffersInterop.getContiguousMemoryFrom(pBuffer);
+
+    if (lCoreMemBuffer.getSizeInBytes() != getPixelSizeInBytes()
+                                           * Region3.volume(pRegion))
+      throw new ClearCLIllegalArgumentException("Attempting to read from buffer of wrong size!");
 
     ClearCLPeerPointer lHostMemPointer = getBackend().wrap(pBuffer);
 
