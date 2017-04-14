@@ -108,8 +108,8 @@ public class ClearCLImageViewer
   {
     this(pClearCLImage,
          pWindowTitle,
-         (int) (Math.max(pClearCLImage.getWidth(), 896)),
-         (int) (Math.max(pClearCLImage.getHeight(), 896)));
+         (int) (Math.max(pClearCLImage.getWidth(), 512)),
+         (int) (Math.max(pClearCLImage.getHeight(), 512)));
   }
 
   /**
