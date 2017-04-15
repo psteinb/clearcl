@@ -532,8 +532,11 @@ public class ClearCLContext extends ClearCLBase
   @Override
   public void close()
   {
-    getBackend().releaseContext(getPeerPointer());
-    setPeerPointer(null);
+    if (getPeerPointer() != null)
+    {
+      getBackend().releaseContext(getPeerPointer());
+      setPeerPointer(null);
+    }
   }
 
 }

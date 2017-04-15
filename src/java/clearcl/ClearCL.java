@@ -1,6 +1,7 @@
 package clearcl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import clearcl.abs.ClearCLBase;
 import clearcl.backend.ClearCLBackendInterface;
@@ -19,6 +20,8 @@ import clearcl.selector.GlobalMemorySelector;
  */
 public class ClearCL extends ClearCLBase
 {
+
+  HashSet<ClearCLDevice> mAccessedDeviceList = new HashSet<>();
 
   /**
    * Creates a ClearCL instance for a given ClearCL backend.
@@ -163,7 +166,11 @@ public class ClearCL extends ClearCLBase
     ArrayList<ClearCLDevice> lBestDevices =
                                           getBestDevices(pDeviceSelectors);
     if (lBestDevices.size() > 0)
-      return lBestDevices.get(0);
+    {
+      ClearCLDevice lFirstBestDevice = lBestDevices.get(0);
+      mAccessedDeviceList.add(lFirstBestDevice);
+      return lFirstBestDevice;
+    }
     else
       return null;
   }
@@ -208,7 +215,6 @@ public class ClearCL extends ClearCLBase
 
       lSelectedDeviceList.clear();
       lSelectedDeviceList.addAll(lTempSelectedList);
-
     }
 
     return lSelectedDeviceList;
@@ -234,16 +240,17 @@ public class ClearCL extends ClearCLBase
         lSelectedDeviceList.add(lClearClDevice);
       }
     }
+
+    mAccessedDeviceList.addAll(lSelectedDeviceList);
+
     return lSelectedDeviceList;
   }
 
-  /* (non-Javadoc)
-   * @see clearcl.ClearCLBase#close()
-   */
   @Override
   public void close()
   {
-
+    for (ClearCLDevice lClearCLDevice : mAccessedDeviceList)
+      lClearCLDevice.close();
   }
 
 }
