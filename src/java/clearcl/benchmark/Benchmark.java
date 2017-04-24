@@ -63,7 +63,8 @@ public class Benchmark
 
       lClearCL.close();
 
-      return lFastestDevice.toString();
+      return lFastestDevice == null ? null
+                                    : lFastestDevice.toString();
     }
     catch (Throwable e)
     {

@@ -40,7 +40,7 @@ public class ClearCLDevice extends ClearCLBase
    */
   public String getName()
   {
-    return getBackend().getDeviceName(mDevicePointer);
+    return getBackend().getDeviceName(mDevicePointer).trim();
   }
 
   /**

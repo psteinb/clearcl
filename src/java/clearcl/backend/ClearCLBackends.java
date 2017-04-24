@@ -63,9 +63,6 @@ public class ClearCLBackends
     lFunctional &= Benchmark.getFastestDevice(pClearCLBackend,
                                               BenchmarkTest.Buffer,
                                               2) != null;
-    lFunctional &= Benchmark.getFastestDevice(pClearCLBackend,
-                                              BenchmarkTest.Image,
-                                              2) != null;
 
     return lFunctional;
   }
