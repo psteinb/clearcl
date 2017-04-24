@@ -25,7 +25,24 @@ public class ElapsedTime
   public static double measure(String pDescription,
                                Runnable pRunnable)
   {
-    return measure(true, pDescription, pRunnable);
+    return measure(true, false, pDescription, pRunnable);
+  }
+
+  /**
+   * Measures the elapsed time of a Runnable. This version forces the outputto
+   * standard out.
+   * 
+   * 
+   * @param pDescription
+   *          description of the runnable
+   * @param pRunnable
+   *          runnable
+   * @return elapsed time in milliseconds
+   */
+  public static double measureForceOutput(String pDescription,
+                                          Runnable pRunnable)
+  {
+    return measure(true, true, pDescription, pRunnable);
   }
 
   /**
@@ -41,6 +58,28 @@ public class ElapsedTime
    * @return elapsed time in milliseconds
    */
   public static double measure(boolean pActive,
+                               String pDescription,
+                               Runnable pRunnable)
+  {
+    return measure(pActive, false, pDescription, pRunnable);
+  }
+
+  /**
+   * Measures the elapsed time of a Runnable. An optional boolean flag can be
+   * used to switch of the timing.
+   * 
+   * @param pActive
+   *          true -> measure, false -> execute without measuring
+   * @param pForceOutput
+   *          forces output to standard out
+   * @param pDescription
+   *          description of the code (runnable)
+   * @param pRunnable
+   *          runnable
+   * @return elapsed time in milliseconds
+   */
+  public static double measure(boolean pActive,
+                               boolean pForceOutput,
                                String pDescription,
                                Runnable pRunnable)
   {
@@ -66,7 +105,7 @@ public class ElapsedTime
     long lElapsedNanos = lNanosStop - lNanosStart;
     double lElapsedTimeInMilliseconds = lElapsedNanos * 1e-6;
 
-    if (sStandardOutput)
+    if (pForceOutput || sStandardOutput)
       System.out.format("%g ms for %s \n",
                         lElapsedTimeInMilliseconds,
                         pDescription);
