@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import clearcl.abs.ClearCLBase;
 import clearcl.enums.BuildStatus;
+import clearcl.enums.ImageChannelDataType;
 import clearcl.exceptions.ClearCLProgramNotBuiltException;
 import clearcl.ocllib.OCLlib;
 import clearcl.util.StringUtils;
@@ -196,6 +197,61 @@ public class ClearCLProgram extends ClearCLBase
   {
     mDefinesMap.put(pSymbol, "");
     mModified = true;
+  }
+
+  /**
+   * Adds one of three kinds of defines: FLOAT, INT and UINT depending on the
+   * given channel datatype. This is usefull for kernels that need to switch
+   * between different variants of write_imageX and read_imageX.
+   * 
+   * @param pChannelDataType
+   *          channel data type
+   */
+  public void addDefineForDataType(ImageChannelDataType pChannelDataType)
+  {
+    switch (pChannelDataType)
+    {
+    case Float:
+      addDefine("FLOAT");
+      break;
+    case HalfFloat:
+      addDefine("FLOAT");
+      break;
+    case SignedInt16:
+      addDefine("INT");
+      break;
+    case SignedInt32:
+      addDefine("INT");
+      break;
+    case SignedInt8:
+      addDefine("INT");
+      break;
+    case SignedNormalizedInt16:
+      addDefine("FLOAT");
+      break;
+    case SignedNormalizedInt8:
+      addDefine("FLOAT");
+      break;
+    case UnsignedInt16:
+      addDefine("UINT");
+      break;
+    case UnsignedInt32:
+      addDefine("UINT");
+      break;
+    case UnsignedInt8:
+      addDefine("UINT");
+      break;
+    case UnsignedNormalizedInt16:
+      addDefine("FLOAT");
+      break;
+    case UnsignedNormalizedInt8:
+      addDefine("FLOAT");
+      break;
+    default:
+      break;
+
+    }
+
   }
 
   /**
@@ -757,7 +813,11 @@ public class ClearCLProgram extends ClearCLBase
   @Override
   public void close()
   {
-    getBackend().releaseProgram(getPeerPointer());
-    setPeerPointer(null);
+    if (getPeerPointer() != null)
+    {
+      getBackend().releaseProgram(getPeerPointer());
+      setPeerPointer(null);
+    }
   }
+
 }

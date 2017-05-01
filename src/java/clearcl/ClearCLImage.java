@@ -97,7 +97,10 @@ public class ClearCLImage extends ClearCLMemBase implements
   public void fillZero(boolean pBlockingFill,
                        boolean pNotifyListeners)
   {
-    fill(0.0f, pBlockingFill, pNotifyListeners);
+    if (isNormalized() || isFloat())
+      fill(0.0f, pBlockingFill, pNotifyListeners);
+    else
+      fill(0, pBlockingFill, pNotifyListeners);
   }
 
   /**
@@ -123,7 +126,29 @@ public class ClearCLImage extends ClearCLMemBase implements
   }
 
   /**
-   * Fills this image with a RGBA 'color'.
+   * Fills this image with a single channel 'color'.
+   * 
+   * @param pColor
+   *          single channel int color
+   * @param pBlockingFill
+   *          true -> blocking call, false -> asynchronous call
+   * @param pNotifyListeners
+   *          true -> notify listeners, false -> do not notify
+   */
+  public void fill(int pColor,
+                   boolean pBlockingFill,
+                   boolean pNotifyListeners)
+  {
+    fill(new int[]
+    { pColor, pColor, pColor, pColor },
+         Region3.originZero(),
+         Region3.region(getDimensions()),
+         pBlockingFill,
+         pNotifyListeners);
+  }
+
+  /**
+   * Fills this image with a float RGBA 'color'.
    * 
    * @param pRGBA
    *          four float color
@@ -144,7 +169,28 @@ public class ClearCLImage extends ClearCLMemBase implements
   }
 
   /**
-   * Fills a nD region of this image with a RGBA 'color'.
+   * Fills this image with an int RGBA 'color'.
+   * 
+   * @param pRGBA
+   *          four int color
+   * @param pBlockingFill
+   *          true -> blocking call, false -> asynchronous call
+   * @param pNotifyListeners
+   *          true -> notify listeners, false -> do not notify
+   */
+  public void fill(int[] pRGBA,
+                   boolean pBlockingFill,
+                   boolean pNotifyListeners)
+  {
+    fill(pRGBA,
+         Region3.originZero(),
+         Region3.region(getDimensions()),
+         pBlockingFill,
+         pNotifyListeners);
+  }
+
+  /**
+   * Fills a nD region of this image with a RGBA float 'color'.
    * 
    * @param pRGBA
    *          four float color
@@ -164,15 +210,83 @@ public class ClearCLImage extends ClearCLMemBase implements
                    boolean pNotifyListeners)
   {
     if (!(isNormalized() || isFloat()))
-      throw new ClearCLIllegalArgumentException("Image data type must not be normalized integer or float");
+      throw new ClearCLIllegalArgumentException("Image data type must be normalized integer or float, if trying to clear image please use fillZero.");
+
+    fillInternal(floatToIntBits(pRGBA),
+                 pOrigin,
+                 pRegion,
+                 pBlockingFill,
+                 pNotifyListeners);
+  }
+
+  /**
+   * Fills a nD region of this image with a RGBA int 'color'.
+   * 
+   * @param pRGBA
+   *          four int color
+   * @param pOrigin
+   *          region origin
+   * @param pRegion
+   *          region dimensions
+   * @param pBlockingFill
+   *          true -> blocking call, false -> asynchronous call
+   * @param pNotifyListeners
+   *          true -> notify listeners, false -> do not notify
+   */
+  public void fill(int[] pRGBA,
+                   long[] pOrigin,
+                   long[] pRegion,
+                   boolean pBlockingFill,
+                   boolean pNotifyListeners)
+  {
+    if ((isNormalized() || isFloat()))
+      throw new ClearCLIllegalArgumentException("Image data type must be of integer type, if trying to clear image please use fillZero.");
+
+    fillInternal(pRGBA,
+                 pOrigin,
+                 pRegion,
+                 pBlockingFill,
+                 pNotifyListeners);
+  }
+
+  private int[] floatToIntBits(float[] pRGBA)
+  {
+
+    int[] lRGBAint = new int[pRGBA.length];
+    for (int i = 0; i < lRGBAint.length; i++)
+      lRGBAint[i] = Float.floatToIntBits(pRGBA[i]);
+
+    return lRGBAint;
+  }
+
+  /**
+   * Fills a nD region of this image with a RGBA int 'color'.
+   * 
+   * @param pRGBA
+   *          four int color
+   * @param pOrigin
+   *          region origin
+   * @param pRegion
+   *          region dimensions
+   * @param pBlockingFill
+   *          true -> blocking call, false -> asynchronous call
+   * @param pNotifyListeners
+   *          true -> notify listeners, false -> do not notify
+   */
+  private void fillInternal(int[] pRGBA,
+                            long[] pOrigin,
+                            long[] pRegion,
+                            boolean pBlockingFill,
+                            boolean pNotifyListeners)
+  {
     if (pRGBA.length > 4)
-      throw new ClearCLIllegalArgumentException("Float array must have length 4");
+      throw new ClearCLIllegalArgumentException("Array must have length 4");
 
     int lLength = 4 * 4;
     ContiguousBuffer lContiguousBuffer =
                                        ContiguousBuffer.allocate(lLength);
-    for (float lFloat : pRGBA)
-      lContiguousBuffer.writeFloat(lFloat);
+    for (int lInt : pRGBA)
+      lContiguousBuffer.writeInt(lInt);
     lContiguousBuffer.rewind();
 
     byte[] lPattern = new byte[lLength];
@@ -907,8 +1021,11 @@ public class ClearCLImage extends ClearCLMemBase implements
   @Override
   public void close()
   {
-    getBackend().releaseImage(getPeerPointer());
-    setPeerPointer(null);
+    if (getPeerPointer() != null)
+    {
+      getBackend().releaseImage(getPeerPointer());
+      setPeerPointer(null);
+    }
   }
 
 }

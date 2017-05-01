@@ -202,11 +202,11 @@ public class ClearCLDevice extends ClearCLBase
   @Override
   public void close()
   {
-    for (ClearCLContext lContext : mContextList)
-      lContext.close();
-
     if (getPeerPointer() != null)
     {
+      for (ClearCLContext lContext : mContextList)
+        lContext.close();
+
       getBackend().releaseDevice(getPeerPointer());
       setPeerPointer(null);
     }

@@ -58,6 +58,13 @@ public class Region3
     return lArray;
   }
 
+  /**
+   * Returns the volume of a given region (total number of voxels)
+   * 
+   * @param pRegion
+   *          3D region
+   * @return volume
+   */
   public static long volume(long[] pRegion)
   {
     long lVolume = 1;

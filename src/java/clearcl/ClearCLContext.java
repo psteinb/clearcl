@@ -274,11 +274,28 @@ public class ClearCLContext extends ClearCLBase
    */
   public ClearCLImage createImage(ClearCLImage pImage)
   {
+    return createImage(pImage, null);
+  }
+
+  /**
+   * Creates an image with same parameters as the given image,
+   * 
+   * @param pImage
+   *          template image to use
+   * @param pChannelDataType
+   *          Overrides channel data type, if null the original channel data
+   *          type is used
+   * @return created image
+   */
+  public ClearCLImage createImage(ClearCLImage pImage,
+                                  ImageChannelDataType pChannelDataType)
+  {
     return createImage(pImage.getMemAllocMode(),
                        pImage.getHostAccessType(),
                        pImage.getKernelAccessType(),
                        pImage.getChannelOrder(),
-                       pImage.getChannelDataType(),
+                       pChannelDataType == null ? pImage.getChannelDataType()
+                                                : pChannelDataType,
                        pImage.getDimensions());
   }
 

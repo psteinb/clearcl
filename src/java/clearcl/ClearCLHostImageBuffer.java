@@ -220,8 +220,11 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
   @Override
   public void close()
   {
-    mContiguousMemory.free();
-    mContiguousMemory = null;
+    if (mContiguousMemory != null)
+    {
+      mContiguousMemory.free();
+      mContiguousMemory = null;
+    }
   }
 
 }

@@ -578,8 +578,11 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   @Override
   public void close()
   {
-    getBackend().releaseKernel(getPeerPointer());
-    setPeerPointer(null);
+    if (getPeerPointer() != null)
+    {
+      getBackend().releaseKernel(getPeerPointer());
+      setPeerPointer(null);
+    }
   }
 
 }

@@ -46,13 +46,14 @@ public class ClearCLQueue extends ClearCLBase
     getBackend().waitQueueToFinish(getPeerPointer());
   }
 
-  /* (non-Javadoc)
-   * @see clearcl.ClearCLBase#close()
-   */
   @Override
   public void close()
   {
-    getBackend().releaseQueue(getPeerPointer());
+    if (getPeerPointer() != null)
+    {
+      getBackend().releaseQueue(getPeerPointer());
+      setPeerPointer(null);
+    }
   }
 
 }

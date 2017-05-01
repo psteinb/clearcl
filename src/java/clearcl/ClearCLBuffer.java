@@ -743,8 +743,11 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   @Override
   public void close()
   {
-    getBackend().releaseBuffer(getPeerPointer());
-    setPeerPointer(null);
+    if (getPeerPointer() != null)
+    {
+      getBackend().releaseBuffer(getPeerPointer());
+      setPeerPointer(null);
+    }
   }
 
 }

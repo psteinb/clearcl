@@ -249,8 +249,12 @@ public class ClearCL extends ClearCLBase
   @Override
   public void close()
   {
-    for (ClearCLDevice lClearCLDevice : mAccessedDeviceList)
-      lClearCLDevice.close();
+    if (!mAccessedDeviceList.isEmpty())
+    {
+      for (ClearCLDevice lClearCLDevice : mAccessedDeviceList)
+        lClearCLDevice.close();
+      mAccessedDeviceList.clear();
+    }
   }
 
 }
