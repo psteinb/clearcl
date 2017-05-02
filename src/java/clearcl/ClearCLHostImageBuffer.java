@@ -178,6 +178,20 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
   }
 
   @Override
+  public void copyTo(ClearCLImage pImage, boolean pBlockingWrite)
+  {
+    // since this is a host image, we fall-back to a 'read'
+    pImage.readFrom(getContiguousMemory(), pBlockingWrite);
+  }
+
+  @Override
+  public void copyTo(ClearCLBuffer pBuffer, boolean pBlockingWrite)
+  {
+    // since this is a host image, we fall-back to a 'read'
+    pBuffer.readFrom(getContiguousMemory(), pBlockingWrite);
+  }
+
+  @Override
   public void writeTo(ContiguousMemoryInterface pContiguousMemory,
                       boolean pBlockingWrite)
   {

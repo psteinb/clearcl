@@ -2,6 +2,8 @@ package clearcl.interfaces;
 
 import java.nio.Buffer;
 
+import clearcl.ClearCLBuffer;
+import clearcl.ClearCLImage;
 import clearcl.backend.ClearCLBackendInterface;
 import coremem.ContiguousMemoryInterface;
 import coremem.enums.NativeTypeEnum;
@@ -13,6 +15,26 @@ import coremem.enums.NativeTypeEnum;
  */
 public interface ClearCLImageInterface extends ClearCLMemInterface
 {
+
+  /**
+   * Copies the contents of this image to a given image.
+   * 
+   * @param pImage
+   *          destination image
+   * @param pBlockingWrite
+   *          true -> blocking call, false -> asynchronous call
+   */
+  void copyTo(ClearCLImage pImage, boolean pBlockingWrite);
+
+  /**
+   * Copies the contents of this image to a given buffer.
+   * 
+   * @param pBuffer
+   *          destination buffer
+   * @param pBlockingWrite
+   *          true -> blocking call, false -> asynchronous call
+   */
+  void copyTo(ClearCLBuffer pBuffer, boolean pBlockingWrite);
 
   /**
    * Copies image into CoreMem contiguous memory
