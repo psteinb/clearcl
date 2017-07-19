@@ -600,7 +600,9 @@ public class ClearCLImage extends ClearCLMemBase implements
   }
 
   /**
-   * Reads from a CoreMem fragmented buffer into a nD region of this image.
+   * Reads from a CoreMem fragmented buffer into a nD region of this image. Each
+   * fragment corresponds to a single XY 2D plane (for XYZ 3D images) or a
+   * single X 1D line (for XY 2D images).
    * 
    * @param pFragmentedMemory
    *          CoreMem fragmented buffer
@@ -623,17 +625,62 @@ public class ClearCLImage extends ClearCLMemBase implements
                                               * Region3.volume(pRegion))
       throw new ClearCLIllegalArgumentException("Attempting to read from buffer of wrong size!");
 
-    ClearCLPeerPointer lHostMemPointer =
-                                       getBackend().wrap(pFragmentedMemory);
+    int lNumberOfFragments = pFragmentedMemory.getNumberOfFragments();
 
-    getBackend().enqueueWriteToImage(mClearCLContext.getDefaultQueue()
-                                                    .getPeerPointer(),
-                                     getPeerPointer(),
-                                     pBlockingRead,
-                                     Region3.origin(pOrigin),
-                                     Region3.region(pRegion),
-                                     lHostMemPointer);
-    notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+    long[] lOrigin = Region3.origin(pOrigin);
+    long[] lRegion = Region3.region(pRegion);
+
+    if (getDimension() == 2)
+    {
+      lRegion[1] = 1;
+
+      for (int i = 0; i < lNumberOfFragments; i++)
+      {
+        ContiguousMemoryInterface lContiguousMemoryInterface =
+                                                             pFragmentedMemory.get(i);
+
+        ClearCLPeerPointer lFragmentHostMemPointer =
+                                                   getBackend().wrap(lContiguousMemoryInterface);
+
+        getBackend().enqueueWriteToImage(mClearCLContext.getDefaultQueue()
+                                                        .getPeerPointer(),
+                                         getPeerPointer(),
+                                         pBlockingRead,
+                                         lOrigin,
+                                         lRegion,
+                                         lFragmentHostMemPointer);
+
+        lOrigin[1]++;
+      }
+
+      notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+    }
+    else if (getDimension() == 3)
+    {
+      lRegion[2] = 1;
+
+      for (int i = 0; i < lNumberOfFragments; i++)
+      {
+        ContiguousMemoryInterface lContiguousMemoryInterface =
+                                                             pFragmentedMemory.get(i);
+
+        ClearCLPeerPointer lFragmentHostMemPointer =
+                                                   getBackend().wrap(lContiguousMemoryInterface);
+
+        getBackend().enqueueWriteToImage(mClearCLContext.getDefaultQueue()
+                                                        .getPeerPointer(),
+                                         getPeerPointer(),
+                                         pBlockingRead,
+                                         lOrigin,
+                                         lRegion,
+                                         lFragmentHostMemPointer);
+
+        lOrigin[2]++;
+      }
+
+      notifyListenersOfChange(mClearCLContext.getDefaultQueue());
+    }
+
   }
 
   /**
