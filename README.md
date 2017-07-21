@@ -69,7 +69,7 @@ repositories {
 
 ## Getting started:
 
-Just check the test (here)[https://github.com/ClearVolume/ClearCL/blob/master/src/java/clearcl/test/ClearCLTests.java] to learn how to use ClearCL. More tests are coming...
+Just check the test [here](https://github.com/ClearVolume/ClearCL/blob/master/src/java/clearcl/test/ClearCLTests.java) to learn how to use ClearCL. More tests are coming...
 
 ## How to build project with Gradle
 
