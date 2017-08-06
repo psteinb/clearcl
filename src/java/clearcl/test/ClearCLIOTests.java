@@ -66,7 +66,7 @@ public class ClearCLIOTests {
         lImageSrc.copyTo(lImageDst, new long[]
                 { 0, 0, 0 }, new long[]
                 { 0, 0, 0 }, new long[]
-                { 10, 10, 10 }, true);
+                { 100, 100, 100 }, true);
 
 
         TiffWriter lTiffWriter = new TiffWriter(NativeTypeEnum.Byte, 1f, 0f);
