@@ -70,11 +70,26 @@ public class ClearCLIOTests {
 
 
         TiffWriter lTiffWriter = new TiffWriter(NativeTypeEnum.Byte, 1f, 0f);
-        File lFile = new File("out/temp/test.tif");
-        if (lFile.exists()) {
-            lFile.delete();
+        File lFile8 = new File("out/temp/test8.tif");
+        File lFile16 = new File("out/temp/test16.tif");
+        File lFile32 = new File("out/temp/test32.tif");
+        if (lFile8.exists()) {
+            lFile8.delete();
+        }
+        if (lFile16.exists()) {
+            lFile16.delete();
+        }
+        if (lFile32.exists()) {
+            lFile32.delete();
         }
 
-        lTiffWriter.write(lImageDst, lFile);
+
+        lTiffWriter.setBytesPerPixel(8);
+        lTiffWriter.write(lImageDst, lFile8);
+        lTiffWriter.setBytesPerPixel(16);
+        lTiffWriter.write(lImageDst, lFile16);
+        lTiffWriter.setBytesPerPixel(32);
+        lTiffWriter.write(lImageDst, lFile32);
+
     }
 }

@@ -10,11 +10,13 @@ import coremem.offheap.OffHeapMemory;
 import coremem.util.Size;
 import loci.common.services.ServiceFactory;
 import loci.formats.FormatTools;
-import loci.formats.IFormatWriter;
-import loci.formats.ImageWriter;
 import loci.formats.MetadataTools;
 import loci.formats.meta.IMetadata;
 import loci.formats.services.OMEXMLService;
+
+import static loci.formats.FormatTools.FLOAT;
+import static loci.formats.FormatTools.UINT16;
+import static loci.formats.FormatTools.UINT8;
 
 /**
  * Image TIFF writer
@@ -30,6 +32,8 @@ public class TiffWriter extends WriterBase implements WriterInterface
 {
   byte[] mTransferArray;
   OffHeapMemory mTransferMemory;
+  int mBytesPerPixel = 16;
+  int mPixelType = FormatTools.UINT16;
 
 
   /**
@@ -51,20 +55,35 @@ public class TiffWriter extends WriterBase implements WriterInterface
     super(pNativeTypeEnum, pScaling, pOffset);
   }
 
+  public void setBytesPerPixel(int pBytesPerPixel) {
+    if (pBytesPerPixel == 8 || pBytesPerPixel == 16 || pBytesPerPixel == 32) {
+      mBytesPerPixel = pBytesPerPixel;
+    }
+  }
+
   @Override
   public boolean write(ClearCLImageInterface pImage,
                        File pFile) throws Throwable
   {
     pFile.getParentFile().mkdirs();
+    long[] dimensions = pImage.getDimensions();
 
-
-    int lWidth = (int) pImage.getDimensions()[0];
-    int lHeight = (int) pImage.getDimensions()[1];
-    int lDepth = (int) pImage.getDimensions()[2];
+    int lWidth = (int) dimensions[0];
+    int lHeight = dimensions.length > 1?(int) pImage.getDimensions()[1]:1;
+    int lDepth = dimensions.length > 2?(int) pImage.getDimensions()[2]:1;
     
-    int lPixelType = FormatTools.UINT16;
-    long lUINT16BitSizeInBytes = lWidth * lHeight
-                                 * FormatTools.getBytesPerPixel(lPixelType);
+    mPixelType = FormatTools.UINT16;
+    switch (mBytesPerPixel) {
+      case 8:
+        mPixelType = UINT8;
+        break;
+      case 32:
+        mPixelType = FormatTools.FLOAT;
+        break;
+    }
+
+    long lArraySizeInBytes = lWidth * lHeight
+                                 * FormatTools.getBytesPerPixel(mPixelType);
     long lFloatSizeInBytes = lWidth * lHeight * lDepth * Size.FLOAT;
 
     if (mTransferMemory == null
@@ -76,13 +95,12 @@ public class TiffWriter extends WriterBase implements WriterInterface
     }
 
     if (mTransferArray == null
-            || lUINT16BitSizeInBytes != mTransferArray.length
-            * Size.SHORT)
+            || lArraySizeInBytes != mTransferArray.length)
     {
       mTransferArray =
-              new byte[Math.toIntExact(lUINT16BitSizeInBytes)];
+              new byte[Math.toIntExact(lArraySizeInBytes)];
     }
-    
+
     // Dirty hack:
     ClearCLImage lImage = (ClearCLImage)pImage;
 
@@ -100,7 +118,7 @@ public class TiffWriter extends WriterBase implements WriterInterface
                                    null,
                                    false,
                                    "XYZCT",
-                                   FormatTools.getPixelTypeString(lPixelType),
+                                   FormatTools.getPixelTypeString(mPixelType),
                                    lWidth,
                                    lHeight,
                                    lDepth,
@@ -119,21 +137,13 @@ public class TiffWriter extends WriterBase implements WriterInterface
     ContiguousBuffer lBuffer = new ContiguousBuffer(mTransferMemory);
 
 
-    float lScaling = getScaling();
-    float lOffset = getOffset();
 
     for (int z = 0; z < lDepth; z++)
     {
       int i = 0;
       while (lBuffer.hasRemainingFloat() && i < mTransferArray.length)
       {
-        float lFloatValue = lBuffer.readFloat() * lScaling + lOffset;
-        int lIntValue = Math.round(lFloatValue);
-        byte lLowByte = (byte) (lIntValue & 0xFF);
-        byte lHighByte = (byte) ((lIntValue >> 8) & 0xFF);
-    
-        mTransferArray[i++] = lHighByte;
-        mTransferArray[i++] = lLowByte;
+        i = appendValueToArray(lBuffer.readFloat(), i);
       }
       
       System.out.println("length="+mTransferArray.length);
@@ -143,6 +153,37 @@ public class TiffWriter extends WriterBase implements WriterInterface
     
     System.out.println("Done.");
     return true;
+  }
+
+  private int appendValueToArray(float pFloatValue,  int i) {
+    float lFloatValue = pFloatValue * mScaling + mOffset;
+
+    int lIntValue = Math.round(lFloatValue);
+
+    switch (mPixelType) {
+      case UINT8:
+        lIntValue = Math.round(lFloatValue);
+        byte lByte = (byte) (lIntValue & 0xFF);
+        mTransferArray[i++] = lByte;
+        break;
+      case UINT16:
+        lIntValue = Math.round(lFloatValue);
+
+        byte lLowByte = (byte) (lIntValue & 0xFF);
+        byte lHighByte = (byte) ((lIntValue >> 8) & 0xFF);
+
+        mTransferArray[i++] = lHighByte;
+        mTransferArray[i++] = lLowByte;
+        break;
+      case FLOAT:
+        lIntValue = Float.floatToIntBits(pFloatValue);
+        mTransferArray[i++] = (byte)(lIntValue>>>24);
+        mTransferArray[i++] = (byte)(lIntValue>>>16);
+        mTransferArray[i++] = (byte)(lIntValue>>> 8);
+        mTransferArray[i++] = (byte)lIntValue;
+        break;
+    }
+    return i;
   }
 
 }
