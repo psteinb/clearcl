@@ -28,6 +28,9 @@ import loci.formats.services.OMEXMLService;
  */
 public class TiffWriter extends WriterBase implements WriterInterface
 {
+  byte[] mTransferArray;
+  OffHeapMemory mTransferMemory;
+
 
   /**
    * Instanciates a Image TIFF writer. The voxel values produced by the phantom
@@ -64,13 +67,25 @@ public class TiffWriter extends WriterBase implements WriterInterface
                                  * FormatTools.getBytesPerPixel(lPixelType);
     long lFloatSizeInBytes = lWidth * lHeight * lDepth * Size.FLOAT;
 
-    byte[] mTransferArray = new byte[Math.toIntExact(lUINT16BitSizeInBytes)];
+    if (mTransferMemory == null
+            || lFloatSizeInBytes != mTransferMemory.getSizeInBytes())
+    {
+      mTransferMemory =
+              OffHeapMemory.allocateBytes("PhantomTiffWriter",
+                      lFloatSizeInBytes);
+    }
 
+    if (mTransferArray == null
+            || lUINT16BitSizeInBytes != mTransferArray.length
+            * Size.SHORT)
+    {
+      mTransferArray =
+              new byte[Math.toIntExact(lUINT16BitSizeInBytes)];
+    }
+    
     // Dirty hack:
     ClearCLImage lImage = (ClearCLImage)pImage;
 
-    OffHeapMemory mTransferMemory =
-            OffHeapMemory.allocateBytes(pImage.getSizeInBytes());
     lImage.writeTo(mTransferMemory, new long[]
             { 0, 0, 0 }, new long[]
             { lWidth, lHeight, lDepth }, true);
