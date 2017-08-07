@@ -97,8 +97,8 @@ public class TiffWriter extends WriterBase implements WriterInterface
         || lFloatSizeInBytes != mTransferMemory.getSizeInBytes())
     {
       mTransferMemory =
-                        OffHeapMemory.allocateBytes("PhantomTiffWriter",
-                                                    lFloatSizeInBytes);
+                      OffHeapMemory.allocateBytes("PhantomTiffWriter",
+                                                  lFloatSizeInBytes);
     }
 
     if (mTransferArray == null
