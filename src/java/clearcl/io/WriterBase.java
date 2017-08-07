@@ -10,7 +10,7 @@ import coremem.enums.NativeTypeEnum;
  */
 public abstract class WriterBase implements WriterInterface
 {
-  private float mScaling, mOffset;
+  protected float mScaling, mOffset;
   private boolean mOverwrite;
   private NativeTypeEnum mNativeTypeEnum;
 
