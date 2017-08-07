@@ -2,6 +2,12 @@ package clearcl.test;
 
 import java.io.File;
 
+import clearcl.*;
+import clearcl.backend.ClearCLBackendInterface;
+import clearcl.backend.ClearCLBackends;
+import clearcl.enums.*;
+import clearcl.io.TiffWriter;
+import coremem.enums.NativeTypeEnum;
 
 import org.junit.Test;
 
