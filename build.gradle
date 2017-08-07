@@ -88,6 +88,7 @@ repositories
 	maven { url "http://oss.sonatype.org/content/groups/public" }
 	maven { url "http://dl.bintray.com/clearcontrol/ClearControl" }
 	maven { url "https://mvnrepository.com/artifact/org.jocl/jocl"}
+	maven { url "https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases" }
 	maven { url "http://artifacts.openmicroscopy.org/artifactory/maven/"}
 }
 
