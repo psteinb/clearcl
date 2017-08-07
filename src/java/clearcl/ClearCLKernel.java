@@ -3,6 +3,8 @@ package clearcl;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import clearcl.abs.ClearCLBase;
 import clearcl.exceptions.ClearCLArgumentMissingException;
@@ -519,10 +521,18 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   {
     final String lSourceCode = getSourceCode();
     {
-      final int lBeginOfKernelSignature =
-                                        lSourceCode.indexOf(pKernelName);
-      if (lBeginOfKernelSignature >= 0)
+      Pattern lPattern = Pattern.compile("[\n\r\\s]+(" + pKernelName
+                                         + ")[\n\r\\s(]+");
+
+      Matcher lMatcher = lPattern.matcher(lSourceCode);
+
+      /*final int lBeginOfKernelSignature =
+                                        max(lSourceCode.indexOf(pKernelName+" "),
+                                            lSourceCode.indexOf(pKernelName+"("));/**/
+      // if (lBeginOfKernelSignature >= 0)
+      if (lMatcher.find())
       {
+        int lBeginOfKernelSignature = lMatcher.start(1);
         final int lEndOfKernelSignature =
                                         lSourceCode.indexOf('{',
                                                             lBeginOfKernelSignature);

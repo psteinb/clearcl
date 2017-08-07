@@ -106,7 +106,7 @@ public class ClearCLBasicTests
 
           // System.out.println(lProgram.getSourceCode());
 
-          final BuildStatus lBuildStatus = lProgram.build();
+          final BuildStatus lBuildStatus = lProgram.buildAndLog();
 
           // System.out.println(lProgram.getBuildLog());
 
