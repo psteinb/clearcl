@@ -1,6 +1,6 @@
 __kernel
 void reduce_min_buffer( __global float* buffer,
-                                   int    length,
+                                   long    length,
                           __global float* result) 
 {
   int index  = get_global_id(0);
