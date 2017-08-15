@@ -1,12 +1,22 @@
-package clearcl.test;
+package clearcl.io.test;
 
 import java.io.File;
 
-import clearcl.*;
+import clearcl.ClearCL;
+import clearcl.ClearCLContext;
+import clearcl.ClearCLDevice;
+import clearcl.ClearCLImage;
+import clearcl.ClearCLKernel;
+import clearcl.ClearCLProgram;
 import clearcl.backend.ClearCLBackendInterface;
 import clearcl.backend.ClearCLBackends;
-import clearcl.enums.*;
+import clearcl.enums.BuildStatus;
+import clearcl.enums.HostAccessType;
+import clearcl.enums.ImageChannelDataType;
+import clearcl.enums.ImageChannelOrder;
+import clearcl.enums.KernelAccessType;
 import clearcl.io.TiffWriter;
+import clearcl.test.ClearCLBasicTests;
 import coremem.enums.NativeTypeEnum;
 
 import org.junit.Test;
@@ -73,21 +83,17 @@ public class ClearCLIOTests
     TiffWriter lTiffWriter = new TiffWriter(NativeTypeEnum.Byte,
                                             1f,
                                             0f);
-    File lFile8 = new File("out/temp/test8.tif");
-    File lFile16 = new File("out/temp/test16.tif");
-    File lFile32 = new File("out/temp/test32.tif");
-    if (lFile8.exists())
-    {
-      lFile8.delete();
-    }
-    if (lFile16.exists())
-    {
-      lFile16.delete();
-    }
-    if (lFile32.exists())
-    {
-      lFile32.delete();
-    }
+    File lFile8 = File.createTempFile(this.getClass().getSimpleName(),
+                                      "test8");
+    File lFile16 =
+                 File.createTempFile(this.getClass().getSimpleName(),
+                                     "test16");
+    File lFile32 =
+                 File.createTempFile(this.getClass().getSimpleName(),
+                                     "test32");
+    lFile8.deleteOnExit();
+    lFile16.deleteOnExit();
+    lFile32.deleteOnExit();
 
     lTiffWriter.setBytesPerPixel(8);
     lTiffWriter.write(lImageDst, lFile8);
