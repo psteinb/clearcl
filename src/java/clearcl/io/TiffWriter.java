@@ -6,6 +6,7 @@ import static loci.formats.FormatTools.UINT8;
 
 import java.io.File;
 
+import ch.qos.logback.classic.Level;
 import loci.common.services.ServiceFactory;
 import loci.formats.FormatTools;
 import loci.formats.MetadataTools;
@@ -17,6 +18,9 @@ import coremem.buffers.ContiguousBuffer;
 import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
 import coremem.util.Size;
+import loci.formats.tiff.TiffSaver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Image TIFF writer
@@ -114,6 +118,13 @@ public class TiffWriter extends WriterBase implements WriterInterface
     { 0, 0, 0 }, new long[]
     { lWidth, lHeight, lDepth }, true);
 
+    // Workaround to turn the BioFormats logger OFF
+    Logger LOGGER = LoggerFactory.getLogger(TiffSaver.class);
+    if (LOGGER instanceof ch.qos.logback.classic.Logger) {
+      ((ch.qos.logback.classic.Logger) LOGGER).setLevel(Level.OFF);
+    }
+
+
     ServiceFactory factory = new ServiceFactory();
     OMEXMLService service = factory.getInstance(OMEXMLService.class);
     IMetadata meta = service.createOMEXMLMetadata();
@@ -150,7 +161,6 @@ public class TiffWriter extends WriterBase implements WriterInterface
         i = appendValueToArray(lBuffer.readFloat(), i);
       }
 
-      System.out.println("length=" + mTransferArray.length);
       writer.saveBytes(z, mTransferArray);
     }
     writer.close();
