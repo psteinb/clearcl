@@ -20,7 +20,6 @@ import clearcl.backend.ClearCLBackends;
 import clearcl.enums.BuildStatus;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
-import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.KernelAccessType;
 import clearcl.test.ClearCLBasicTests;
 import coremem.enums.NativeTypeEnum;
@@ -65,6 +64,8 @@ public class ClearCLBasicDemo
                                                      "test.cl");
       lProgram.addDefine("CONSTANT", "1");
 
+      // System.out.println(lProgram.getSourceCode());
+
       BuildStatus lBuildStatus = lProgram.buildAndLog();
 
       assertEquals(lBuildStatus, BuildStatus.Success);
@@ -81,29 +82,27 @@ public class ClearCLBasicDemo
   {
 
     ClearCLImage lImageSrc =
-                           lContext.createImage(HostAccessType.WriteOnly,
-                                                KernelAccessType.ReadWrite,
-                                                ImageChannelOrder.Intensity,
-                                                ImageChannelDataType.Float,
-                                                100,
-                                                100,
-                                                100);
+                           lContext.createSingleChannelImage(HostAccessType.WriteOnly,
+                                                             KernelAccessType.ReadWrite,
+                                                             ImageChannelDataType.Float,
+                                                             100,
+                                                             100,
+                                                             100);
 
     ClearCLKernel lKernel = pProgram.createKernel("fillimagexor");
 
     lKernel.setArgument("image", lImageSrc);
     lKernel.setArgument("u", 1f);
-    lKernel.setGlobalSizes(100, 100, 100);
+    lKernel.setGlobalSizes(lImageSrc);
     lKernel.run();
 
     ClearCLImage lImageDst =
-                           lContext.createImage(HostAccessType.ReadOnly,
-                                                KernelAccessType.WriteOnly,
-                                                ImageChannelOrder.Intensity,
-                                                ImageChannelDataType.Float,
-                                                10,
-                                                10,
-                                                10);
+                           lContext.createSingleChannelImage(HostAccessType.ReadOnly,
+                                                             KernelAccessType.WriteOnly,
+                                                             ImageChannelDataType.Float,
+                                                             10,
+                                                             10,
+                                                             10);
 
     lImageSrc.copyTo(lImageDst, new long[]
     { 10, 20, 30 }, new long[]

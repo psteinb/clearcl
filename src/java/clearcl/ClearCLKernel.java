@@ -42,6 +42,8 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   private final ConcurrentHashMap<Integer, Argument> mIndexToArgumentMap =
                                                                          new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, Number> mDefaultArgumentsMap;
+  private final ConcurrentHashMap<Integer, Boolean> mUpdatedArgumentsMap =
+                                                                         new ConcurrentHashMap<>();
 
   private long[] mGlobalOffsets = new long[]
   { 0, 0, 0 };
@@ -228,6 +230,26 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
       throw new ClearCLUnknownArgumentNameException(this,
                                                     pArgumentName,
                                                     pObject);
+    Argument lExistingArgumentValue =
+                                    mIndexToArgumentMap.get(lArgumentIndex);
+
+    if (lExistingArgumentValue == null)
+    {
+      mUpdatedArgumentsMap.put(lArgumentIndex, true);
+    }
+    else
+    {
+      if (lExistingArgumentValue.argument == pObject
+          || lExistingArgumentValue.argument.equals(pObject))
+      {
+        mUpdatedArgumentsMap.put(lArgumentIndex, false);
+      }
+      else
+      {
+        mUpdatedArgumentsMap.put(lArgumentIndex, true);
+      }
+
+    }
 
     mIndexToArgumentMap.put(lArgumentIndex, new Argument(pObject));
 
@@ -285,54 +307,57 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
       final String lArgumentName = lEntry.getKey();
       final Integer lArgumentIndex = lEntry.getValue();
 
-      try
-      {
+      if (mUpdatedArgumentsMap.get(lArgumentIndex) == null
+          || mUpdatedArgumentsMap.get(lArgumentIndex))
+        try
+        {
 
-        Argument lArgument = mIndexToArgumentMap.get(lArgumentIndex);
+          Argument lArgument =
+                             mIndexToArgumentMap.get(lArgumentIndex);
 
-        /*System.out.format("index: %d, arg name: %s, arg: '%s' \n",
+          /*System.out.format("index: %d, arg name: %s, arg: '%s' \n",
                           lArgumentIndex,
                           lArgumentName,
                           lArgument==null?"default~"+mDefaultArgumentsMap.get(lArgumentName):lArgument.argument);/**/
 
-        if (lArgument == null)
-        {
-          final Number lDefaultValue =
-                                     mDefaultArgumentsMap.get(lArgumentName);
-          if (lDefaultValue != null)
-            lArgument = new Argument(lDefaultValue);
-        }
+          if (lArgument == null)
+          {
+            final Number lDefaultValue =
+                                       mDefaultArgumentsMap.get(lArgumentName);
+            if (lDefaultValue != null)
+              lArgument = new Argument(lDefaultValue);
+          }
 
-        if (lArgument == null)
-          throw new ClearCLArgumentMissingException(this,
-                                                    lArgumentName,
-                                                    lArgumentIndex);
+          if (lArgument == null)
+            throw new ClearCLArgumentMissingException(this,
+                                                      lArgumentName,
+                                                      lArgumentIndex);
 
-        if (lArgument.argument instanceof ClearCLLocalMemory)
-        {
-          // TODO: why do we need lLocalMemory for ?
-          @SuppressWarnings("unused")
-          final ClearCLLocalMemory lLocalMemory =
-                                                (ClearCLLocalMemory) lArgument.argument;
-          getBackend().setKernelArgument(this.getPeerPointer(),
-                                         lArgumentIndex,
-                                         lArgument.argument);/**/
+          if (lArgument.argument instanceof ClearCLLocalMemory)
+          {
+            // TODO: why do we need lLocalMemory for ?
+            @SuppressWarnings("unused")
+            final ClearCLLocalMemory lLocalMemory =
+                                                  (ClearCLLocalMemory) lArgument.argument;
+            getBackend().setKernelArgument(this.getPeerPointer(),
+                                           lArgumentIndex,
+                                           lArgument.argument);/**/
 
+          }
+          else
+          {
+            getBackend().setKernelArgument(this.getPeerPointer(),
+                                           lArgumentIndex,
+                                           lArgument.argument);/**/
+          }
         }
-        else
+        catch (final Throwable e)
         {
-          getBackend().setKernelArgument(this.getPeerPointer(),
-                                         lArgumentIndex,
-                                         lArgument.argument);/**/
+          throw new ClearCLException(String.format("problem while setting argument '%s' at index %d \n",
+                                                   lArgumentName,
+                                                   lArgumentIndex),
+                                     e);
         }
-      }
-      catch (final Throwable e)
-      {
-        throw new ClearCLException(String.format("problem while setting argument '%s' at index %d \n",
-                                                 lArgumentName,
-                                                 lArgumentIndex),
-                                   e);
-      }
     }
 
   }
