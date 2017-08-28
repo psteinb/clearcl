@@ -16,7 +16,6 @@ import clearcl.enums.BenchmarkTest;
 import clearcl.enums.BuildStatus;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
-import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
 import coremem.enums.NativeTypeEnum;
@@ -175,6 +174,8 @@ public class Benchmark
                                                    "kernel/benchmark.cl");
     lProgram.addBuildOptionAllMathOpt();
 
+    // System.out.println(lProgram.getSourceCode());
+
     long lStartCompileTimeNanos = System.nanoTime();
     BuildStatus lBuildStatus = lProgram.buildAndLog();
     long lStopCompileTimeNanos = System.nanoTime();
@@ -190,33 +191,30 @@ public class Benchmark
     {
 
       ClearCLBuffer lBufferA =
-                             lContext.createBuffer(MemAllocMode.None,
-                                                   HostAccessType.Undefined,
-                                                   KernelAccessType.Undefined,
+                             lContext.createBuffer(MemAllocMode.Best,
+                                                   HostAccessType.ReadWrite,
+                                                   KernelAccessType.ReadOnly,
                                                    NativeTypeEnum.Float,
                                                    c2DBufferSize * c2DBufferSize);
       ClearCLBuffer lBufferB =
-                             lContext.createBuffer(MemAllocMode.None,
-                                                   HostAccessType.Undefined,
-                                                   KernelAccessType.Undefined,
+                             lContext.createBuffer(MemAllocMode.Best,
+                                                   HostAccessType.ReadWrite,
+                                                   KernelAccessType.WriteOnly,
                                                    NativeTypeEnum.Float,
                                                    c2DBufferSize * c2DBufferSize);
 
       ClearCLBuffer lBufferC =
-                             lContext.createBuffer(MemAllocMode.None,
-                                                   HostAccessType.Undefined,
-                                                   KernelAccessType.Undefined,
+                             lContext.createBuffer(MemAllocMode.Best,
+                                                   HostAccessType.ReadWrite,
+                                                   KernelAccessType.ReadWrite,
                                                    NativeTypeEnum.UnsignedInt,
                                                    c2DBufferSize * c2DBufferSize);
 
-      ClearCLImage lImage = lContext.createImage(MemAllocMode.None,
-                                                 HostAccessType.Undefined,
-                                                 KernelAccessType.Undefined,
-                                                 ImageChannelOrder.R,
-                                                 ImageChannelDataType.UnsignedInt16,
-                                                 c3DImageSize,
-                                                 c3DImageSize,
-                                                 c3DImageSize);
+      ClearCLImage lImage =
+                          lContext.createSingleChannelImage(ImageChannelDataType.UnsignedInt16,
+                                                            c3DImageSize,
+                                                            c3DImageSize,
+                                                            c3DImageSize);
 
       ClearCLKernel lKernelCompute;
 
@@ -225,6 +223,9 @@ public class Benchmark
 
       case Image:
         lKernelCompute = lProgram.createKernel("image");
+
+        System.out.println(lKernelCompute.getArgumentNamesList());
+
         lKernelCompute.setGlobalSizes(c2DBufferSize, c2DBufferSize);
         lKernelCompute.setArguments(lImage, c3DImageSize, lBufferC);
         break;

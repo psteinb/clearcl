@@ -25,9 +25,9 @@ __kernel void buffer(__global const float *a, __global float *b)
 // Render function,
 // performs max projection and then uses the transfer function to obtain a color per pixel:
 __kernel void image(	__read_only image3d_t image,
-                          const uint  imageW,
-                         global uint *output						
-						            )
+                                  int       imageW,
+                           global uint     *output						
+						       )
 {
   // thread int coordinates:
   const uint x = get_global_id(0);
@@ -45,7 +45,7 @@ __kernel void image(	__read_only image3d_t image,
 	for(int i=0; i<64; i++) 
 	{
 	  	maxp = fmax(maxp,read_imagef(image, volumeSampler, pos).x);
-	  	pos+=vecstep;
+	  	pos += vecstep;
 	}
 
 	// lookup in transfer function texture:

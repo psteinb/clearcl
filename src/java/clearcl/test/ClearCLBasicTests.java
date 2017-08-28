@@ -9,6 +9,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import org.junit.Test;
+
 import clearcl.ClearCL;
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLContext;
@@ -28,8 +30,6 @@ import clearcl.enums.KernelAccessType;
 import clearcl.exceptions.OpenCLException;
 import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
-
-import org.junit.Test;
 
 /**
  * Basic tests.
@@ -92,7 +92,7 @@ public class ClearCLBasicTests
         {
           final ClearCLDevice lClearClDevice = lPlatform.getDevice(d);
 
-          /*System.out.println("\t" + d
+          System.out.println("\t" + d
                              + " -> \n"
                              + lClearClDevice.getInfoString());/**/
 

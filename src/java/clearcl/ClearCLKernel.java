@@ -1,8 +1,11 @@
 package clearcl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import clearcl.abs.ClearCLBase;
 import clearcl.exceptions.ClearCLArgumentMissingException;
@@ -29,6 +32,13 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
     {
       argument = pObject;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("arg[%s]", argument);
+    }
+
   }
 
   private final ClearCLContext mClearCLContext;
@@ -36,10 +46,14 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   private final String mName;
   private final String mSourceCode;
 
-  private final ConcurrentHashMap<String, Integer> mNameToIndexMap;
+  private final ConcurrentHashMap<String, Integer> mNameToIndexMap =
+                                                                   new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Integer, String> mIndexToNameMap =
+                                                                   new ConcurrentHashMap<>();
   private final ConcurrentHashMap<Integer, Argument> mIndexToArgumentMap =
                                                                          new ConcurrentHashMap<>();
-  private final ConcurrentHashMap<String, Number> mDefaultArgumentsMap;
+  private final ConcurrentHashMap<String, Number> mDefaultArgumentsMap =
+                                                                       new ConcurrentHashMap<>();
 
   private long[] mGlobalOffsets = new long[]
   { 0, 0, 0 };
@@ -72,8 +86,8 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
     mName = pKernelName;
     mSourceCode = pSourceCode;
 
-    mNameToIndexMap = getKernelIndexMap(pKernelName);
-    mDefaultArgumentsMap = getKernelDefaultArgumentsMap(pKernelName);
+    getKernelIndexMap(pKernelName);
+    getKernelDefaultArgumentsMap(pKernelName);
   }
 
   /**
@@ -171,6 +185,31 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   }
 
   /**
+   * Returns the number of arguments for this kernel
+   * 
+   * @return number of arguments
+   */
+  public int getNumberOfArguments()
+  {
+    return mNameToIndexMap.size();
+  }
+
+  /**
+   * Returns the list of arguments names
+   * 
+   * @return list of argument names
+   */
+  public ArrayList<String> getArgumentNamesList()
+  {
+    int lNumberOfArguments = getNumberOfArguments();
+    ArrayList<String> lArrayList = new ArrayList<String>();
+    for (int i = 0; i < lNumberOfArguments; i++)
+      lArrayList.add(mIndexToNameMap.get(i));
+
+    return lArrayList;
+  }
+
+  /**
    * Clears arguments.
    */
   public void clearArguments()
@@ -205,7 +244,6 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   public void setArgument(final int pIndex, final Object pObject)
   {
     mIndexToArgumentMap.put(pIndex, new Argument(pObject));
-
   }
 
   /**
@@ -411,12 +449,9 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
    * 
    * @param pKernelName
    *          kernel name
-   * @return default args map
    */
-  private ConcurrentHashMap<String, Number> getKernelDefaultArgumentsMap(final String pKernelName)
+  private void getKernelDefaultArgumentsMap(final String pKernelName)
   {
-    final ConcurrentHashMap<String, Number> lNameToDefaultArgumentMapMap =
-                                                                         new ConcurrentHashMap<String, Number>();
 
     final String lSourceCode = getSourceCode();
 
@@ -456,33 +491,33 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
       switch (lArgumentType)
       {
       case 'b':
-        lNameToDefaultArgumentMapMap.put(lArgumentName,
-                                         Byte.parseByte(lArgumentValue));
+        mDefaultArgumentsMap.put(lArgumentName,
+                                 Byte.parseByte(lArgumentValue));
         break;
 
       case 's':
-        lNameToDefaultArgumentMapMap.put(lArgumentName,
-                                         Short.parseShort(lArgumentValue));
+        mDefaultArgumentsMap.put(lArgumentName,
+                                 Short.parseShort(lArgumentValue));
         break;
 
       case 'i':
-        lNameToDefaultArgumentMapMap.put(lArgumentName,
-                                         Integer.parseInt(lArgumentValue));
+        mDefaultArgumentsMap.put(lArgumentName,
+                                 Integer.parseInt(lArgumentValue));
         break;
 
       case 'l':
-        lNameToDefaultArgumentMapMap.put(lArgumentName,
-                                         Long.parseLong(lArgumentValue));
+        mDefaultArgumentsMap.put(lArgumentName,
+                                 Long.parseLong(lArgumentValue));
         break;
 
       case 'f':
-        lNameToDefaultArgumentMapMap.put(lArgumentName,
-                                         Float.parseFloat(lArgumentValue));
+        mDefaultArgumentsMap.put(lArgumentName,
+                                 Float.parseFloat(lArgumentValue));
         break;
 
       case 'd':
-        lNameToDefaultArgumentMapMap.put(lArgumentName,
-                                         Double.parseDouble(lArgumentValue));
+        mDefaultArgumentsMap.put(lArgumentName,
+                                 Double.parseDouble(lArgumentValue));
         break;
       }
 
@@ -490,14 +525,10 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
     }
 
     // System.out.println(lNameToDefaultArgumentMapMap);
-
-    return lNameToDefaultArgumentMapMap;
   }
 
-  private ConcurrentHashMap<String, Integer> getKernelIndexMap(final String pKernelName)
+  private void getKernelIndexMap(final String pKernelName)
   {
-    final ConcurrentHashMap<String, Integer> lNameToIndexMap =
-                                                             new ConcurrentHashMap<String, Integer>();
 
     final String[] lKernelSignature = getKernelSignature(pKernelName);
 
@@ -507,46 +538,52 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
       final String[] lSplit = lArgumentEntry.split("[*\\s]+");
       // System.out.println(Arrays.toString(lSplit));
       final String lArgumentName = lSplit[lSplit.length - 1];
-      lNameToIndexMap.put(lArgumentName, i);
-
+      mNameToIndexMap.put(lArgumentName, i);
+      mIndexToNameMap.put(i, lArgumentName);
       i++;
     }
 
-    return lNameToIndexMap;
   }
 
   private String[] getKernelSignature(final String pKernelName)
   {
     final String lSourceCode = getSourceCode();
     {
-      final int lBeginOfKernelSignature =
-                                        lSourceCode.indexOf(pKernelName);
-      if (lBeginOfKernelSignature >= 0)
+      String lKernelPatternStr = "__kernel\\s+void\\s+" + pKernelName;
+      Pattern lKernelPattern = Pattern.compile(lKernelPatternStr);
+      Matcher lMatcher = lKernelPattern.matcher(lSourceCode);
+
+      if (lMatcher.find())
       {
-        final int lEndOfKernelSignature =
-                                        lSourceCode.indexOf('{',
-                                                            lBeginOfKernelSignature);
-        final String lSubStringKernel =
-                                      lSourceCode.substring(lBeginOfKernelSignature,
-                                                            lEndOfKernelSignature);
+        final int lBeginOfKernelSignature = lMatcher.start();
+        if (lBeginOfKernelSignature >= 0)
+        {
+          final int lEndOfKernelSignature =
+                                          lSourceCode.indexOf('{',
+                                                              lBeginOfKernelSignature);
+          final String lSubStringKernel =
+                                        lSourceCode.substring(lBeginOfKernelSignature,
+                                                              lEndOfKernelSignature);
 
-        final String lSubStringSignature =
-                                         lSubStringKernel.substring(lSubStringKernel.indexOf('(')
-                                                                    + 1,
-                                                                    lSubStringKernel.indexOf(')'));
+          final String lSubStringSignature =
+                                           lSubStringKernel.substring(lSubStringKernel.indexOf('(')
+                                                                      + 1,
+                                                                      lSubStringKernel.indexOf(')'));
 
-        // System.out.println("[[[" + lSubStringSignature + "]]]");
+          // System.out.println("[[[" + lSubStringSignature + "]]]");
 
-        final String[] lKernelSignature =
-                                        lSubStringSignature.split(",",
-                                                                  -1);
+          final String[] lKernelSignature =
+                                          lSubStringSignature.split(",",
+                                                                    -1);
 
-        for (int i = 0; i < lKernelSignature.length; i++)
-          lKernelSignature[i] = lKernelSignature[i].trim();
+          for (int i = 0; i < lKernelSignature.length; i++)
+            lKernelSignature[i] = lKernelSignature[i].trim();
 
-        // System.out.println(Arrays.toString(lKernelSignature));
-        return lKernelSignature;
+          // System.out.println(Arrays.toString(lKernelSignature));
+          return lKernelSignature;
+        }
       }
+
     }
     return null;
   }
