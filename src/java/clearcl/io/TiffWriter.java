@@ -5,6 +5,7 @@ import static loci.formats.FormatTools.UINT16;
 import static loci.formats.FormatTools.UINT8;
 
 import java.io.File;
+import java.nio.file.FileAlreadyExistsException;
 
 import loci.common.services.ServiceFactory;
 import loci.formats.FormatTools;
@@ -72,6 +73,9 @@ public class TiffWriter extends WriterBase implements WriterInterface
   public boolean write(ClearCLImageInterface pImage,
                        File pFile) throws Throwable
   {
+    if (pFile.exists()) {
+      throw new FileAlreadyExistsException("File " + pFile.getAbsolutePath() + " already exists.");
+    }
     pFile.getParentFile().mkdirs();
     long[] dimensions = pImage.getDimensions();
 
