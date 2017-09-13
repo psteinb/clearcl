@@ -73,8 +73,11 @@ public class TiffWriter extends WriterBase implements WriterInterface
   public boolean write(ClearCLImageInterface pImage,
                        File pFile) throws Throwable
   {
-    if (pFile.exists()) {
-      throw new FileAlreadyExistsException("File " + pFile.getAbsolutePath() + " already exists.");
+    if (!getOverwrite() && pFile.exists())
+    {
+      throw new FileAlreadyExistsException("File "
+                                           + pFile.getAbsolutePath()
+                                           + " already exists.");
     }
     pFile.getParentFile().mkdirs();
     long[] dimensions = pImage.getDimensions();

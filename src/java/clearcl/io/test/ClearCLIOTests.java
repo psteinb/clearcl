@@ -95,6 +95,7 @@ public class ClearCLIOTests
     lFile16.deleteOnExit();
     lFile32.deleteOnExit();
 
+    lTiffWriter.setOverwrite(true);
     lTiffWriter.setBytesPerPixel(8);
     lTiffWriter.write(lImageDst, lFile8);
     lTiffWriter.setBytesPerPixel(16);
