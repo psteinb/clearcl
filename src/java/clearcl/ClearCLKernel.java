@@ -31,6 +31,13 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
     {
       argument = pObject;
     }
+
+    @Override
+    public String toString()
+    {
+      return String.format("Arg[%s]", argument);
+    }
+
   }
 
   private final ClearCLContext mClearCLContext;
@@ -44,6 +51,8 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   private final ConcurrentHashMap<String, Number> mDefaultArgumentsMap;
   private final ConcurrentHashMap<Integer, Boolean> mUpdatedArgumentsMap =
                                                                          new ConcurrentHashMap<>();
+
+  private volatile boolean mArgumentCaching = true;
 
   private long[] mGlobalOffsets = new long[]
   { 0, 0, 0 };
@@ -175,11 +184,76 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   }
 
   /**
+   * Returns true if arguments are cached.
+   * 
+   * @return true if caching active, false otherwise
+   */
+  public boolean isArgumentCaching()
+  {
+    return mArgumentCaching;
+  }
+
+  /**
+   * Sets argument caching. This prevents resubmitting an argument which value
+   * is unchanged. Caching is on by default.
+   * 
+   * @param pArgumentCaching
+   *          true for cacging, false otherwise
+   */
+  public void setArgumentCaching(boolean pArgumentCaching)
+  {
+    mArgumentCaching = pArgumentCaching;
+  }
+
+  /**
    * Clears arguments.
    */
   public void clearArguments()
   {
     mIndexToArgumentMap.clear();
+    mUpdatedArgumentsMap.clear();
+  }
+
+  /**
+   * Sets argument for a given argument index.
+   * 
+   * @param pIndex
+   *          argument index
+   * @param pObject
+   *          argument
+   */
+  public void setArgument(final int pIndex, final Object pObject)
+  {
+
+    if (isArgumentCaching())
+    {
+      Argument lExistingArgumentValue =
+                                      mIndexToArgumentMap.get(pIndex);
+
+      if (lExistingArgumentValue == null
+          || lExistingArgumentValue.argument == null
+          || lExistingArgumentValue.argument != pObject
+          || !lExistingArgumentValue.argument.equals(pObject))
+      {
+        mUpdatedArgumentsMap.put(pIndex, true);
+      }
+    }
+
+    mIndexToArgumentMap.put(pIndex, new Argument(pObject));
+
+  }
+
+  /**
+   * Return argument value for a given argument index.
+   * 
+   * @param pIndex
+   *          argument index
+   * 
+   * @return value
+   */
+  public Object getArgument(final int pIndex)
+  {
+    return mIndexToArgumentMap.get(pIndex).argument;
   }
 
   /**
@@ -196,20 +270,6 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
       setArgument(i, lObject);
       i++;
     }
-  }
-
-  /**
-   * Sets argument for a given argument index.
-   * 
-   * @param pIndex
-   *          argument index
-   * @param pObject
-   *          argument
-   */
-  public void setArgument(final int pIndex, final Object pObject)
-  {
-    mIndexToArgumentMap.put(pIndex, new Argument(pObject));
-
   }
 
   /**
@@ -230,29 +290,29 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
       throw new ClearCLUnknownArgumentNameException(this,
                                                     pArgumentName,
                                                     pObject);
-    Argument lExistingArgumentValue =
-                                    mIndexToArgumentMap.get(lArgumentIndex);
 
-    if (lExistingArgumentValue == null)
-    {
-      mUpdatedArgumentsMap.put(lArgumentIndex, true);
-    }
-    else
-    {
-      if (lExistingArgumentValue.argument == pObject
-          || lExistingArgumentValue.argument.equals(pObject))
-      {
-        mUpdatedArgumentsMap.put(lArgumentIndex, false);
-      }
-      else
-      {
-        mUpdatedArgumentsMap.put(lArgumentIndex, true);
-      }
+    setArgument(lArgumentIndex, pObject);
+  }
 
-    }
+  /**
+   * Return argument value for a given argument name.
+   * 
+   * @param pArgumentName
+   *          argument name
+   * 
+   * 
+   * @return value
+   */
+  public Object getArgument(final String pArgumentName)
+  {
+    final Integer lArgumentIndex = mNameToIndexMap.get(pArgumentName);
 
-    mIndexToArgumentMap.put(lArgumentIndex, new Argument(pObject));
+    if (lArgumentIndex == null)
+      throw new ClearCLUnknownArgumentNameException(this,
+                                                    pArgumentName,
+                                                    null);
 
+    return mIndexToArgumentMap.get(lArgumentIndex).argument;
   }
 
   /**
@@ -291,7 +351,7 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
     if (lArgumentIndex == null)
       return false;
 
-    mIndexToArgumentMap.put(lArgumentIndex, new Argument(pObject));
+    setArgument(lArgumentIndex, pObject);
     return true;
   }
 
@@ -307,7 +367,8 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
       final String lArgumentName = lEntry.getKey();
       final Integer lArgumentIndex = lEntry.getValue();
 
-      if (mUpdatedArgumentsMap.get(lArgumentIndex) == null
+      if (!isArgumentCaching()
+          || mUpdatedArgumentsMap.get(lArgumentIndex) == null
           || mUpdatedArgumentsMap.get(lArgumentIndex))
         try
         {
@@ -315,10 +376,12 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
           Argument lArgument =
                              mIndexToArgumentMap.get(lArgumentIndex);
 
-          /*System.out.format("index: %d, arg name: %s, arg: '%s' \n",
-                          lArgumentIndex,
-                          lArgumentName,
-                          lArgument==null?"default~"+mDefaultArgumentsMap.get(lArgumentName):lArgument.argument);/**/
+          /*System.out.format("Updated or new: index: %d, arg name: %s, arg: '%s' \n",
+                            lArgumentIndex,
+                            lArgumentName,
+                            lArgument == null ? "default~"
+                                                + mDefaultArgumentsMap.get(lArgumentName)
+                                              : lArgument.argument);/**/
 
           if (lArgument == null)
           {
@@ -350,6 +413,8 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
                                            lArgumentIndex,
                                            lArgument.argument);/**/
           }
+
+          mUpdatedArgumentsMap.put(lArgumentIndex, false);
         }
         catch (final Throwable e)
         {
@@ -358,6 +423,11 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
                                                    lArgumentIndex),
                                      e);
         }
+      /*else
+        System.out.format("Not updated: index: %d, arg name: %s, arg: '%s' \n",
+                          lArgumentIndex,
+                          lArgumentName,
+                          mIndexToArgumentMap.get(lArgumentIndex));/**/
     }
 
   }
