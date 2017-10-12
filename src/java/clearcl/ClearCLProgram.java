@@ -3,6 +3,7 @@ package clearcl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -178,10 +179,14 @@ public class ClearCLProgram extends ClearCLBase
       mDefinesMap.put(pKey, "" + pValue.longValue());
     else if (pValue instanceof Float)
       mDefinesMap.put(pKey,
-                      String.format("%ef", pValue.floatValue()));
+                      String.format(Locale.US,
+                                    "%ef",
+                                    pValue.floatValue()));
     else if (pValue instanceof Double)
       mDefinesMap.put(pKey,
-                      String.format("%ef", pValue.doubleValue()));
+                      String.format(Locale.US,
+                                    "%ef",
+                                    pValue.doubleValue()));
 
     mModified = true;
   }
