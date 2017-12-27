@@ -21,10 +21,10 @@ if(hasProperty('bintray_user') && hasProperty('bintray_key') )
 		dryRun = false //Whether to run this as dry-run, without deploying
 		publish = true //If version should be auto published after an upload
 		pkg {
-			repo = 'ClearVolume'
-			userOrg = 'clearvolume' //An optional organization name when the repo belongs to one of the user's orgs
-			name = 'ClearCL'
-			desc = 'ClearCL'
+			repo = 'snapshots'
+			userOrg = 'haesleinhuepf' //An optional organization name when the repo belongs to one of the user's orgs
+			name = project.name
+			desc = project.name
 			websiteUrl = 'https://clearvolume.github.io/ClearVolume/'
 			issueTrackerUrl = 'https://github.com/ClearVolume/ClearGL/issues'
 			vcsUrl = 'https://github.com/ClearVolume/ClearGL.git'
