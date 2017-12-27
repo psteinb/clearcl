@@ -1,5 +1,7 @@
 package clearcl;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -118,7 +120,28 @@ public class ClearCLProgram extends ClearCLBase
 
     InputStream lResourceAsStream =
                                   pClassForRessource.getResourceAsStream(pIncludeRessourceName);
-
+    if (lResourceAsStream == null)
+    {
+      String[] lPath = pClassForRessource.getCanonicalName()
+                                         .split("\\.");
+      String[] lCutPath = new String[lPath.length - 1];
+      System.arraycopy(lPath, 0, lCutPath, 0, lCutPath.length);
+      String lAbsoluteKernelFilename =
+                                     ("/" + String.join("/", lCutPath)
+                                      + "/"
+                                      + pIncludeRessourceName).replace("/./",
+                                                                       "/");
+      lResourceAsStream =
+                        pClassForRessource.getResourceAsStream(lAbsoluteKernelFilename);
+    }
+    if (lResourceAsStream == null)
+    {
+      File lKernelFile = new File(pIncludeRessourceName);
+      if (lKernelFile.exists())
+      {
+        lResourceAsStream = new FileInputStream(lKernelFile);
+      }
+    }
     if (lResourceAsStream == null)
     {
       String lMessage = String.format("Cannot find source: [%s] %s",
