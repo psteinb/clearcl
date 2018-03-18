@@ -106,7 +106,7 @@ inline float fbm3 (int seed, float3 x, int octaves )
 }
 
 
-__kernel void fbmrender2( __global __write_only float*     output,
+__kernel void fbmrender2( __global  float*     output,
                                                 int        seed,
                                                 float      ox,
                                                 float      oy,
@@ -133,7 +133,7 @@ __kernel void fbmrender2( __global __write_only float*     output,
   output[index] = value;
 }
 
-__kernel void fbmrender3( __global __write_only float*     output,
+__kernel void fbmrender3( __global  float*     output,
                                                 int        seed,
                                                 float      ox,
                                                 float      oy,

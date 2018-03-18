@@ -4,7 +4,7 @@
 //default image_render_2df vmax=1f
 //default image_render_2df gamma=1f
 __kernel void image_render_2d(           __read_only  image2d_t  image,
-                                __global __write_only uchar*     rgbabuffer,
+                                __global  uchar*     rgbabuffer,
             		                                      float      vmin,
             		                                      float      vmax,
             		                                      float      gamma)
@@ -48,7 +48,7 @@ __kernel void image_render_2d(           __read_only  image2d_t  image,
 //default image_render_2df vmax=1f
 //default image_render_2df gamma=1f
 __kernel void buffer_render_2df(__global              float*     image,
-                                __global __write_only uchar*     rgbabuffer,
+                                __global uchar*     rgbabuffer,
                                                       float      vmin,
                                                       float      vmax,
                                                       float      gamma)

@@ -8,7 +8,7 @@
 //default image_render_colorproj_3d zmax=16000i
 //default image_render_colorproj_3d zstep=1i
 __kernel void image_render_colorproj_3d(          __read_only  image3d_t  image,
-                                          __global __write_only uchar*     rgbabuffer,
+                                          __global  uchar*     rgbabuffer,
                                                                 float      vmin,
                                                                 float      vmax,
                                                                 float      gamma,
@@ -75,7 +75,7 @@ __kernel void image_render_colorproj_3d(          __read_only  image3d_t  image,
 //default image_render_colorproj_3df zmax=16000i
 //default image_render_colorproj_3df zstep=1i
 __kernel void buffer_render_colorproj_3df(__global              float*     image,
-                                          __global __write_only uchar*     rgbabuffer,
+                                          __global  uchar*     rgbabuffer,
                                                                 float      vmin,
                                                                 float      vmax,
                                                                 float      gamma,
