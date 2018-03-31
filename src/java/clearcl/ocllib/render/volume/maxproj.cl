@@ -20,7 +20,7 @@ volume and iso surface rendering
 // Render function,
 __kernel void image_render_maxproj_3d( 
                                     __read_only image3d_t    image,	
-                          __global __write_only uchar*       rgbabuffer,
+                          __global  uchar*       rgbabuffer,
                                                 float        vmin,
                                                 float        vmax,
                                                 float        gamma,
