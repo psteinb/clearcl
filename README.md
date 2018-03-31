@@ -95,4 +95,5 @@ using specific classes. ClearCL backends further encapsulate these within [Clear
 ## Contributors
 
 * Loic Royer ( royer -at- mpi-cbg -point- de )
+* Robert Haase ( rhaase -at- mpi-cbg -point- de )
 * you?
