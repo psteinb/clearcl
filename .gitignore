@@ -12,3 +12,4 @@ src/clearvolume/demo/databig/
 clearcl.iml
 .idea
 *.iml
+/out/
