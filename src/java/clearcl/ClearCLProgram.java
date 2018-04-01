@@ -1,9 +1,6 @@
 package clearcl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
@@ -122,10 +119,14 @@ public class ClearCLProgram extends ClearCLBase
                                   pClassForRessource.getResourceAsStream(pIncludeRessourceName);
     if (lResourceAsStream == null)
     {
+      // split packages of a classname
       String[] lPath = pClassForRessource.getCanonicalName()
                                          .split("\\.");
+      // keep all but the last one
       String[] lCutPath = new String[lPath.length - 1];
       System.arraycopy(lPath, 0, lCutPath, 0, lCutPath.length);
+
+      // assemble new filename
       String lAbsoluteKernelFilename =
                                      ("/" + String.join("/", lCutPath)
                                       + "/"
@@ -133,13 +134,21 @@ public class ClearCLProgram extends ClearCLBase
                                                                        "/");
       lResourceAsStream =
                         pClassForRessource.getResourceAsStream(lAbsoluteKernelFilename);
+
     }
     if (lResourceAsStream == null)
     {
       File lKernelFile = new File(pIncludeRessourceName);
       if (lKernelFile.exists())
       {
-        lResourceAsStream = new FileInputStream(lKernelFile);
+        try
+        {
+          lResourceAsStream = new FileInputStream(lKernelFile);
+        }
+        catch (FileNotFoundException e)
+        {
+          e.printStackTrace();
+        }
       }
     }
     if (lResourceAsStream == null)
