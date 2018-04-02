@@ -25,9 +25,9 @@
 
 #ifndef BUFFER_READ_WRITE
     #define BUFFER_READ_WRITE 1
-inline __attribute__((overloadable)) int2 read_bufferui(int read_buffer_width, int read_buffer_height, __global unsigned int * buffer, sampler_t sampler, int4 pos )
+inline __attribute__((overloadable)) ushort2 read_bufferui(int read_buffer_width, int read_buffer_height, __global ushort * buffer, sampler_t sampler, int4 pos )
 {
-    return (int2){buffer[pos.x + pos.y * read_buffer_width + pos.z * read_buffer_width * read_buffer_height],0};
+    return (ushort2){buffer[pos.x + pos.y * read_buffer_width + pos.z * read_buffer_width * read_buffer_height],0};
 }
 
 inline __attribute__((overloadable)) float2 read_bufferf(int read_buffer_width, int read_buffer_height, __global float* buffer, sampler_t sampler, int4 pos )
@@ -35,7 +35,7 @@ inline __attribute__((overloadable)) float2 read_bufferf(int read_buffer_width, 
     return (float2){buffer[pos.x + pos.y * read_buffer_width + pos.z * read_buffer_width * read_buffer_height],0};
 }
 
-inline __attribute__((overloadable)) void write_bufferui(int write_buffer_width, int write_buffer_height, __global unsigned int * buffer, int4 pos, int value )
+inline __attribute__((overloadable)) void write_bufferui(int write_buffer_width, int write_buffer_height, __global ushort * buffer, int4 pos, ushort value )
 {
     buffer[pos.x + pos.y * write_buffer_width + pos.z * write_buffer_width * write_buffer_height] = value;
 }
@@ -45,9 +45,9 @@ inline __attribute__((overloadable)) void write_bufferf(int write_buffer_width, 
     buffer[pos.x + pos.y * write_buffer_width + pos.z * write_buffer_width * write_buffer_height] = value;
 }
 
-inline __attribute__((overloadable)) int2 read_bufferui(int read_buffer_width, int read_buffer_height, __global unsigned int * buffer, sampler_t sampler, int2 pos )
+inline __attribute__((overloadable)) ushort2 read_bufferui(int read_buffer_width, int read_buffer_height, __global ushort * buffer, sampler_t sampler, int2 pos )
 {
-    return (int2){buffer[pos.x + pos.y * read_buffer_width ],0};
+    return (ushort2){buffer[pos.x + pos.y * read_buffer_width ],0};
 }
 
 inline __attribute__((overloadable)) float2 read_bufferf(int read_buffer_width, int read_buffer_height, __global float* buffer, sampler_t sampler, int2 pos )
@@ -55,7 +55,7 @@ inline __attribute__((overloadable)) float2 read_bufferf(int read_buffer_width, 
     return (float2){buffer[pos.x + pos.y * read_buffer_width ],0};
 }
 
-inline __attribute__((overloadable)) void write_bufferui(int write_buffer_width, int write_buffer_height, __global unsigned int * buffer, int2 pos, int value )
+inline __attribute__((overloadable)) void write_bufferui(int write_buffer_width, int write_buffer_height, __global ushort * buffer, int2 pos, ushort value )
 {
     buffer[pos.x + pos.y * write_buffer_width ] = value;
 }
