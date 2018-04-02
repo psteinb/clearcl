@@ -134,7 +134,7 @@ def getVersionName = { ->
 
 group = 'net.clearvolume'
 
-version = "0.5.8"
+version = "0.5.9"
 
 
 artifacts
