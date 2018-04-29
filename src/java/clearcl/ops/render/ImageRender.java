@@ -16,7 +16,7 @@ import clearcl.ops.render.enums.Parameter;
 import clearcl.util.MatrixUtils;
 
 /**
- * Fractional Brownian Noise generation.
+ * Headless modular volume rendering
  *
  * @author royer
  */
