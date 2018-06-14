@@ -135,7 +135,7 @@ def getVersionName = { ->
 
 group = 'net.clearvolume'
 
-version = getVersionName()
+version = "0.5.9"
 
 
 artifacts
@@ -158,7 +158,7 @@ apply from: 'gradle/bintrayUpload.gradle'
 //***********************************************************************************
 // GIT HOOKS:
 
-apply from: 'gradle/install-git-hooks.gradle'
+//apply from: 'gradle/install-git-hooks.gradle'
 
 //***********************************************************************************
 // SPOTLESS:

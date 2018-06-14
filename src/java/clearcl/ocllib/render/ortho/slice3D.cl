@@ -4,7 +4,7 @@
 //default image_render_slice_3d vmax=1f
 //default image_render_slice_3d gamma=1f
 __kernel void image_render_slice_3d(          __read_only   image3d_t  image,
-                                      __global __write_only uchar*     rgbabuffer,
+                                      __global  uchar*     rgbabuffer,
                                                             float      vmin,
                                                             float      vmax,
                                                             float      gamma,
@@ -43,7 +43,7 @@ __kernel void image_render_slice_3d(          __read_only   image3d_t  image,
 //default image_render_slice_3df vmax=1f
 //default image_render_slice_3df gamma=1f
 __kernel void buffer_render_slice_3df(__global              float*     image,
-                                      __global __write_only uchar*     rgbabuffer,
+                                      __global  uchar*     rgbabuffer,
                                                             float      vmin,
                                                             float      vmax,
                                                             float      gamma,
