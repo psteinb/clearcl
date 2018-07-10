@@ -18,8 +18,7 @@ import clearcl.ClearCLKernel;
 import clearcl.ClearCLPlatform;
 import clearcl.ClearCLProgram;
 import clearcl.backend.ClearCLBackendInterface;
-import clearcl.backend.javacl.ClearCLBackendJavaCL;
-import clearcl.backend.jocl.ClearCLBackendJOCL;
+import clearcl.backend.ClearCLBackends;
 import clearcl.enums.BuildStatus;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
@@ -42,34 +41,18 @@ public class ClearCLBasicTests
   private static final int cFloatArrayLength = 1024 * 1024;
 
   /**
-   * Test with JOCL backend
+   * test with best backend
    * 
    * @throws Exception
    *           NA
    */
   @Test
-  public void testBackendJOCL() throws Exception
+  public void testBasics() throws Exception
   {
-    final ClearCLBackendJOCL lClearCLJOCLBackend =
-                                                 new ClearCLBackendJOCL();
+    final ClearCLBackendInterface lClearCLBackendInterface =
+                                                           ClearCLBackends.getBestBackend();
 
-    testWithBackend(lClearCLJOCLBackend);
-
-  }
-
-  /**
-   * test with JavaCL backend
-   * 
-   * @throws Exception
-   *           NA
-   */
-  @Test
-  public void testBackendJavaCL() throws Exception
-  {
-    final ClearCLBackendJavaCL lClearCLBackendJavaCL =
-                                                     new ClearCLBackendJavaCL();
-
-    testWithBackend(lClearCLBackendJavaCL);
+    testWithBackend(lClearCLBackendInterface);
 
   }
 

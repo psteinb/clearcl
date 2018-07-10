@@ -5,8 +5,7 @@ import static org.junit.Assert.assertTrue;
 import clearcl.ClearCL;
 import clearcl.ClearCLDevice;
 import clearcl.backend.ClearCLBackendInterface;
-import clearcl.backend.javacl.ClearCLBackendJavaCL;
-import clearcl.backend.jocl.ClearCLBackendJOCL;
+import clearcl.backend.ClearCLBackends;
 import clearcl.selector.BadDeviceSelector;
 import clearcl.selector.DeviceTypeSelector;
 import clearcl.selector.FastestDeviceSelector;
@@ -23,33 +22,18 @@ public class ClearCLBestDeviceTests
 {
 
   /**
-   * Test with JOCL backend
+   * Test with best backend
    * 
    * @throws Exception
    *           NA
    */
   @Test
-  public void testBackendJOCL() throws Exception
+  public void testBestBackend() throws Exception
   {
-    ClearCLBackendJOCL lClearCLJOCLBackend = new ClearCLBackendJOCL();
+    ClearCLBackendInterface lClearCLBackendInterface =
+                                                     ClearCLBackends.getBestBackend();
 
-    testWithBackend(lClearCLJOCLBackend);
-
-  }
-
-  /**
-   * Test with JavaCL backend
-   * 
-   * @throws Exception
-   *           NA
-   */
-  @Test
-  public void testBackendJavaCL() throws Exception
-  {
-    ClearCLBackendJavaCL lClearCLBackendJavaCL =
-                                               new ClearCLBackendJavaCL();
-
-    testWithBackend(lClearCLBackendJavaCL);
+    testWithBackend(lClearCLBackendInterface);
 
   }
 

@@ -1,23 +1,21 @@
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-}
 
 plugins {
 	id "com.jfrog.bintray" version "1.2"
-	id "us.kirchmeier.capsule" version "1.0.2"
 	id "com.diffplug.gradle.spotless" version "3.1.0"
+	id "de.undercouch.download" version "3.4.3"
 }
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
-apply plugin: 'idea'
-apply plugin: 'com.diffplug.gradle.spotless'
-apply plugin: 'findbugs'
 
+
+// Master gradle file:
+apply from: 'https://github.com/ClearControl/master/blob/master/master.gradle?raw=true'
+
+println project.ext.codeformatfile
 
 //***********************************************************************************
 // JAVA CODE BUILDING
@@ -63,13 +61,13 @@ dependencies
 {
 
 	// CoreMem:
-	compile ('net.coremem:coremem:0.4.4')  {transitive= true; changing= true}
+	compile ('net.coremem:coremem:'+project.ext.versionsMap["coremem"])  {transitive= true; changing= true}
 	
 	// JAVACL Backend:
 	compile ('com.nativelibs4java:javacl:1.0.0-RC4') {transitive= true; changing= false}
 		
 	// JOCL backend:
-	compile ('org.jocl:jocl:2.0.0') {transitive= true; changing= false}
+	compile ('org.jocl:jocl:2.0.1') {transitive= true; changing= false}
 	
 	// Vecmath:
     compile ('javax.vecmath:vecmath:1.5.2')
@@ -114,29 +112,11 @@ if (JavaVersion.current().isJava8Compatible()) {
 }
 
 
-
-
-
-
 //***********************************************************************************
-// BINTRAY PUBLISHING
+// PUBLISHING
 
-/*
- * Gets the version name from the latest Git tag
- */
-def getVersionName = { ->
-		def stdout = new ByteArrayOutputStream()
-		exec {
-				commandLine 'git', 'describe', '--tags'
-				standardOutput = stdout
-		}
-		return stdout.toString().trim()
-}
-
-group = 'net.clearvolume'
-
-version = "0.5.9"
-
+group   = project.ext.groupname
+version = project.ext.versionsMap[project.name]
 
 artifacts
 {
@@ -153,38 +133,6 @@ publishing {
 	}
 }
 
-apply from: 'gradle/bintrayUpload.gradle'
-
-//***********************************************************************************
-// GIT HOOKS:
-
-//apply from: 'gradle/install-git-hooks.gradle'
-
-//***********************************************************************************
-// SPOTLESS:
-
-spotless {
-    java {
-        //licenseHeader '/* Licensed under Apache-2.0 */' // License header
- 
-        importOrder(['java', 'javax', 'com', 'org'])
-
-        removeUnusedImports() // removes any unused imports
-
-        eclipseFormatFile 'codeformat.eclipse.xml'  
-    }
-}
-
-
-//***********************************************************************************
-// FINDBUGS:
-
-tasks.withType(FindBugs) {
-    reports {
-        xml.enabled false
-        html.enabled true
-    }
-}
 
 
 

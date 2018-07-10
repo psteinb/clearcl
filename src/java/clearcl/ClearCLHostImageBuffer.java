@@ -234,6 +234,7 @@ public class ClearCLHostImageBuffer extends ClearCLMemBase implements
   @Override
   public void close()
   {
+    // No need for rgc here: contig mem is already garbage collected
     if (mContiguousMemory != null)
     {
       mContiguousMemory.free();

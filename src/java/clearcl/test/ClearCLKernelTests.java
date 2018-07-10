@@ -11,8 +11,7 @@ import clearcl.ClearCLDevice;
 import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
 import clearcl.backend.ClearCLBackendInterface;
-import clearcl.backend.javacl.ClearCLBackendJavaCL;
-import clearcl.backend.jocl.ClearCLBackendJOCL;
+import clearcl.backend.ClearCLBackends;
 import clearcl.enums.BuildStatus;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.KernelAccessType;
@@ -35,34 +34,18 @@ public class ClearCLKernelTests
   private static final int cFloatArrayLength = 1024 * 1024;
 
   /**
-   * Test with JOCL backend
+   * Test with best backend
    * 
    * @throws Exception
    *           NA
    */
   @Test
-  public void testBackendJOCL() throws Exception
+  public void testBestBackend() throws Exception
   {
-    ClearCLBackendJOCL lClearCLJOCLBackend = new ClearCLBackendJOCL();
+    ClearCLBackendInterface lClearCLBackendInterface =
+                                                     ClearCLBackends.getBestBackend();
 
-    testWithBackend(lClearCLJOCLBackend);
-
-  }
-
-  /**
-   * Test with JavaCL backend
-   * 
-   * @throws Exception
-   *           NA
-   */
-  @Test
-  public void testBackendJavaCL() throws Exception
-  {
-    ClearCLBackendJavaCL lClearCLBackendJavaCL =
-                                               new ClearCLBackendJavaCL();
-
-    testWithBackend(lClearCLBackendJavaCL);
-
+    testWithBackend(lClearCLBackendInterface);
   }
 
   private void testWithBackend(ClearCLBackendInterface pClearCLBackendInterface) throws Exception
@@ -172,7 +155,7 @@ public class ClearCLKernelTests
       }
       catch (RuntimeException e)
       {
-        System.out.println("Caught as expected: " + e);
+        System.out.println("ALL GOOD, Caught as expected: " + e);
       }
 
       // what if an unknown argument is added?
@@ -189,7 +172,7 @@ public class ClearCLKernelTests
       }
       catch (RuntimeException e)
       {
-        System.out.println("Caught as expected: " + e);
+        System.out.println("ALL GOOD, Caught as expected: " + e);
       }
 
       assertTrue(!lFailed);

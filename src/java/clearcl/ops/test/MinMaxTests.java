@@ -10,7 +10,7 @@ import clearcl.ClearCLContext;
 import clearcl.ClearCLDevice;
 import clearcl.ClearCLImage;
 import clearcl.backend.ClearCLBackendInterface;
-import clearcl.backend.javacl.ClearCLBackendJavaCL;
+import clearcl.backend.ClearCLBackends;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
@@ -39,7 +39,7 @@ public class MinMaxTests
   public void testMinMaxBufferFloat() throws IOException
   {
     ClearCLBackendInterface lClearCLBackend =
-                                            new ClearCLBackendJavaCL();
+                                            ClearCLBackends.getBestBackend();
 
     try (ClearCL lClearCL = new ClearCL(lClearCLBackend))
     {
@@ -119,7 +119,7 @@ public class MinMaxTests
   public void testMinMaxImage1F() throws IOException
   {
     ClearCLBackendInterface lClearCLBackend =
-                                            new ClearCLBackendJavaCL();
+                                            ClearCLBackends.getBestBackend();
 
     try (ClearCL lClearCL = new ClearCL(lClearCLBackend))
     {
@@ -150,7 +150,7 @@ public class MinMaxTests
   public void testMinMaxImage2F() throws IOException
   {
     ClearCLBackendInterface lClearCLBackend =
-                                            new ClearCLBackendJavaCL();
+                                            ClearCLBackends.getBestBackend();
 
     try (ClearCL lClearCL = new ClearCL(lClearCLBackend))
     {
@@ -182,7 +182,7 @@ public class MinMaxTests
   public void testMinMaxImage3F() throws IOException
   {
     ClearCLBackendInterface lClearCLBackend =
-                                            new ClearCLBackendJavaCL();
+                                            ClearCLBackends.getBestBackend();
 
     try (ClearCL lClearCL = new ClearCL(lClearCLBackend))
     {

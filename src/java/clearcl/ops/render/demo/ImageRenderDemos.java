@@ -92,7 +92,7 @@ public class ImageRenderDemos
 
       ClearCLImageViewer lView = ClearCLImageViewer.view(lRGBABuffer);
 
-      while (lView.isShowing())
+      for (int i = 0; i < 100 && lView.isShowing(); i++)
       {
         Thread.sleep(10);
       }

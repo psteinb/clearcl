@@ -1,7 +1,5 @@
 package clearcl;
 
-import java.util.ArrayList;
-
 import clearcl.abs.ClearCLBase;
 import clearcl.enums.DeviceInfo;
 import clearcl.enums.DeviceType;
@@ -16,8 +14,6 @@ public class ClearCLDevice extends ClearCLBase
 
   private ClearCLPlatform mClearCLPlatform;
   private ClearCLPeerPointer mDevicePointer;
-
-  private ArrayList<ClearCLContext> mContextList = new ArrayList<>();
 
   /**
    * Construction of this object is done from within a ClearCLPlatform.
@@ -180,7 +176,6 @@ public class ClearCLDevice extends ClearCLBase
     ClearCLContext lClearCLContext =
                                    new ClearCLContext(this,
                                                       lContextPointer);
-    mContextList.add(lClearCLContext);
 
     return lClearCLContext;
   }
@@ -204,9 +199,6 @@ public class ClearCLDevice extends ClearCLBase
   {
     if (getPeerPointer() != null)
     {
-      for (ClearCLContext lContext : mContextList)
-        lContext.close();
-
       getBackend().releaseDevice(getPeerPointer());
       setPeerPointer(null);
     }

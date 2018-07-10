@@ -7,7 +7,6 @@ import java.util.Random;
 import clearcl.ClearCL;
 import clearcl.ClearCLDevice;
 import clearcl.backend.ClearCLBackendInterface;
-import clearcl.backend.javacl.ClearCLBackendJavaCL;
 import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.benchmark.Benchmark;
 import clearcl.enums.BenchmarkTest;
@@ -33,7 +32,7 @@ public class BenchmarkDemo
   {
     Benchmark.sStdOutVerbose = true;
     testWithBackend(new ClearCLBackendJOCL());
-    testWithBackend(new ClearCLBackendJavaCL());
+    // testWithBackend(new ClearCLBackendJavaCL());
   }
 
   private void testWithBackend(ClearCLBackendInterface lClearCLBackendInterface)

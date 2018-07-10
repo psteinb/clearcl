@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import clearcl.abs.ClearCLBase;
+import clearcl.backend.ClearCLBackendInterface;
 import clearcl.exceptions.ClearCLArgumentMissingException;
 import clearcl.exceptions.ClearCLException;
 import clearcl.exceptions.ClearCLInvalidExecutionRange;
@@ -14,13 +15,17 @@ import clearcl.exceptions.ClearCLUnknownArgumentNameException;
 import clearcl.interfaces.ClearCLImageInterface;
 import clearcl.util.ElapsedTime;
 import coremem.enums.NativeTypeEnum;
+import coremem.rgc.Cleanable;
+import coremem.rgc.Cleaner;
+import coremem.rgc.RessourceCleaner;
 
 /**
  * ClearCLKernel is the ClearCL abstraction for OpenCL kernels.
  *
  * @author royer
  */
-public class ClearCLKernel extends ClearCLBase implements Runnable
+public class ClearCLKernel extends ClearCLBase
+                           implements Runnable, Cleanable
 {
 
   private class Argument
@@ -37,7 +42,6 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
     {
       return String.format("Arg[%s]", argument);
     }
-
   }
 
   private final ClearCLContext mClearCLContext;
@@ -59,6 +63,11 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   private long[] mGlobalSizes = null;
   private long[] mLocalSizes = null;
   private boolean mLogExecutiontime = true;
+
+  // This will register this buffer for GC cleanup
+  {
+    RessourceCleaner.register(this);
+  }
 
   /**
    * This constructor is called internally from an OpenCl program.
@@ -685,9 +694,49 @@ public class ClearCLKernel extends ClearCLBase implements Runnable
   {
     if (getPeerPointer() != null)
     {
+      if (mKernelCleaner != null)
+        mKernelCleaner.mClearCLPeerPointer = null;
       getBackend().releaseKernel(getPeerPointer());
       setPeerPointer(null);
     }
+  }
+
+  // NOTE: this _must_ be a static class, otherwise instances of this class will
+  // implicitely hold a reference of this image...
+  private static class KernelCleaner implements Cleaner
+  {
+    public ClearCLBackendInterface mBackend;
+    public ClearCLPeerPointer mClearCLPeerPointer;
+
+    public KernelCleaner(ClearCLBackendInterface pBackend,
+                         ClearCLPeerPointer pClearCLPeerPointer)
+    {
+      mBackend = pBackend;
+      mClearCLPeerPointer = pClearCLPeerPointer;
+    }
+
+    @Override
+    public void run()
+    {
+      try
+      {
+        if (mClearCLPeerPointer != null)
+          mBackend.releaseKernel(mClearCLPeerPointer);
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  KernelCleaner mKernelCleaner = new KernelCleaner(getBackend(),
+                                                   getPeerPointer());
+
+  @Override
+  public Cleaner getCleaner()
+  {
+    return mKernelCleaner;
   }
 
 }

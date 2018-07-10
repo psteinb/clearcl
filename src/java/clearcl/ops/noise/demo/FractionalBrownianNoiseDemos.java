@@ -65,11 +65,11 @@ public class FractionalBrownianNoiseDemos
       ClearCLImageViewer lViewImage =
                                     ClearCLImageViewer.view(lBuffer);
 
-      for (int i = 0; i < 1000000 && lViewImage.isShowing(); i++)
+      for (int i = 0; i < 10 && lViewImage.isShowing(); i++)
       {
         lNoise.setSeed(i);
         lNoise.fbm2D(lBuffer, true);
-        Thread.sleep(5000);
+        // Thread.sleep(5000);
       }
 
     }
@@ -115,11 +115,11 @@ public class FractionalBrownianNoiseDemos
       ClearCLImageViewer lViewImage =
                                     ClearCLImageViewer.view(lBuffer);
 
-      for (int i = 0; i < 1000000 && lViewImage.isShowing(); i++)
+      for (int i = 0; i < 10 && lViewImage.isShowing(); i++)
       {
         lNoise.setSeed(i);
         lNoise.fbm3D(lBuffer, true);
-        Thread.sleep(5000);
+        // Thread.sleep(1000);
       }
 
     }

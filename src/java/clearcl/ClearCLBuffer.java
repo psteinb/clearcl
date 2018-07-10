@@ -4,6 +4,7 @@ import java.nio.Buffer;
 import java.util.Arrays;
 
 import clearcl.abs.ClearCLMemBase;
+import clearcl.backend.ClearCLBackendInterface;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
@@ -14,16 +15,21 @@ import clearcl.interfaces.ClearCLMemInterface;
 import clearcl.util.Region3;
 import coremem.ContiguousMemoryInterface;
 import coremem.enums.NativeTypeEnum;
+import coremem.rgc.Cleanable;
+import coremem.rgc.Cleaner;
+import coremem.rgc.RessourceCleaner;
 import coremem.util.Size;
 
 /**
  * ClearCLBuffer is the ClearCL abstraction for OpenCL buffers.
- * 
+ *
  * @author royer
  */
 public class ClearCLBuffer extends ClearCLMemBase implements
                            ClearCLMemInterface,
-                           ClearCLImageInterface
+                           ClearCLImageInterface,
+                           Cleanable
+
 {
 
   private final ClearCLContext mClearCLContext;
@@ -31,9 +37,14 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   private long mNumberOfChannels;
   private final long[] mDimensions;
 
+  // This will register this buffer for GC cleanup
+  {
+    RessourceCleaner.register(this);
+  }
+
   /**
    * This constructor is called internally from an OpenCl context.
-   * 
+   *
    * @param pClearCLContext
    *          context
    * @param pBufferPointer
@@ -45,8 +56,8 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    *          kernel access type
    * @param pNativeType
    *          data type
-   * @param pLength
-   *          length
+   * @param pDimensions
+   *          dimensions
    */
   ClearCLBuffer(ClearCLContext pClearCLContext,
                 ClearCLPeerPointer pBufferPointer,
@@ -70,7 +81,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Fills the buffer with a given byte.
-   * 
+   *
    * @param pByte
    *          byte to fill buffer with
    * @param pBlockingFill
@@ -85,7 +96,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Fills the buffer with a given byte pattern.
-   * 
+   *
    * @param pPattern
    *          pattern as a sequence of bytes
    * @param pBlockingFill
@@ -100,7 +111,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
    * Fills the buffer with a given byte pattern, from a given starting offset,
    * and for a certain length. This call can be required to block until
    * operation is finished.
-   * 
+   *
    * @param pPattern
    *          pattern as a sequence of bytes
    * @param pOffsetInBuffer
@@ -130,7 +141,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Copies this OpenCl buffer into another OpenCl buffer of same length.
-   * 
+   *
    * @param pDstBuffer
    *          destination buffer
    * @param pBlockingCopy
@@ -148,7 +159,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   /**
    * Copies a linear region of this OpenCl buffer into a linear region of same
    * length of another OpenCl buffer.
-   * 
+   *
    * @param pDstBuffer
    *          destination buffer
    * @param pOffsetInSrcBuffer
@@ -187,7 +198,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   /**
    * Copies a 3D region of this OpenCl buffer into a 3D region of same
    * dimensions of another OpenCl buffer.
-   * 
+   *
    * @param pDstBuffer
    *          destination buffer
    * @param pOriginInSrcBuffer
@@ -218,7 +229,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Copies this OpenCl buffer to an OpenCl image.
-   * 
+   *
    * @param pDstImage
    *          destination image
    * @param pBlockingCopy
@@ -236,7 +247,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   /**
    * Copies a 3D region of this OpenCl buffer into a 3D region of same
    * dimensions of an OpenCl image.
-   * 
+   *
    * @param pDstImage
    *          destination image
    * @param pOffsetInSrcBuffer
@@ -268,7 +279,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Copies this image into a host image.
-   * 
+   *
    * @param pClearCLHostImage
    *          host image.
    * @param pBlockingCopy
@@ -295,7 +306,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Writes the contents of this OpenCl buffer into CoreMem buffer.
-   * 
+   *
    * @param pContiguousMemory
    *          destination CoreMem buffer
    * @param pBlockingWrite
@@ -314,7 +325,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   /**
    * Writes the contents of this OpenCl buffer into a linear region of a CoreMem
    * buffer.
-   * 
+   *
    * @param pContiguousMemory
    *          destination CoreMem buffer
    * @param pOffsetInBuffer
@@ -352,10 +363,9 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Writes a NIO buffer into this OpenCl buffer.
-   * 
+   *
    * @param pBuffer
    *          destination NIO buffer
-   * 
    * @param pBlockingWrite
    *          true -> blocking call, false -> asynchronous call
    */
@@ -370,7 +380,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Writes a linear region of a NIO buffer into this OpenCl buffer.
-   * 
+   *
    * @param pBuffer
    *          destination NIO buffer
    * @param pOffsetInBuffer
@@ -407,7 +417,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Reads from a linear region of a CoreMem buffer into this OpenCl buffer.
-   * 
+   *
    * @param pContiguousMemory
    *          source NIO buffer
    * @param pBlockingRead
@@ -425,7 +435,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Reads from a linear region of a CoreMem buffer into this OpenCl buffer.
-   * 
+   *
    * @param pContiguousMemory
    *          source CoreMem buffer
    * @param pOffsetInBuffer
@@ -464,7 +474,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Reads from a linear region of a NIO buffer into this OpenCl buffer.
-   * 
+   *
    * @param pBuffer
    *          source NIO buffer
    * @param pBlockingRead
@@ -481,7 +491,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Reads from a linear region of a NIO buffer into this OpenCl buffer.
-   * 
+   *
    * @param pBuffer
    *          source NIO buffer
    * @param pOffsetInBuffer
@@ -520,7 +530,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   /**
    * Writes to a 3D region of a CoreMem buffer into a 3D region of this OpenCl
    * buffer.
-   * 
+   *
    * @param pContiguousMemory
    *          destination CoreMem buffer
    * @param pSourceOrigin
@@ -557,7 +567,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   /**
    * Writes to a 3D region of a NIO buffer into a 3D region of this OpenCl
    * buffer.
-   * 
+   *
    * @param pBuffer
    *          destination NIO buffer
    * @param pSourceOrigin
@@ -593,7 +603,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   /**
    * Reads from a 3D region of a CoreMem buffer into a 3D region of this OpenCl
    * buffer.
-   * 
+   *
    * @param pContiguousMemory
    *          source CoreMem buffer
    * @param pSourceOrigin
@@ -632,7 +642,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   /**
    * Reads from a 3D region of a NIO buffer into a 3D region of this OpenCl
    * buffer.
-   * 
+   *
    * @param pBuffer
    *          source NIO buffer
    * @param pSourceOrigin
@@ -678,7 +688,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Returns data type.
-   * 
+   *
    * @return data type
    */
   @Override
@@ -690,7 +700,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   /**
    * Returns length in elements, an element is composed of potentially several
    * channels and is certainly not equal to the size in bytes!
-   * 
+   *
    * @return length in elements
    */
   public long getLength()
@@ -712,7 +722,7 @@ public class ClearCLBuffer extends ClearCLMemBase implements
 
   /**
    * Returns the size in bytes.
-   * 
+   *
    * @return size in bytes
    */
   @Override
@@ -745,9 +755,51 @@ public class ClearCLBuffer extends ClearCLMemBase implements
   {
     if (getPeerPointer() != null)
     {
+      if (mBufferCleaner != null)
+        mBufferCleaner.mClearCLPeerPointer = null;
       getBackend().releaseBuffer(getPeerPointer());
       setPeerPointer(null);
     }
+  }
+
+  // NOTE: this _must_ be a static class, otherwise instances of this class will
+  // implicitely hold a reference of this image...
+  private static class BufferCleaner implements Cleaner
+  {
+    public ClearCLBackendInterface mBackend;
+    public ClearCLPeerPointer mClearCLPeerPointer;
+
+    public BufferCleaner(ClearCLBackendInterface pBackend,
+                         ClearCLPeerPointer pClearCLPeerPointer)
+    {
+      mBackend = pBackend;
+      mClearCLPeerPointer = pClearCLPeerPointer;
+    }
+
+    @Override
+    public void run()
+    {
+      try
+      {
+        if (mClearCLPeerPointer != null)
+          mBackend.releaseBuffer(mClearCLPeerPointer);
+        /*System.out.println("Cleaning buffer pointer: "
+                           + mClearCLPeerPointer);/**/
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  BufferCleaner mBufferCleaner = new BufferCleaner(getBackend(),
+                                                   getPeerPointer());
+
+  @Override
+  public Cleaner getCleaner()
+  {
+    return mBufferCleaner;
   }
 
 }

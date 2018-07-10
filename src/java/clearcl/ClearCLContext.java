@@ -3,6 +3,7 @@ package clearcl;
 import java.io.IOException;
 
 import clearcl.abs.ClearCLBase;
+import clearcl.backend.ClearCLBackendInterface;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
@@ -11,19 +12,27 @@ import clearcl.enums.KernelAccessType;
 import clearcl.enums.MemAllocMode;
 import clearcl.exceptions.OpenCLException;
 import coremem.enums.NativeTypeEnum;
+import coremem.rgc.Cleanable;
+import coremem.rgc.Cleaner;
+import coremem.rgc.RessourceCleaner;
 
 /**
  * ClearCLContext is the ClearCL abstraction for OpenCl contexts.
  *
  * @author royer
  */
-public class ClearCLContext extends ClearCLBase
+public class ClearCLContext extends ClearCLBase implements Cleanable
 {
   private boolean mDebugNotifyAllocation = false;
 
   private final ClearCLDevice mDevice;
 
   private final ClearCLQueue mDefaultQueue;
+
+  // This will register this buffer for GC cleanup
+  {
+    RessourceCleaner.register(this);
+  }
 
   /**
    * Construction of this object is done from within a ClearClDevice.
@@ -32,7 +41,6 @@ public class ClearCLContext extends ClearCLBase
    *          device
    * @param pContextPointer
    *          context peer pointer
-   * @param pContextPointer2
    */
   ClearCLContext(final ClearCLDevice pClearCLDevice,
                  ClearCLPeerPointer pContextPointer)
@@ -551,9 +559,50 @@ public class ClearCLContext extends ClearCLBase
   {
     if (getPeerPointer() != null)
     {
+      if (mContextCleaner != null)
+        mContextCleaner.mClearCLPeerPointer = null;
       getBackend().releaseContext(getPeerPointer());
       setPeerPointer(null);
     }
+  }
+
+  // NOTE: this _must_ be a static class, otherwise instances of this class will
+  // implicitely hold a reference of this image...
+  private static class ContextCleaner implements Cleaner
+  {
+    public ClearCLBackendInterface mBackend;
+    public ClearCLPeerPointer mClearCLPeerPointer;
+
+    public ContextCleaner(ClearCLBackendInterface pBackend,
+                          ClearCLPeerPointer pClearCLPeerPointer)
+    {
+      mBackend = pBackend;
+      mClearCLPeerPointer = pClearCLPeerPointer;
+    }
+
+    @Override
+    public void run()
+    {
+      try
+      {
+        if (mClearCLPeerPointer != null)
+          mBackend.releaseContext(mClearCLPeerPointer);
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  ContextCleaner mContextCleaner =
+                                 new ContextCleaner(getBackend(),
+                                                    getPeerPointer());
+
+  @Override
+  public Cleaner getCleaner()
+  {
+    return mContextCleaner;
   }
 
 }

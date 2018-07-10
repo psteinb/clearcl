@@ -8,8 +8,7 @@ import clearcl.ClearCLDevice;
 import clearcl.ClearCLImage;
 import clearcl.ClearCLPlatform;
 import clearcl.backend.ClearCLBackendInterface;
-import clearcl.backend.javacl.ClearCLBackendJavaCL;
-import clearcl.backend.jocl.ClearCLBackendJOCL;
+import clearcl.backend.ClearCLBackends;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
@@ -21,7 +20,7 @@ import coremem.offheap.OffHeapMemory;
 import org.junit.Test;
 
 /**
- * Basic tests.
+ * Basic image tests.
  *
  * @author royer
  */
@@ -29,35 +28,18 @@ public class ClearCLImageTests
 {
 
   /**
-   * Test with JOCL backend
+   * test with best backend
    * 
    * @throws Exception
    *           NA
    */
   @Test
-  public void testBackendJOCL() throws Exception
+  public void testBestBackend() throws Exception
   {
-    final ClearCLBackendJOCL lClearCLJOCLBackend =
-                                                 new ClearCLBackendJOCL();
+    final ClearCLBackendInterface lClearCLBackendInterface =
+                                                           ClearCLBackends.getBestBackend();
 
-    testWithBackend(lClearCLJOCLBackend);
-
-  }
-
-  /**
-   * test with JavaCL backend
-   * 
-   * @throws Exception
-   *           NA
-   */
-  @Test
-  public void testBackendJavaCL() throws Exception
-  {
-    final ClearCLBackendJavaCL lClearCLBackendJavaCL =
-                                                     new ClearCLBackendJavaCL();
-
-    testWithBackend(lClearCLBackendJavaCL);
-
+    testWithBackend(lClearCLBackendInterface);
   }
 
   private void testWithBackend(final ClearCLBackendInterface pClearCLBackendInterface) throws Exception

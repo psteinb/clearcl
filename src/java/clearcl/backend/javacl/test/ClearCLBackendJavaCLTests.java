@@ -2,7 +2,8 @@ package clearcl.backend.javacl.test;
 
 import static org.junit.Assert.assertTrue;
 
-import clearcl.backend.javacl.ClearCLBackendJavaCL;
+import clearcl.backend.ClearCLBackendInterface;
+import clearcl.backend.jocl.ClearCLBackendJOCL;
 
 import org.junit.Test;
 
@@ -20,11 +21,11 @@ public class ClearCLBackendJavaCLTests
   @Test
   public void test()
   {
-    ClearCLBackendJavaCL lClearCLBackendJavaCL =
-                                               new ClearCLBackendJavaCL();
+    ClearCLBackendInterface lClearCLBackend =
+                                            new ClearCLBackendJOCL();
 
     // System.out.println(lClearCLBackendJavaCL.getNumberOfPlatforms());
-    assertTrue(lClearCLBackendJavaCL.getNumberOfPlatforms() > 0);
+    assertTrue(lClearCLBackend.getNumberOfPlatforms() > 0);
 
   }
 

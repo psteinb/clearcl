@@ -4,6 +4,7 @@ import java.nio.Buffer;
 import java.util.Arrays;
 
 import clearcl.abs.ClearCLMemBase;
+import clearcl.backend.ClearCLBackendInterface;
 import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
@@ -22,6 +23,9 @@ import coremem.enums.NativeTypeEnum;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.interop.NIOBuffersInterop;
 import coremem.offheap.OffHeapMemory;
+import coremem.rgc.Cleanable;
+import coremem.rgc.Cleaner;
+import coremem.rgc.RessourceCleaner;
 
 /**
  * ClearCLImage is the ClearCL abstraction for OpenCL images.
@@ -30,7 +34,8 @@ import coremem.offheap.OffHeapMemory;
  */
 public class ClearCLImage extends ClearCLMemBase implements
                           ClearCLMemInterface,
-                          ClearCLImageInterface
+                          ClearCLImageInterface,
+                          Cleanable
 {
   private final ClearCLContext mClearCLContext;
 
@@ -38,6 +43,11 @@ public class ClearCLImage extends ClearCLMemBase implements
   private final ImageChannelOrder mImageChannelOrder;
   private final ImageChannelDataType mImageChannelDataType;
   private final long[] mDimensions;
+
+  // This will register this buffer for GC cleanup
+  {
+    RessourceCleaner.register(this);
+  }
 
   /**
    * This constructor is called internally from an OpenCl context.
@@ -56,12 +66,8 @@ public class ClearCLImage extends ClearCLMemBase implements
    *          channel order
    * @param pImageChannelType
    *          channel data type
-   * @param pWidth
-   *          width
-   * @param pHeight
-   *          height
-   * @param pDepth
-   *          depth
+   * @param pDimensions
+   *          width, height, depth, ... (varargs)
    */
   ClearCLImage(ClearCLContext pClearCLContext,
                ClearCLPeerPointer pImage,
@@ -1070,9 +1076,48 @@ public class ClearCLImage extends ClearCLMemBase implements
   {
     if (getPeerPointer() != null)
     {
+      if (mImageCleaner != null)
+        mImageCleaner.mClearCLPeerPointer = null;
       getBackend().releaseImage(getPeerPointer());
       setPeerPointer(null);
     }
   }
 
+  // NOTE: this _must_ be a static class, otherwise instances of this class will
+  // implicitely hold a reference of this image...
+  private static class ImageCleaner implements Cleaner
+  {
+    private ClearCLBackendInterface mBackend;
+    private ClearCLPeerPointer mClearCLPeerPointer;
+
+    public ImageCleaner(ClearCLBackendInterface pBackend,
+                        ClearCLPeerPointer pClearCLPeerPointer)
+    {
+      mBackend = pBackend;
+      mClearCLPeerPointer = pClearCLPeerPointer;
+    }
+
+    @Override
+    public void run()
+    {
+      try
+      {
+        if (mClearCLPeerPointer != null)
+          mBackend.releaseImage(mClearCLPeerPointer);
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  ImageCleaner mImageCleaner = new ImageCleaner(getBackend(),
+                                                getPeerPointer());
+
+  @Override
+  public Cleaner getCleaner()
+  {
+    return mImageCleaner;
+  }
 }

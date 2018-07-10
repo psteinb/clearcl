@@ -7,18 +7,22 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import clearcl.abs.ClearCLBase;
+import clearcl.backend.ClearCLBackendInterface;
 import clearcl.enums.BuildStatus;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.exceptions.ClearCLProgramNotBuiltException;
 import clearcl.ocllib.OCLlib;
 import clearcl.util.StringUtils;
+import coremem.rgc.Cleanable;
+import coremem.rgc.Cleaner;
+import coremem.rgc.RessourceCleaner;
 
 /**
  * ClearCLProgram is the ClearCL abstraction for OpenCl programs.
  *
  * @author royer
  */
-public class ClearCLProgram extends ClearCLBase
+public class ClearCLProgram extends ClearCLBase implements Cleanable
 {
   private final ClearCLDevice mDevice;
   private final ClearCLContext mContext;
@@ -34,6 +38,11 @@ public class ClearCLProgram extends ClearCLBase
   private volatile String mLastBuiltSourceCode;
   private ConcurrentHashMap<String, ClearCLKernel> mKernelCache =
                                                                 new ConcurrentHashMap<String, ClearCLKernel>();
+
+  // This will register this buffer for GC cleanup
+  {
+    RessourceCleaner.register(this);
+  }
 
   /**
    * This constructor is called internally from an OpenCl context.
@@ -852,9 +861,50 @@ public class ClearCLProgram extends ClearCLBase
   {
     if (getPeerPointer() != null)
     {
+      if (mProgramCleaner != null)
+        mProgramCleaner.mClearCLPeerPointer = null;
       getBackend().releaseProgram(getPeerPointer());
       setPeerPointer(null);
     }
+  }
+
+  // NOTE: this _must_ be a static class, otherwise instances of this class will
+  // implicitely hold a reference of this image...
+  private static class ProgramCleaner implements Cleaner
+  {
+    public ClearCLBackendInterface mBackend;
+    public ClearCLPeerPointer mClearCLPeerPointer;
+
+    public ProgramCleaner(ClearCLBackendInterface pBackend,
+                          ClearCLPeerPointer pClearCLPeerPointer)
+    {
+      mBackend = pBackend;
+      mClearCLPeerPointer = pClearCLPeerPointer;
+    }
+
+    @Override
+    public void run()
+    {
+      try
+      {
+        if (mClearCLPeerPointer != null)
+          mBackend.releaseProgram(mClearCLPeerPointer);
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  ProgramCleaner mProgramCleaner =
+                                 new ProgramCleaner(getBackend(),
+                                                    getPeerPointer());
+
+  @Override
+  public Cleaner getCleaner()
+  {
+    return mProgramCleaner;
   }
 
 }
