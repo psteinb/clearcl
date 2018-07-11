@@ -15,8 +15,6 @@ apply plugin: 'maven-publish'
 // Master gradle file:
 apply from: 'https://github.com/ClearControl/master/blob/master/master.gradle?raw=true'
 
-println project.ext.codeformatfile
-
 //***********************************************************************************
 // JAVA CODE BUILDING
 
