@@ -20,28 +20,31 @@ ClearVolume 2.0 GPU code will be built on top of ClearCL to offer flexibility an
 
 ## In progress:
 1. Full support for events
-2. Improve robustness: ClearCL is used the current ClearVolume ImageJ plugin.
+2. Improve robustness: ClearCL is used in the current ClearVolume ImageJ plugin.
 
 ## Planned features:
 1. Basic set of OpenCL kernels for image processing: denoising, deconvolution, image quality, correlation, projection...
 2. Scatter-gather for processing images and buffers that don't fit in GPU mem.
 3. Upload-and-scaledown functionality to load and scale down images into GPU memory
 4. Live-coding infrastructire to be able to edit kernel code and immediately see the result.
-5. Integration with imglib2 and FiJi.
+
+## Integration with imglib2 and FiJi
+Integration with imglib2 and FiJi is done in the [ClearCLIJ](https://github.com/ClearControl/clearclij) project.
 
 ## How to add ClearCL as a dependency to your project:
 
-Find the latest version on [BinTray](https://bintray.com/clearvolume/ClearVolume/ClearCL)
+Find the latest version on [BinTray](https://bintray.com/clearcontrol/ClearControl/ClearCL)
+You can also find out the latest official version [here](https://github.com/ClearControl/master/blob/master/master.gradle).
 
 ### With Gradle:
 ~~~~
-     compile 'net.clearvolume:clearcl:0.3.36'
+     compile 'net.clearcontrol:clearcl:0.6.0'
 ~~~~
 
 ~~~~
 repositories {
     maven {
-        url  "http://dl.bintray.com/clearvolume/ClearVolume" 
+        url  "http://dl.bintray.com/clearcontrol/ClearControl" 
     }
 }
 ~~~~
@@ -49,9 +52,9 @@ repositories {
 ### With Maven:
 ~~~~
 <dependency>
-  <groupId>net.clearvolume</groupId>
+  <groupId>net.clearcontrol</groupId>
   <artifactId>clearcl</artifactId>
-  <version>0.3.36</version>
+  <version>0.6.0</version>
   <type>pom</type>
 </dependency>
 ~~~~
@@ -63,11 +66,9 @@ repositories {
      </snapshots>
      <id>bintray-clearvolume-ClearVolume</id>
      <name>bintray</name>
-     <url>http://dl.bintray.com/clearvolume/ClearVolume</url>
+     <url>http://dl.bintray.com/clearcontrol/ClearControl</url>
  </repository>
 ~~~~
-
-
 
 ## Getting started:
 
