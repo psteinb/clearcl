@@ -33,8 +33,8 @@ Integration with imglib2 and FiJi is done in the [ClearCLIJ](https://github.com/
 
 ## How to add ClearCL as a dependency to your project:
 
-Find the latest version on [BinTray](https://bintray.com/clearcontrol/ClearControl/ClearCL)
-You can also find out the latest official version [here](https://github.com/ClearControl/master/blob/master/master.gradle).
+Find the latest version on [BinTray](https://bintray.com/clearcontrol/ClearControl/ClearCL).
+You can also find out the latest official version [here](https://github.com/ClearControl/master/blob/45a3e7956f6783eaf833d1e08ed28839f8dc0cb4/master.gradle#L32).
 
 ### With Gradle:
 ~~~~
