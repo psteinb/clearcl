@@ -36,6 +36,8 @@ Integration with imglib2 and FiJi is done in the [ClearCLIJ](https://github.com/
 Find the latest version on [BinTray](https://bintray.com/clearcontrol/ClearControl/ClearCL).
 You can also find out the latest official version [here](https://github.com/ClearControl/master/blob/45a3e7956f6783eaf833d1e08ed28839f8dc0cb4/master.gradle#L32).
 
+IMPORTANT NOTE: ClearCL has been moved from the ClearVolume org to the ClearControl org.
+
 ### With Gradle:
 ~~~~
      compile 'net.clearcontrol:clearcl:0.6.0'
