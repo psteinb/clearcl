@@ -23,16 +23,16 @@ sourceSets
 	main
 	{
 		java
-		{ srcDir 'src/java' }
+		{ srcDir 'src/main/java' }
     resources
-		{ srcDir 'src/java' }
+		{ srcDir 'src/main/java' }
 	}
 	test
 	{
 		java
-		{ srcDir 'src/java' }
+		{ srcDir 'src/test/java' }
     resources
-		{ srcDir 'src/java' }
+		{ srcDir 'src/test/java' }
 	}
 }
 
@@ -130,9 +130,6 @@ publishing {
 		}
 	}
 }
-
-
-
 
 
 
