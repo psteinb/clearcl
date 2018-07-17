@@ -76,10 +76,14 @@ repositories {
 
 Just check the tests [here](https://github.com/ClearVolume/ClearCL/blob/master/src/java/clearcl/test/ClearCLTests.java) to learn how to use ClearCL. More tests are coming...
 
-Here are some examples:
+
+## Example:
+
+Here is an example taken from the tests:
 
 ````java
 
+// 
 ClearCLBackendInterface lClearCLBackendInterface = ClearCLBackends.getBestBackend();
 
 try (ClearCL lClearCL = new ClearCL(lClearCLBackendInterface))
@@ -158,7 +162,7 @@ try (ClearCL lClearCL = new ClearCL(lClearCLBackendInterface))
       lKernel.setArgument("c", lBufferC);
       lKernel.run();
 
-      // what if a argument is missing but there is a default value defined?
+      // what if an argument is missing but there is a default value defined?
       try
       {
         lKernel.clearArguments();
@@ -175,7 +179,7 @@ try (ClearCL lClearCL = new ClearCL(lClearCLBackendInterface))
 
       boolean lFailed = false;
 
-      // what if a argument is missing?
+      // what if an argument is missing?
       try
       {
         lKernel.clearArguments();
@@ -213,7 +217,7 @@ try (ClearCL lClearCL = new ClearCL(lClearCLBackendInterface))
 
 ````
 
-Kernel is here:
+The corresponding kernel is here:
 
 ````java
 
