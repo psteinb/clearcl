@@ -78,7 +78,7 @@ Just check the tests [here](https://github.com/ClearVolume/ClearCL/blob/master/s
 
 Here are some examples:
 
-~~~~
+````java
 
 ClearCLBackendInterface lClearCLBackendInterface = ClearCLBackends.getBestBackend();
 
@@ -211,11 +211,11 @@ try (ClearCL lClearCL = new ClearCL(lClearCLBackendInterface))
 
     }
 
-~~~~
+````
 
 Kernel is here:
 
-~~~~
+````java
 
 // You can include other resources
 // Path relative to class OCLlib, the package is found automatically (first in class path if several exist)
@@ -266,7 +266,7 @@ __kernel void fillimagexor(__write_only image3d_t image, int dx, int dy, float u
 	write_imagef (image, (int4)(x, y, z, 0), u*((x+dx)^((y+dy)+1)^(z+2)));
 }
 
-~~~~
+````
 
 
 ## How to build project with Gradle
