@@ -144,6 +144,13 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
       lResourceAsStream =
                         pClassForRessource.getResourceAsStream(lAbsoluteKernelFilename);
 
+      lAbsoluteKernelFilename.replace("/test/", "/main/");
+
+      if (lResourceAsStream == null)
+      {
+        lResourceAsStream =
+                pClassForRessource.getResourceAsStream(lAbsoluteKernelFilename);
+      }
     }
     if (lResourceAsStream == null)
     {
