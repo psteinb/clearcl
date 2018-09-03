@@ -53,13 +53,11 @@ test
 	maxHeapSize = "4G"
 }
 
-
-
 dependencies
 {
 
 	// CoreMem:
-	compile ('net.coremem:coremem:'+project.ext.versionsMap["coremem"])  {transitive= true; changing= true}
+	compile ('net.clearcontrol:coremem:'+depver('coremem'))  {transitive= true; changing= true}
 	
 	// JAVACL Backend:
 	compile ('com.nativelibs4java:javacl:1.0.0-RC4') {transitive= true; changing= false}
@@ -81,7 +79,12 @@ dependencies
 
 repositories
 {
-	mavenCentral()
+	// Main repos:
+    mavenLocal()
+    mavenCentral()
+    jcenter()  
+
+    // Other repos:
 	maven { url "http://oss.sonatype.org/content/groups/public" }
 	maven { url "http://dl.bintray.com/clearcontrol/ClearControl" }
 	maven { url "https://mvnrepository.com/artifact/org.jocl/jocl"}
