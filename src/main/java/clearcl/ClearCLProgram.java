@@ -27,17 +27,21 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
   private final ClearCLDevice mDevice;
   private final ClearCLContext mContext;
   private final ArrayList<String> mSourceCode;
-  private final ConcurrentHashMap<String, String> mDefinesMap =
-                                                              new ConcurrentHashMap<>();
-  private final ArrayList<String> mBuildOptionsList =
-                                                    new ArrayList<>();
-  private final ArrayList<String> mIncludesSearchPackages =
-                                                          new ArrayList<>();
+  private final ConcurrentHashMap<String, String>
+      mDefinesMap =
+      new ConcurrentHashMap<>();
+  private final ArrayList<String>
+      mBuildOptionsList =
+      new ArrayList<>();
+  private final ArrayList<String>
+      mIncludesSearchPackages =
+      new ArrayList<>();
 
   private volatile boolean mModified = true;
   private volatile String mLastBuiltSourceCode;
-  private ConcurrentHashMap<String, ClearCLKernel> mKernelCache =
-                                                                new ConcurrentHashMap<String, ClearCLKernel>();
+  private ConcurrentHashMap<String, ClearCLKernel>
+      mKernelCache =
+      new ConcurrentHashMap<String, ClearCLKernel>();
 
   // This will register this buffer for GC cleanup
   {
@@ -46,7 +50,7 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
 
   /**
    * This constructor is called internally from an OpenCl context.
-   * 
+   *
    * @param pDevice
    * @param pClearCLContext
    * @param pProgramPointer
@@ -65,9 +69,8 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
   /**
    * Adds a package to the list of Java packages to search for reference classes
    * when loading includes in cl files.
-   * 
-   * @param pPackagePath
-   *          full package path and package name.
+   *
+   * @param pPackagePath full package path and package name.
    */
   public void addIncludesSearchPackage(String pPackagePath)
   {
@@ -78,9 +81,8 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
    * Adds a reference class used to locate resources (*.cl files) for includes
    * in cl files. This method is preferred because it is more resiliant to
    * refactoring.
-   * 
-   * @param pReferenceClass
-   *          reference class
+   *
+   * @param pReferenceClass reference class
    */
   public void addIncludesReferenceClass(Class<?> pReferenceClass)
   {
@@ -91,9 +93,8 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
   /**
    * Adds source code to this program. You must rebuild after this call for
    * changes to take effect.
-   * 
-   * @param pSourceCode
-   *          source code string
+   *
+   * @param pSourceCode source code string
    */
   public void addSource(String pSourceCode)
   {
@@ -104,52 +105,57 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
   /**
    * Adds source code to this program from a resource file located relative to a
    * given class. You must rebuild after this call for changes to take effect.
-   * 
-   * @param pClassForRessource
-   *          Reference class to locate resources
-   * @param pIncludeRessourceName
-   *          Resource file names (relative to reference class)
-   * @throws IOException
-   *           if problem while loading resource
+   *
+   * @param pClassForRessource    Reference class to locate resources
+   * @param pIncludeRessourceName Resource file names (relative to reference class)
+   * @throws IOException if problem while loading resource
    */
   public void addSource(Class<?> pClassForRessource,
-                        String pIncludeRessourceName) throws IOException
+                        String pIncludeRessourceName) throws
+                                                      IOException
   {
     StringBuilder lStringBuilder = new StringBuilder();
 
     lStringBuilder.append("\n\n");
-    lStringBuilder.append(" //###########################################################################\n");
-    lStringBuilder.append("// Source: '" + pIncludeRessourceName
+    lStringBuilder.append(
+        " //###########################################################################\n");
+    lStringBuilder.append("// Source: '"
+                          + pIncludeRessourceName
                           + "' relative to "
                           + pClassForRessource.getSimpleName()
                           + "\n");
 
-    InputStream lResourceAsStream =
-                                  pClassForRessource.getResourceAsStream(pIncludeRessourceName);
+    InputStream
+        lResourceAsStream =
+        pClassForRessource.getResourceAsStream(pIncludeRessourceName);
     if (lResourceAsStream == null)
     {
       // split packages of a classname
-      String[] lPath = pClassForRessource.getCanonicalName()
-                                         .split("\\.");
+      String[]
+          lPath =
+          pClassForRessource.getCanonicalName().split("\\.");
       // keep all but the last one
       String[] lCutPath = new String[lPath.length - 1];
       System.arraycopy(lPath, 0, lCutPath, 0, lCutPath.length);
 
       // assemble new filename
-      String lAbsoluteKernelFilename =
-                                     ("/" + String.join("/", lCutPath)
-                                      + "/"
-                                      + pIncludeRessourceName).replace("/./",
-                                                                       "/");
+      String
+          lAbsoluteKernelFilename =
+          ("/"
+           + String.join("/", lCutPath)
+           + "/"
+           + pIncludeRessourceName).replace("/./", "/");
       lResourceAsStream =
-                        pClassForRessource.getResourceAsStream(lAbsoluteKernelFilename);
+          pClassForRessource.getResourceAsStream(
+              lAbsoluteKernelFilename);
 
-
+      // In case we are searching in the wrong root:
       if (lResourceAsStream == null)
       {
         lAbsoluteKernelFilename.replace("/test/", "/main/");
         lResourceAsStream =
-                pClassForRessource.getResourceAsStream(lAbsoluteKernelFilename);
+            pClassForRessource.getResourceAsStream(
+                lAbsoluteKernelFilename);
       }
     }
     if (lResourceAsStream == null)
@@ -169,15 +175,17 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
     }
     if (lResourceAsStream == null)
     {
-      String lMessage = String.format("Cannot find source: [%s] %s",
-                                      pClassForRessource.getSimpleName()
-                                                        .toString(),
-                                      pIncludeRessourceName);
+      String
+          lMessage =
+          String.format("Cannot find source: [%s] %s",
+                        pClassForRessource.getSimpleName().toString(),
+                        pIncludeRessourceName);
       throw new IOException(lMessage);
     }
 
-    String lSourceCode = StringUtils.streamToString(lResourceAsStream,
-                                                    "UTF-8");
+    String
+        lSourceCode =
+        StringUtils.streamToString(lResourceAsStream, "UTF-8");
     lStringBuilder.append(lSourceCode);
     lStringBuilder.append("\n\n");
 
@@ -197,11 +205,9 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
   /**
    * Adds a define (e.g. #define 'key' 'value') to the program source code. You
    * must rebuild after this call for changes to take effect.
-   * 
-   * @param pKey
-   *          key
-   * @param pValue
-   *          value
+   *
+   * @param pKey   key
+   * @param pValue value
    */
   public void addDefine(String pKey, String pValue)
   {
@@ -213,15 +219,14 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
    * Adds a numerical define (e.g. #define 'key' 'value' with 'value' a number)
    * to the program source code. You must rebuild after this call for changes to
    * take effect.
-   * 
-   * @param pKey
-   *          key
-   * @param pValue
-   *          value
+   *
+   * @param pKey   key
+   * @param pValue value
    */
   public void addDefine(String pKey, Number pValue)
   {
-    if (pValue instanceof Byte || pValue instanceof Short
+    if (pValue instanceof Byte
+        || pValue instanceof Short
         || pValue instanceof Integer
         || pValue instanceof Long)
       mDefinesMap.put(pKey, "" + pValue.longValue());
@@ -242,9 +247,8 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
   /**
    * Adds a define (e.g. #define 'symbol') to the program source code. You must
    * rebuild after this call for changes to take effect.
-   * 
-   * @param pSymbol
-   *          define symbol
+   *
+   * @param pSymbol define symbol
    */
   public void addDefine(String pSymbol)
   {
@@ -256,9 +260,8 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
    * Adds one of three kinds of defines: FLOAT, INT and UINT depending on the
    * given channel datatype. This is usefull for kernels that need to switch
    * between different variants of write_imageX and read_imageX.
-   * 
-   * @param pChannelDataType
-   *          channel data type
+   *
+   * @param pChannelDataType channel data type
    */
   public void addDefineForDataType(ImageChannelDataType pChannelDataType)
   {
@@ -320,9 +323,8 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
   /**
    * Adds an building option for this program. You must rebuild after this call
    * for changes to take effect.
-   * 
-   * @param pOption
-   *          option string
+   *
+   * @param pOption option string
    */
   public void addBuildOption(String pOption)
   {
@@ -342,7 +344,7 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
 
   /**
    * Returns the device for this program.
-   * 
+   *
    * @return device
    */
   public ClearCLDevice getDevice()
@@ -352,7 +354,7 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
 
   /**
    * Returns the context for this program.
-   * 
+   *
    * @return context
    */
   public ClearCLContext getContext()
@@ -362,10 +364,9 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
 
   /**
    * Builds program and logs any errors on the stdout
-   * 
+   *
    * @return build status
-   * @throws IOException
-   *           thrown if source code includes cannot be resolved
+   * @throws IOException thrown if source code includes cannot be resolved
    */
   public BuildStatus buildAndLog() throws IOException
   {
@@ -381,10 +382,9 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
   /**
    * Builds this program. The source code can be changed after a first build and
    * this method will build a new program from scratch.
-   * 
+   *
    * @return build status
-   * @throws IOException
-   *           thrown if source code includes cannot be resolved
+   * @throws IOException thrown if source code includes cannot be resolved
    */
   public BuildStatus build() throws IOException
   {
@@ -398,9 +398,10 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
       return BuildStatus.Error;
     }
 
-    ClearCLPeerPointer lProgramPeerPointer =
-                                           getBackend().getProgramPeerPointer(mContext.getPeerPointer(),
-                                                                              mLastBuiltSourceCode);
+    ClearCLPeerPointer
+        lProgramPeerPointer =
+        getBackend().getProgramPeerPointer(mContext.getPeerPointer(),
+                                           mLastBuiltSourceCode);
 
     ClearCLPeerPointer lCurrentProgramPeerPointer = getPeerPointer();
     if (lCurrentProgramPeerPointer != null)
@@ -420,43 +421,49 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
   /**
    * Returns the complete concatenated source code with includes and defines
    * added.
-   * 
+   *
    * @return source code
-   * @throws IOException
-   *           thrown if the includes cannot be resolved
+   * @throws IOException thrown if the includes cannot be resolved
    */
   public String getSourceCode() throws IOException
   {
     String lConcatenatedSourceCode = concatenateSourceCode();
 
-    String lSourceCodeWithDefines =
-                                  insertDefines(lConcatenatedSourceCode);
-    String lSourceCodeWithDefinesAndIncludes =
-                                             insertIncludes(lSourceCodeWithDefines);
-    String lSourceCodeWithPreamble =
-                                   insertPreamble(lSourceCodeWithDefinesAndIncludes);
+    String
+        lSourceCodeWithDefines =
+        insertDefines(lConcatenatedSourceCode);
+    String
+        lSourceCodeWithDefinesAndIncludes =
+        insertIncludes(lSourceCodeWithDefines);
+    String
+        lSourceCodeWithPreamble =
+        insertPreamble(lSourceCodeWithDefinesAndIncludes);
     return lSourceCodeWithPreamble;
   }
 
   private String insertPreamble(String pSourceCode) throws IOException
   {
-    InputStream lResourceAsStream =
-                                  OCLlib.class.getResourceAsStream("preamble/preamble.cl");
+    InputStream
+        lResourceAsStream =
+        OCLlib.class.getResourceAsStream("preamble/preamble.cl");
 
     if (lResourceAsStream == null)
     {
-      String lMessage =
-                      String.format("Cannot find preamble file at 'preamble/preamble.cl'");
+      String
+          lMessage =
+          String.format(
+              "Cannot find preamble file at 'preamble/preamble.cl'");
       throw new IOException(lMessage);
     }
-    String lPreambleCode =
-                         StringUtils.streamToString(lResourceAsStream,
-                                                    "UTF-8");
+    String
+        lPreambleCode =
+        StringUtils.streamToString(lResourceAsStream, "UTF-8");
 
     StringBuilder lStringBuilder = new StringBuilder();
 
     lStringBuilder.append("\n\n");
-    lStringBuilder.append(" //###########################################################################\n");
+    lStringBuilder.append(
+        " //###########################################################################\n");
     lStringBuilder.append("// Preamble:\n");
     lStringBuilder.append(lPreambleCode);
     lStringBuilder.append("\n\n");
@@ -470,16 +477,19 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
     StringBuilder lStringBuilder = new StringBuilder();
 
     lStringBuilder.append("\n\n");
-    lStringBuilder.append(" //###########################################################################\n");
+    lStringBuilder.append(
+        " //###########################################################################\n");
     lStringBuilder.append("// Defines:\n");
     for (Map.Entry<String, String> lDefinesEntry : mDefinesMap.entrySet())
     {
 
       if (lDefinesEntry.getValue().length() == 0)
-        lStringBuilder.append("#define " + lDefinesEntry.getKey()
+        lStringBuilder.append("#define "
+                              + lDefinesEntry.getKey()
                               + "\n");
       else
-        lStringBuilder.append("#define " + lDefinesEntry.getKey()
+        lStringBuilder.append("#define "
+                              + lDefinesEntry.getKey()
                               + " \t"
                               + lDefinesEntry.getValue()
                               + "\n");
@@ -496,36 +506,39 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
 
     int lBeginIndex = 0;
     int lIncludeIndex = 0;
-    while ((lIncludeIndex = pSourceCode.indexOf("#include",
-                                                lBeginIndex)) >= 0)
+    while ((
+               lIncludeIndex =
+                   pSourceCode.indexOf("#include", lBeginIndex)) >= 0)
     {
       lSourceCodeWithIncludes.append(pSourceCode.substring(lBeginIndex,
                                                            lIncludeIndex));
 
       int lEndOfLine = pSourceCode.indexOf('\n', lIncludeIndex);
 
-      String lIncludeLine = pSourceCode.substring(lIncludeIndex,
-                                                  lEndOfLine);
+      String
+          lIncludeLine =
+          pSourceCode.substring(lIncludeIndex, lEndOfLine);
 
       int lClassNameBegin = lIncludeLine.indexOf('[');
-      int lClassNameEnd = lIncludeLine.indexOf(']',
-                                               lClassNameBegin + 1);
-      String lClassName = lClassNameBegin == -1 ? ""
-                                                : lIncludeLine.substring(lClassNameBegin
-                                                                         + 1,
-                                                                         lClassNameEnd)
-                                                              .trim();
+      int
+          lClassNameEnd =
+          lIncludeLine.indexOf(']', lClassNameBegin + 1);
+      String
+          lClassName =
+          lClassNameBegin == -1 ?
+          "" :
+          lIncludeLine.substring(lClassNameBegin + 1, lClassNameEnd)
+                      .trim();
 
       int lIncludeNameBegin = lIncludeLine.indexOf('"');
-      int lIncludeNameEnd =
-                          lIncludeLine.indexOf('"',
-                                               lIncludeNameBegin + 1);
+      int
+          lIncludeNameEnd =
+          lIncludeLine.indexOf('"', lIncludeNameBegin + 1);
 
-      String lIncludeName = lIncludeLine
-                                        .substring(lIncludeNameBegin
-                                                   + 1,
-                                                   lIncludeNameEnd)
-                                        .trim();
+      String
+          lIncludeName =
+          lIncludeLine.substring(lIncludeNameBegin + 1,
+                                 lIncludeNameEnd).trim();
 
       Class<?> lReferenceClass = Object.class;
       if (lClassName.isEmpty())
@@ -534,36 +547,43 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
         lReferenceClass = findClassByName(lClassName);
 
       if (lReferenceClass == null)
-        System.err.println("reference class unknown: " + lClassName
+        System.err.println("reference class unknown: "
+                           + lClassName
                            + " in line: '"
                            + lIncludeLine
                            + "'");
 
-      InputStream lResourceAsStream =
-                                    lReferenceClass.getResourceAsStream(lIncludeName);
+      InputStream
+          lResourceAsStream =
+          lReferenceClass.getResourceAsStream(lIncludeName);
 
       if (lResourceAsStream != null)
       {
 
-        String lSourceCode =
-                           StringUtils.streamToString(lResourceAsStream,
-                                                      "UTF-8");
+        String
+            lSourceCode =
+            StringUtils.streamToString(lResourceAsStream, "UTF-8");
 
         lSourceCodeWithIncludes.append("\n\n");
-        lSourceCodeWithIncludes.append(" //___________________________________________________________________________\n");
+        lSourceCodeWithIncludes.append(
+            " //___________________________________________________________________________\n");
         lSourceCodeWithIncludes.append("// Begin Include: '"
-                                       + lIncludeName + "'\n");
+                                       + lIncludeName
+                                       + "'\n");
         lSourceCodeWithIncludes.append(lSourceCode);
         lSourceCodeWithIncludes.append("// End Include: '"
-                                       + lIncludeName + "'\n");
-        lSourceCodeWithIncludes.append(" //___________________________________________________________________________\n");
+                                       + lIncludeName
+                                       + "'\n");
+        lSourceCodeWithIncludes.append(
+            " //___________________________________________________________________________\n");
         lSourceCodeWithIncludes.append("\n\n");
 
       }
       else
       {
         lSourceCodeWithIncludes.append("\n");
-        lSourceCodeWithIncludes.append("//WARNING!! Could not resolve include given below:\n");
+        lSourceCodeWithIncludes.append(
+            "//WARNING!! Could not resolve include given below:\n");
         lSourceCodeWithIncludes.append("//" + lIncludeLine);
       }
 
@@ -615,28 +635,29 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
 
   /**
    * Returns last build status for this program.
-   * 
+   *
    * @return last build status
    */
   public BuildStatus getBuildStatus()
   {
-    BuildStatus lBuildStatus =
-                             getBackend().getBuildStatus(getDevice().getPeerPointer(),
-                                                         getPeerPointer());
+    BuildStatus
+        lBuildStatus =
+        getBackend().getBuildStatus(getDevice().getPeerPointer(),
+                                    getPeerPointer());
     return lBuildStatus;
   }
 
   /**
    * Returns last build logs for this program.
-   * 
+   *
    * @return build logs
    */
   public String getBuildLog()
   {
-    String lBuildLog = getBackend()
-                                   .getBuildLog(getDevice().getPeerPointer(),
-                                                getPeerPointer())
-                                   .trim();
+    String
+        lBuildLog =
+        getBackend().getBuildLog(getDevice().getPeerPointer(),
+                                 getPeerPointer()).trim();
     return lBuildLog;
   }
 
@@ -644,9 +665,8 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
    * Returns the kernel of a given name. If the kernel is not yet created, it is
    * then created on-demand. Note: this will not recreate a kernel that already
    * exists.
-   * 
-   * @param pKernelName
-   *          kernel name
+   *
+   * @param pKernelName kernel name
    * @return kernel
    */
   public ClearCLKernel getKernel(String pKernelName)
@@ -662,9 +682,8 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
 
   /**
    * Creates kernel of given name from this program
-   * 
-   * @param pKernelName
-   *          kernel name (function name)
+   *
+   * @param pKernelName kernel name (function name)
    * @return kernel
    */
   public ClearCLKernel createKernel(String pKernelName)
@@ -672,22 +691,24 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
     if (mModified)
       throw new ClearCLProgramNotBuiltException();
 
-    ClearCLPeerPointer lKernelPointer =
-                                      getBackend().getKernelPeerPointer(this.getPeerPointer(),
-                                                                        pKernelName);
+    ClearCLPeerPointer
+        lKernelPointer =
+        getBackend().getKernelPeerPointer(this.getPeerPointer(),
+                                          pKernelName);
 
-    ClearCLKernel lClearCLKernel =
-                                 new ClearCLKernel(getContext(),
-                                                   this,
-                                                   lKernelPointer,
-                                                   pKernelName,
-                                                   mLastBuiltSourceCode);
+    ClearCLKernel
+        lClearCLKernel =
+        new ClearCLKernel(getContext(),
+                          this,
+                          lKernelPointer,
+                          pKernelName,
+                          mLastBuiltSourceCode);
     return lClearCLKernel;
   }
 
   /**
    * Returns the number of lines of code for this program.
-   * 
+   *
    * @return number of line of code.
    */
   public int getNumberLinesOfCode()
@@ -704,13 +725,13 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
   /* (non-Javadoc)
    * @see java.lang.Object#toString()
    */
-  @Override
-  public String toString()
+  @Override public String toString()
   {
-    return String.format("ClearCLProgram [mOptions=%s, mDefinesMap=%s, lines of code:%d]",
-                         mBuildOptionsList.toString(),
-                         mDefinesMap.toString(),
-                         getNumberLinesOfCode());
+    return String.format(
+        "ClearCLProgram [mOptions=%s, mDefinesMap=%s, lines of code:%d]",
+        mBuildOptionsList.toString(),
+        mDefinesMap.toString(),
+        getNumberLinesOfCode());
   }
 
   /**
@@ -836,9 +857,8 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
    * specified, then no maximum is assumed. Otherwise the specified value will
    * be rounded to the next multiple of 4 registers until the GPU specific
    * maximum of 128 registers.
-   * 
-   * @param N
-   *          positive integer
+   *
+   * @param N positive integer
    */
   public void addBuildOptionNVMaximumRegistryCount(int N)
   {
@@ -851,9 +871,8 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
    * >-cl-nv-opt-level</a> compilation option (<b><i>NVIDIA GPUs
    * only</i></b>)<br>
    * Specify optimization level (default value: 3)
-   * 
-   * @param N
-   *          positive integer, or 0 (no optimization).
+   *
+   * @param N positive integer, or 0 (no optimization).
    */
   public void addBuildOptionNVOptimizationLevel(int N)
   {
@@ -863,8 +882,7 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
   /* (non-Javadoc)
    * @see clearcl.ClearCLBase#close()
    */
-  @Override
-  public void close()
+  @Override public void close()
   {
     if (getPeerPointer() != null)
     {
@@ -889,8 +907,7 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
       mClearCLPeerPointer = pClearCLPeerPointer;
     }
 
-    @Override
-    public void run()
+    @Override public void run()
     {
       try
       {
@@ -904,12 +921,11 @@ public class ClearCLProgram extends ClearCLBase implements Cleanable
     }
   }
 
-  ProgramCleaner mProgramCleaner =
-                                 new ProgramCleaner(getBackend(),
-                                                    getPeerPointer());
+  ProgramCleaner
+      mProgramCleaner =
+      new ProgramCleaner(getBackend(), getPeerPointer());
 
-  @Override
-  public Cleaner getCleaner()
+  @Override public Cleaner getCleaner()
   {
     return mProgramCleaner;
   }
