@@ -13,8 +13,4 @@ clearcl.iml
 .idea
 *.iml
 /out/
-gradle/bintrayUpload.gradle
-gradle/installGitHooks
-gradle/master.gradle
-gradle/spotless.gradle
 codeformat.eclipse.xml
