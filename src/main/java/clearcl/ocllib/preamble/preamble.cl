@@ -64,4 +64,30 @@ inline __attribute__((overloadable)) void write_bufferf(int write_buffer_width, 
 {
     buffer[pos.x + pos.y * write_buffer_width ] = value;
 }
+
+
+inline __attribute__((overloadable)) int get_buffer_width(int size, __global float* buffer )
+{
+    return size;
+}
+inline __attribute__((overloadable)) int get_buffer_width(int size, __global ushort* buffer )
+{
+    return size;
+}
+inline __attribute__((overloadable)) int get_buffer_height(int size, __global float* buffer )
+{
+    return size;
+}
+inline __attribute__((overloadable)) int get_buffer_height(int size, __global ushort* buffer )
+{
+    return size;
+}
+inline __attribute__((overloadable)) int get_buffer_depth(int size, __global float* buffer )
+{
+    return size;
+}
+inline __attribute__((overloadable)) int get_buffer_depth(int size, __global ushort* buffer )
+{
+    return size;
+}
 #endif
