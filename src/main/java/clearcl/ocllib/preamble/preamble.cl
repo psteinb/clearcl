@@ -189,8 +189,6 @@ inline void write_buffer2di(int write_buffer_width, int write_buffer_height, int
     buffer_var[pos_in_buffer] = value;
 }
 
-<<<<<<< HEAD
-inline void write_buffer2df(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global float* buffer_var, int2 pos, float value )
 inline void write_buffer2dui(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global ushort * buffer_var, int2 pos, ushort value )
 {
     int pos_in_buffer = pos.x + pos.y * write_buffer_width;
