@@ -119,17 +119,8 @@ inline float2 read_buffer3df(int read_buffer_width, int read_buffer_height, int 
     return (float2){buffer_var[pos_in_buffer],0};
 }
 
-inline void write_buffer3dc(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global char * buffer_var, int4 position, char value )
+inline void write_buffer3dc(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global char * buffer_var, int4 pos, char value )
 {
-    int4 pos = (int4){position.x, position.y, position.z, 0};
-    if (true) { // if (CLK_ADDRESS_CLAMP_TO_EDGE & sampler) {
-        pos.x = max((MINMAX_TYPE)pos.x, (MINMAX_TYPE)0);
-        pos.y = max((MINMAX_TYPE)pos.y, (MINMAX_TYPE)0);
-        pos.z = max((MINMAX_TYPE)pos.z, (MINMAX_TYPE)0);
-        pos.x = min((MINMAX_TYPE)pos.x, (MINMAX_TYPE)write_buffer_width - 1);
-        pos.y = min((MINMAX_TYPE)pos.y, (MINMAX_TYPE)write_buffer_height - 1);
-        pos.z = min((MINMAX_TYPE)pos.z, (MINMAX_TYPE)write_buffer_depth - 1);
-    }
     int pos_in_buffer = pos.x + pos.y * write_buffer_width + pos.z * write_buffer_width * write_buffer_height;
     if (pos.x < 0 || pos.x >= write_buffer_width || pos.y < 0 || pos.y >= write_buffer_height || pos.z < 0 || pos.z >= write_buffer_depth) {
         return;
@@ -137,17 +128,8 @@ inline void write_buffer3dc(int write_buffer_width, int write_buffer_height, int
     buffer_var[pos_in_buffer] = value;
 }
 
-inline void write_buffer3duc(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global uchar * buffer_var, int4 position, uchar value )
+inline void write_buffer3duc(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global uchar * buffer_var, int4 pos, uchar value )
 {
-    int4 pos = (int4){position.x, position.y, position.z, 0};
-    if (true) { // if (CLK_ADDRESS_CLAMP_TO_EDGE & sampler) {
-        pos.x = max((MINMAX_TYPE)pos.x, (MINMAX_TYPE)0);
-        pos.y = max((MINMAX_TYPE)pos.y, (MINMAX_TYPE)0);
-        pos.z = max((MINMAX_TYPE)pos.z, (MINMAX_TYPE)0);
-        pos.x = min((MINMAX_TYPE)pos.x, (MINMAX_TYPE)write_buffer_width - 1);
-        pos.y = min((MINMAX_TYPE)pos.y, (MINMAX_TYPE)write_buffer_height - 1);
-        pos.z = min((MINMAX_TYPE)pos.z, (MINMAX_TYPE)write_buffer_depth - 1);
-    }
     int pos_in_buffer = pos.x + pos.y * write_buffer_width + pos.z * write_buffer_width * write_buffer_height;
     if (pos.x < 0 || pos.x >= write_buffer_width || pos.y < 0 || pos.y >= write_buffer_height || pos.z < 0 || pos.z >= write_buffer_depth) {
         return;
@@ -155,17 +137,8 @@ inline void write_buffer3duc(int write_buffer_width, int write_buffer_height, in
     buffer_var[pos_in_buffer] = value;
 }
 
-inline void write_buffer3di(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global short * buffer_var, int4 position, short value )
+inline void write_buffer3di(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global short * buffer_var, int4 pos, short value )
 {
-    int4 pos = (int4){position.x, position.y, position.z, 0};
-    if (true) { // if (CLK_ADDRESS_CLAMP_TO_EDGE & sampler) {
-        pos.x = max((MINMAX_TYPE)pos.x, (MINMAX_TYPE)0);
-        pos.y = max((MINMAX_TYPE)pos.y, (MINMAX_TYPE)0);
-        pos.z = max((MINMAX_TYPE)pos.z, (MINMAX_TYPE)0);
-        pos.x = min((MINMAX_TYPE)pos.x, (MINMAX_TYPE)write_buffer_width - 1);
-        pos.y = min((MINMAX_TYPE)pos.y, (MINMAX_TYPE)write_buffer_height - 1);
-        pos.z = min((MINMAX_TYPE)pos.z, (MINMAX_TYPE)write_buffer_depth - 1);
-    }
     int pos_in_buffer = pos.x + pos.y * write_buffer_width + pos.z * write_buffer_width * write_buffer_height;
     if (pos.x < 0 || pos.x >= write_buffer_width || pos.y < 0 || pos.y >= write_buffer_height || pos.z < 0 || pos.z >= write_buffer_depth) {
         return;
@@ -173,17 +146,8 @@ inline void write_buffer3di(int write_buffer_width, int write_buffer_height, int
     buffer_var[pos_in_buffer] = value;
 }
 
-inline void write_buffer3dui(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global ushort * buffer_var, int4 position, ushort value )
+inline void write_buffer3dui(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global ushort * buffer_var, int4 pos, ushort value )
 {
-    int4 pos = (int4){position.x, position.y, position.z, 0};
-    if (true) { // if (CLK_ADDRESS_CLAMP_TO_EDGE & sampler) {
-        pos.x = max((MINMAX_TYPE)pos.x, (MINMAX_TYPE)0);
-        pos.y = max((MINMAX_TYPE)pos.y, (MINMAX_TYPE)0);
-        pos.z = max((MINMAX_TYPE)pos.z, (MINMAX_TYPE)0);
-        pos.x = min((MINMAX_TYPE)pos.x, (MINMAX_TYPE)write_buffer_width - 1);
-        pos.y = min((MINMAX_TYPE)pos.y, (MINMAX_TYPE)write_buffer_height - 1);
-        pos.z = min((MINMAX_TYPE)pos.z, (MINMAX_TYPE)write_buffer_depth - 1);
-    }
     int pos_in_buffer = pos.x + pos.y * write_buffer_width + pos.z * write_buffer_width * write_buffer_height;
     if (pos.x < 0 || pos.x >= write_buffer_width || pos.y < 0 || pos.y >= write_buffer_height || pos.z < 0 || pos.z >= write_buffer_depth) {
         return;
@@ -191,17 +155,8 @@ inline void write_buffer3dui(int write_buffer_width, int write_buffer_height, in
     buffer_var[pos_in_buffer] = value;
 }
 
-inline void write_buffer3df(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global float* buffer_var, int4 position, float value )
+inline void write_buffer3df(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global float* buffer_var, int4 pos, float value )
 {
-    int4 pos = (int4){position.x, position.y, position.z, 0};
-    if (true) { // if (CLK_ADDRESS_CLAMP_TO_EDGE & sampler) {
-        pos.x = max((MINMAX_TYPE)pos.x, (MINMAX_TYPE)0);
-        pos.y = max((MINMAX_TYPE)pos.y, (MINMAX_TYPE)0);
-        pos.z = max((MINMAX_TYPE)pos.z, (MINMAX_TYPE)0);
-        pos.x = min((MINMAX_TYPE)pos.x, (MINMAX_TYPE)write_buffer_width - 1);
-        pos.y = min((MINMAX_TYPE)pos.y, (MINMAX_TYPE)write_buffer_height - 1);
-        pos.z = min((MINMAX_TYPE)pos.z, (MINMAX_TYPE)write_buffer_depth - 1);
-    }
     int pos_in_buffer = pos.x + pos.y * write_buffer_width + pos.z * write_buffer_width * write_buffer_height;
     if (pos.x < 0 || pos.x >= write_buffer_width || pos.y < 0 || pos.y >= write_buffer_height || pos.z < 0 || pos.z >= write_buffer_depth) {
         return;
@@ -289,15 +244,8 @@ inline float2 read_buffer2df(int read_buffer_width, int read_buffer_height, int 
     return (float2){buffer_var[pos_in_buffer],0};
 }
 
-inline void write_buffer2dc(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global char * buffer_var, int2 position, char value )
+inline void write_buffer2dc(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global char * buffer_var, int2 pos, char value )
 {
-    int2 pos = (int2){position.x, position.y};
-    if (true) { // if (CLK_ADDRESS_CLAMP_TO_EDGE & sampler) {
-        pos.x = max((MINMAX_TYPE)pos.x, (MINMAX_TYPE)0);
-        pos.y = max((MINMAX_TYPE)pos.y, (MINMAX_TYPE)0);
-        pos.x = min((MINMAX_TYPE)pos.x, (MINMAX_TYPE)write_buffer_width - 1);
-        pos.y = min((MINMAX_TYPE)pos.y, (MINMAX_TYPE)write_buffer_height - 1);
-    }
     int pos_in_buffer = pos.x + pos.y * write_buffer_width;
     if (pos.x < 0 || pos.x >= write_buffer_width || pos.y < 0 || pos.y >= write_buffer_height) {
         return;
@@ -305,15 +253,8 @@ inline void write_buffer2dc(int write_buffer_width, int write_buffer_height, int
     buffer_var[pos_in_buffer] = value;
 }
 
-inline void write_buffer2duc(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global uchar * buffer_var, int2 position, uchar value )
+inline void write_buffer2duc(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global uchar * buffer_var, int2 pos, uchar value )
 {
-    int2 pos = (int2){position.x, position.y};
-    if (true) { // if (CLK_ADDRESS_CLAMP_TO_EDGE & sampler) {
-        pos.x = max((MINMAX_TYPE)pos.x, (MINMAX_TYPE)0);
-        pos.y = max((MINMAX_TYPE)pos.y, (MINMAX_TYPE)0);
-        pos.x = min((MINMAX_TYPE)pos.x, (MINMAX_TYPE)write_buffer_width - 1);
-        pos.y = min((MINMAX_TYPE)pos.y, (MINMAX_TYPE)write_buffer_height - 1);
-    }
     int pos_in_buffer = pos.x + pos.y * write_buffer_width;
     if (pos.x < 0 || pos.x >= write_buffer_width || pos.y < 0 || pos.y >= write_buffer_height) {
         return;
@@ -321,15 +262,8 @@ inline void write_buffer2duc(int write_buffer_width, int write_buffer_height, in
     buffer_var[pos_in_buffer] = value;
 }
 
-inline void write_buffer2di(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global short * buffer_var, int2 position, short value )
+inline void write_buffer2di(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global short * buffer_var, int2 pos, short value )
 {
-    int2 pos = (int2){position.x, position.y};
-    if (true) { // if (CLK_ADDRESS_CLAMP_TO_EDGE & sampler) {
-        pos.x = max((MINMAX_TYPE)pos.x, (MINMAX_TYPE)0);
-        pos.y = max((MINMAX_TYPE)pos.y, (MINMAX_TYPE)0);
-        pos.x = min((MINMAX_TYPE)pos.x, (MINMAX_TYPE)write_buffer_width - 1);
-        pos.y = min((MINMAX_TYPE)pos.y, (MINMAX_TYPE)write_buffer_height - 1);
-    }
     int pos_in_buffer = pos.x + pos.y * write_buffer_width;
     if (pos.x < 0 || pos.x >= write_buffer_width || pos.y < 0 || pos.y >= write_buffer_height) {
         return;
@@ -337,15 +271,8 @@ inline void write_buffer2di(int write_buffer_width, int write_buffer_height, int
     buffer_var[pos_in_buffer] = value;
 }
 
-inline void write_buffer2dui(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global ushort * buffer_var, int2 position, ushort value )
+inline void write_buffer2dui(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global ushort * buffer_var, int2 pos, ushort value )
 {
-    int2 pos = (int2){position.x, position.y};
-    if (true) { // if (CLK_ADDRESS_CLAMP_TO_EDGE & sampler) {
-        pos.x = max((MINMAX_TYPE)pos.x, (MINMAX_TYPE)0);
-        pos.y = max((MINMAX_TYPE)pos.y, (MINMAX_TYPE)0);
-        pos.x = min((MINMAX_TYPE)pos.x, (MINMAX_TYPE)write_buffer_width - 1);
-        pos.y = min((MINMAX_TYPE)pos.y, (MINMAX_TYPE)write_buffer_height - 1);
-    }
     int pos_in_buffer = pos.x + pos.y * write_buffer_width;
     if (pos.x < 0 || pos.x >= write_buffer_width || pos.y < 0 || pos.y >= write_buffer_height) {
         return;
@@ -353,15 +280,8 @@ inline void write_buffer2dui(int write_buffer_width, int write_buffer_height, in
     buffer_var[pos_in_buffer] = value;
 }
 
-inline void write_buffer2df(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global float* buffer_var, int2 position, float value )
+inline void write_buffer2df(int write_buffer_width, int write_buffer_height, int write_buffer_depth, __global float* buffer_var, int2 pos, float value )
 {
-    int2 pos = (int2){position.x, position.y};
-    if (true) { // if (CLK_ADDRESS_CLAMP_TO_EDGE & sampler) {
-        pos.x = max((MINMAX_TYPE)pos.x, (MINMAX_TYPE)0);
-        pos.y = max((MINMAX_TYPE)pos.y, (MINMAX_TYPE)0);
-        pos.x = min((MINMAX_TYPE)pos.x, (MINMAX_TYPE)write_buffer_width - 1);
-        pos.y = min((MINMAX_TYPE)pos.y, (MINMAX_TYPE)write_buffer_height - 1);
-    }
     int pos_in_buffer = pos.x + pos.y * write_buffer_width;
     if (pos.x < 0 || pos.x >= write_buffer_width || pos.y < 0 || pos.y >= write_buffer_height) {
         return;
