@@ -3,7 +3,7 @@ package clearcl.backend.javacl.test;
 import static org.junit.Assert.assertTrue;
 
 import clearcl.backend.ClearCLBackendInterface;
-import clearcl.backend.jocl.ClearCLBackendJOCL;
+import clearcl.backend.javacl.ClearCLBackendJavaCL;
 
 import org.junit.Test;
 
