@@ -1,6 +1,9 @@
 package clearcl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
 
 import clearcl.ClearCL;
 import clearcl.ClearCLContext;
@@ -13,6 +16,7 @@ import clearcl.enums.HostAccessType;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearcl.enums.KernelAccessType;
+import clearcl.exceptions.OpenCLException;
 import clearcl.util.Region3;
 import coremem.fragmented.FragmentedMemory;
 import coremem.offheap.OffHeapMemory;
@@ -26,6 +30,74 @@ import org.junit.Test;
  */
 public class ClearCLImageTests
 {
+  @Test
+  public void testBackendList() throws Exception
+  {
+    final ArrayList<ClearCLBackendInterface> backends =
+                                                      ClearCLBackends.getBackendList();
+
+    assertTrue("only one backend observed", backends.size() > 1);
+
+    for (ClearCLBackendInterface lClearCLBackend : backends)
+    {
+      if (ClearCLBackends.isFunctionalBackendLite(lClearCLBackend))
+      {
+        System.out.println("backend " + lClearCLBackend.getName()
+                           + " found working given the number of platforms");
+      }
+    }
+  }
+
+  @Test
+  public void testImageCreate() throws Exception
+  {
+    final ClearCLBackendInterface lClearCLBackendInterface =
+                                                           ClearCLBackends.getBestBackend();
+
+    final String backend_name = lClearCLBackendInterface.getName();
+    assertTrue(backend_name.length() > 0);
+    System.out.println("[testImageCreate] using " + backend_name
+                       + " backend");
+
+    final ClearCL lClearCL = new ClearCL(lClearCLBackendInterface);
+    final int lNumberOfPlatforms = lClearCL.getNumberOfPlatforms();
+
+    assertTrue(lNumberOfPlatforms > 0);
+
+    final ClearCLPlatform lPlatform = lClearCL.getPlatform(0);
+
+    final ClearCLDevice lClearClDevice = lPlatform.getDevice(0);
+    final String device_name = lClearClDevice.getName();
+    assertTrue(device_name.length() > 0);
+
+    System.out.println("[testImageCreate] using device "
+                       + device_name);
+
+    final ClearCLContext lContext = lClearClDevice.createContext();
+
+    try
+    {
+      final ClearCLImage lImage =
+                                lContext.createImage(HostAccessType.ReadWrite,
+                                                     KernelAccessType.ReadWrite,
+                                                     ImageChannelOrder.R,
+                                                     ImageChannelDataType.UnsignedInt32,
+                                                     // ImageChannelDataType.SignedInt32,
+                                                     10,
+                                                     10,
+                                                     10);
+      assertEquals(lImage.isFloat(), false);
+    }
+    catch (OpenCLException oe)
+    {
+
+      System.err.println("[testImageCreate] cautch exception "
+                         + oe.getErrorString(oe.getErrorCode()));
+      assertEquals(false, true);
+    }
+    // assertEquals(lImage.isInteger()!=true);
+
+  }
 
   /**
    * test with best backend
@@ -82,7 +154,7 @@ public class ClearCLImageTests
     final ClearCLImage lImage =
                               lContext.createImage(HostAccessType.ReadWrite,
                                                    KernelAccessType.ReadWrite,
-                                                   ImageChannelOrder.Intensity,
+                                                   ImageChannelOrder.R,
                                                    ImageChannelDataType.Float,
                                                    10,
                                                    10,
