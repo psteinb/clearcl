@@ -68,6 +68,23 @@ public class ClearCLBackends
   }
 
   /**
+   * Tests whether the given backend can run some basic kernels. This is a good
+   * way to check if the backend is actually operational on a given platform.
+   *
+   * @param pClearCLBackend
+   *          backend
+   * @return true if backend functional, false otherwise
+   */
+  public static final boolean isFunctionalBackendLite(ClearCLBackendInterface pClearCLBackend)
+  {
+    boolean lFunctional =
+                        pClearCLBackend.getNumberOfPlatforms() > 0 ? true
+                                                                   : false;
+
+    return lFunctional;
+  }
+
+  /**
    * Returns the first functional backend that can be identified. The returned
    * backend is tested to be able to run some basic kernels.
    * 
@@ -102,7 +119,7 @@ public class ClearCLBackends
     {
     case Linux:
       print("Linux");
-      lClearCLBackend = getFunctionalBackend();
+      lClearCLBackend = new ClearCLBackendJOCL();
       break;
     case MacOS:
       print("MacOS");

@@ -16,6 +16,7 @@ import static org.jocl.CL.clReleaseContext;
 import static org.jocl.CL.clReleaseKernel;
 import static org.jocl.CL.clReleaseMemObject;
 import static org.jocl.CL.clReleaseProgram;
+import static org.jocl.CL.clGetSupportedImageFormats;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -73,6 +74,12 @@ public class ClearCLBackendJOCL extends ClearCLBackendBase
   {
     return Utils.getBoolean((cl_device_id) pDevicePointer.getPointer(),
                             CL.CL_DEVICE_IMAGE_SUPPORT);
+  }
+
+  @Override
+  public String getName()
+  {
+    return "JOCL";
   }
 
   @Override
@@ -355,6 +362,93 @@ public class ClearCLBackendJOCL extends ClearCLBackendBase
   }
 
   @SuppressWarnings("deprecation")
+  public static boolean isImageFormatSupported(final ClearCLPeerPointer pContextPointer,
+                                                final ImageType pImageType,
+                                                final ImageChannelOrder pImageChannelOrder,
+                                                final ImageChannelDataType pImageChannelType)
+  {
+
+     int image_type_CLCODE = 0;
+     boolean value = false;
+
+    switch(pImageType){
+      case IMAGE1D:
+        image_type_CLCODE = CL.CL_MEM_OBJECT_IMAGE1D;
+        break;
+      case IMAGE2D:
+        image_type_CLCODE = CL.CL_MEM_OBJECT_IMAGE2D;
+        break;
+      case IMAGE3D:
+        image_type_CLCODE = CL.CL_MEM_OBJECT_IMAGE3D;
+        break;
+      default:
+        image_type_CLCODE = -1;
+        break;
+    }
+
+
+     int image_data_type_CLCODE = 0;
+
+    switch(pImageChannelType){
+      case SignedNormalizedInt8:     image_data_type_CLCODE = CL.CL_SNORM_INT8     ;break;
+      case SignedNormalizedInt16:    image_data_type_CLCODE = CL.CL_SNORM_INT16    ;break;
+      case UnsignedNormalizedInt8:   image_data_type_CLCODE = CL.CL_UNORM_INT8     ;break;
+      case UnsignedNormalizedInt16:  image_data_type_CLCODE = CL.CL_UNORM_INT16    ;break;
+      case SignedInt8:               image_data_type_CLCODE = CL.CL_SIGNED_INT8    ;break;
+      case SignedInt16:              image_data_type_CLCODE = CL.CL_SIGNED_INT16   ;break;
+      case SignedInt32:              image_data_type_CLCODE = CL.CL_SIGNED_INT32   ;break;
+      case UnsignedInt8:             image_data_type_CLCODE = CL.CL_UNSIGNED_INT8  ;break;
+      case UnsignedInt16:            image_data_type_CLCODE = CL.CL_UNSIGNED_INT16 ;break;
+      case UnsignedInt32:            image_data_type_CLCODE = CL.CL_UNSIGNED_INT32 ;break;
+      case HalfFloat:                image_data_type_CLCODE = CL.CL_HALF_FLOAT     ;break;
+      case Float:                    image_data_type_CLCODE = CL.CL_FLOAT          ;break;
+      default:
+        break;
+    }
+
+     int image_order_CLCODE = 0;
+
+    switch(pImageChannelOrder){
+      case Intensity: image_order_CLCODE = CL.CL_INTENSITY; break;
+      case Luminance: image_order_CLCODE = CL.CL_LUMINANCE; break;
+      case R        : image_order_CLCODE = CL.CL_R        ; break;
+      case A        : image_order_CLCODE = CL.CL_A        ; break;
+      case RG       : image_order_CLCODE = CL.CL_RG       ; break;
+      case RA       : image_order_CLCODE = CL.CL_RA       ; break;
+      case RGB      : image_order_CLCODE = CL.CL_RGB      ; break;
+      case RGBA     : image_order_CLCODE = CL.CL_RGBA     ; break;
+      case ARGB     : image_order_CLCODE = CL.CL_ARGB     ; break;
+      case BGRA     : image_order_CLCODE = CL.CL_BGRA     ; break;
+      default:
+        break;
+    }
+
+    final int nformats = 100;
+    final cl_image_format[] supported_formats = new cl_image_format[nformats];
+    final int[] obtained_formats = new int[1];
+    obtained_formats[0] = 0;
+
+    BackendUtils.checkOpenCLError(CL.clGetSupportedImageFormats((cl_context)pContextPointer.getPointer(),
+                                                                CL.CL_MEM_READ_ONLY,
+                                                                image_type_CLCODE,
+                                                                nformats,
+                                                                supported_formats,
+                                                                obtained_formats));
+
+    if(obtained_formats[0] < 1)
+      return value;
+
+    for( cl_image_format fmt : supported_formats){
+      if(fmt.image_channel_data_type == image_data_type_CLCODE && fmt.image_channel_order == image_order_CLCODE){
+        value = true;
+        break;
+      }
+    }
+
+    return value;
+  }
+
+  @SuppressWarnings("deprecation")
   @Override
   public ClearCLPeerPointer getImagePeerPointer(final ClearCLPeerPointer pDevicePointer,
                                                 final ClearCLPeerPointer pContextPointer,
@@ -367,6 +461,12 @@ public class ClearCLBackendJOCL extends ClearCLBackendBase
                                                 final long... pDimensions)
   {
     final String lDeviceVersion = getDeviceVersion(pDevicePointer);
+
+    final boolean supported_format = isImageFormatSupported(pContextPointer,pImageType,pImageChannelOrder,pImageChannelType);
+
+    if(!supported_format){
+      throw new ClearCLUnsupportedException("Image format is not supported on device, imagetype "+pImageType+", channel_order "+pImageChannelOrder+", data_type "+pImageChannelType);
+    }
 
     if (lDeviceVersion.contains("1.0")
         || lDeviceVersion.contains("1.1"))
@@ -427,6 +527,8 @@ public class ClearCLBackendJOCL extends ClearCLBackendBase
                                        BackendUtils.getImageChannelOrderFlags(pImageChannelOrder);
       lImageFormat.image_channel_data_type =
                                            BackendUtils.getImageChannelDataTypeFlags(pImageChannelType);
+
+
 
       final cl_image_desc lImageDescription = new cl_image_desc();
       lImageDescription.image_width = pDimensions[0];
