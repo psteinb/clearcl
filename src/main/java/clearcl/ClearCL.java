@@ -232,14 +232,18 @@ public class ClearCL extends ClearCLBase
     int lNumberOfPlatforms = getNumberOfPlatforms();
     for (int i = 0; i < lNumberOfPlatforms; i++)
     {
-      try {
+      try
+      {
         ClearCLPlatform lPlatform = getPlatform(i);
         int lNumberOfDevices = lPlatform.getNumberOfDevices();
-        for (int d = 0; d < lNumberOfDevices; d++) {
+        for (int d = 0; d < lNumberOfDevices; d++)
+        {
           ClearCLDevice lClearClDevice = lPlatform.getDevice(d);
           lSelectedDeviceList.add(lClearClDevice);
         }
-      } catch (Exception e) {
+      }
+      catch (Exception e)
+      {
         System.out.println("Couldn't initialize platform " + i);
         e.printStackTrace();
       }
