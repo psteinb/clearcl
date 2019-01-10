@@ -75,6 +75,12 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase
   }
 
   @Override
+  public String getName()
+  {
+    return this.getClass().getName().replace("ClearCLBackend","");
+  }
+
+  @Override
   public int getNumberOfPlatforms()
   {
     return BackendUtils.checkExceptions(() -> {
@@ -389,6 +395,19 @@ public class ClearCLBackendJavaCL extends ClearCLBackendBase
       return lClearCLPointer;
     });
   }
+
+  @SuppressWarnings("deprecation")
+  public static boolean isImageFormatSupported(final ClearCLPeerPointer pContextPointer,
+                                                final ImageType pImageType,
+                                                final ImageChannelOrder pImageChannelOrder,
+                                                final ImageChannelDataType pImageChannelType)
+  {
+    //needs to be implemented
+    //at the time of writing (2019-01-11) JavaCL was not working on my laptop and hence I test this implementation
+    return false;
+
+  }
+
 
   @Override
   public ClearCLPeerPointer getImagePeerPointer(ClearCLPeerPointer pDevicePointer,
