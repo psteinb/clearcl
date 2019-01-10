@@ -22,7 +22,7 @@ public class ClearCLBackendJavaCLTests
   public void test()
   {
     ClearCLBackendInterface lClearCLBackend =
-                                            new ClearCLBackendJOCL();
+                                            new ClearCLBackendJavaCL();
 
     // System.out.println(lClearCLBackendJavaCL.getNumberOfPlatforms());
     assertTrue(lClearCLBackend.getNumberOfPlatforms() > 0);
