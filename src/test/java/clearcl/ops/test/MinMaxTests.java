@@ -130,7 +130,7 @@ public class MinMaxTests
       ClearCLImage lClearCLImage =
                                  lCreateContext.createImage(HostAccessType.ReadWrite,
                                                             KernelAccessType.ReadWrite,
-                                                            ImageChannelOrder.Intensity,
+                                                            ImageChannelOrder.R,
                                                             ImageChannelDataType.Float,
                                                             2048 + 1);
 
@@ -161,7 +161,7 @@ public class MinMaxTests
       ClearCLImage lClearCLImage =
                                  lCreateContext.createImage(HostAccessType.ReadWrite,
                                                             KernelAccessType.ReadWrite,
-                                                            ImageChannelOrder.Intensity,
+                                                            ImageChannelOrder.R,
                                                             ImageChannelDataType.Float,
                                                             2048 + 1,
                                                             2048 - 1);
@@ -193,7 +193,7 @@ public class MinMaxTests
       ClearCLImage lClearCLImage =
                                  lCreateContext.createImage(HostAccessType.ReadWrite,
                                                             KernelAccessType.ReadWrite,
-                                                            ImageChannelOrder.Intensity,
+                                                            ImageChannelOrder.R,
                                                             ImageChannelDataType.Float,
                                                             128 + 1,
                                                             128 - 1,
