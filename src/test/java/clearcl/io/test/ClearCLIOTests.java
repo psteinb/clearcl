@@ -53,7 +53,7 @@ public class ClearCLIOTests
     ClearCLImage lImageSrc =
                            lContext.createImage(HostAccessType.WriteOnly,
                                                 KernelAccessType.ReadWrite,
-                                                ImageChannelOrder.Intensity,
+                                                ImageChannelOrder.R,
                                                 ImageChannelDataType.Float,
                                                 100,
                                                 100,
@@ -69,7 +69,7 @@ public class ClearCLIOTests
     ClearCLImage lImageDst =
                            lContext.createImage(HostAccessType.ReadOnly,
                                                 KernelAccessType.WriteOnly,
-                                                ImageChannelOrder.Intensity,
+                                                ImageChannelOrder.R,
                                                 ImageChannelDataType.Float,
                                                 100,
                                                 100,
