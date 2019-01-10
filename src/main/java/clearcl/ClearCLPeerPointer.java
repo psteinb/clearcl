@@ -1,7 +1,7 @@
 package clearcl;
 
 /**
- * ClearCLKernel is the ClearCL abstraction for objects used by backends to wrap
+ * ClearCLPeerPointer is the ClearCL abstraction for objects used by backends to wrap
  * OpenCL object pointers.
  * 
  * @author royer
