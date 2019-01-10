@@ -21,6 +21,42 @@ import org.junit.Test;
 public class ClearCLBestDeviceTests
 {
 
+  @Test
+  public void testFastestForImages() throws Exception
+  {
+    ClearCLBackendInterface lClearCLBackendInterface =
+                                                     ClearCLBackends.getBestBackend();
+
+    try (ClearCL lClearCL = new ClearCL(lClearCLBackendInterface))
+    {
+      ClearCLDevice lClearClDevice =
+                                   lClearCL.getBestDevice(DeviceTypeSelector.GPU,
+                                                          FastestDeviceSelector.FastestForImages);
+
+      System.out.println(lClearClDevice);
+      assertTrue(lClearClDevice != null);
+    }
+
+  }
+
+  @Test
+  public void testFastestForBuffers() throws Exception
+  {
+    ClearCLBackendInterface lClearCLBackendInterface =
+                                                     ClearCLBackends.getBestBackend();
+
+    try (ClearCL lClearCL = new ClearCL(lClearCLBackendInterface))
+    {
+      ClearCLDevice lClearClDevice =
+                                   lClearCL.getBestDevice(DeviceTypeSelector.GPU,
+                                                          FastestDeviceSelector.FastestForBuffers);
+
+      System.out.println(lClearClDevice);
+      assertTrue(lClearClDevice != null);
+    }
+
+  }
+
   /**
    * Test with best backend
    * 
