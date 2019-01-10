@@ -25,6 +25,13 @@ public interface ClearCLBackendInterface
 {
 
   /**
+   * Returns the backend name used
+   *
+   * @return number of platforms
+   */
+  String getName();
+
+  /**
    * Returns the number of OpenCL platforms available
    * 
    * @return number of platforms
